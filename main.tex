@@ -1,0 +1,205 @@
+% ============================================================
+% ESPOL - FIEC - SOFG1007 Ingeniería de Software I
+% Plantilla LaTeX - Especificación de Proyecto FINAL (2do parcial)
+% ============================================================
+% Cómo usar esta plantilla:
+%   1. Reemplace todos los textos entre corchetes [así] con la
+%      información real de su proyecto.
+%   2. Coloque el logo de ESPOL en imagenes/logo_espol.png
+%      (si no existe, se muestra una caja de reemplazo y el
+%      documento compila igual).
+%   3. Cada diagrama UML tiene una "caja de reemplazo" que debe
+%      sustituirse por \includegraphics{...} apuntando a la
+%      imagen real exportada desde su herramienta de modelado
+%      (indique el nombre de la herramienta donde se solicita).
+%   4. Compile con pdflatex (2 veces) o latexmk -pdf main.tex
+% ============================================================
+
+\documentclass[12pt,a4paper]{report}
+
+% ---------------- Idioma y codificación ----------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\spanishdecimal{.}
+
+% ---------------- Página y geometría ----------------
+\usepackage[margin=2.5cm,headheight=28pt]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------------- Gráficos y figuras ----------------
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{pgffor}      % para \foreach (usado en los 32 diagramas de secuencia)
+
+% ---------------- Tablas ----------------
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{colortbl}
+
+% ---------------- Color, listas, enlaces ----------------
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{pdfpages}     % para anexar el acta de conformidad escaneada (PDF)
+\usepackage{underscore}   % permite usar "_" literal en nombres de archivo fuera de modo matemático
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{lastpage}
+
+% ---------------- Colores institucionales (ajustar si se desea) ----------------
+\definecolor{espolblue}{RGB}{0,51,102}
+\definecolor{cajagris}{RGB}{245,245,245}
+
+% ---------------- Colores del mapa de calor de riesgos (matriz 5x5) ----------------
+\definecolor{riskmuybajo}{RGB}{198,239,206}
+\definecolor{riskbajo}{RGB}{221,235,148}
+\definecolor{riskmedio}{RGB}{255,230,153}
+\definecolor{riskalto}{RGB}{255,192,120}
+\definecolor{riskmuyalto}{RGB}{255,150,113}
+\definecolor{riskextremo}{RGB}{237,108,108}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=espolblue,
+    citecolor=espolblue,
+    urlcolor=espolblue,
+    pdftitle={Leodega - Especificación de Proyecto},
+    pdfauthor={Darwin Leonardo Diaz Gonzalez; Geovanny Jahir Diaz Loor; Carla Alejandra Gutierrez Cordova; Johao Carlos Dorado Quinde},
+    pdfsubject={SOFG1007 - Ingeniería de Software I - ESPOL},
+}
+
+% ---------------- Nombres en español (ajustes) ----------------
+\addto\captionsspanish{%
+  \renewcommand{\tablename}{Tabla}
+  \renewcommand{\listtablename}{Índice de Tablas}
+  \renewcommand{\listfigurename}{Índice de Figuras}
+  \renewcommand{\contentsname}{Tabla de Contenido}
+  \renewcommand{\appendixname}{Anexo}
+  \renewcommand{\bibname}{Referencias}
+}
+
+% ---------------- Encabezado / pie de página ----------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\lhead{\small ESPOL - FIEC - SOFG1007}
+\rhead{\small Leodega}
+\rfoot{\small Página \thepage\ de \pageref{LastPage}}
+\lfoot{\small Ingeniería de Software I}
+
+% ---------------- Estilo de capítulos ----------------
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\Large\color{espolblue}}
+  {\chaptertitlename\ \thechapter}{10pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% ============================================================
+% COMANDOS REUTILIZABLES PARA DIAGRAMAS UML
+% ============================================================
+% Caja de reemplazo (usar mientras no se tenga la imagen final).
+% Cuando tenga la imagen exportada, reemplace el contenido de
+% \DiagramaImagen por \includegraphics[width=0.9\textwidth]{ruta}
+\newcommand{\DiagramaImagen}[3]{%
+  % #1 = ancho relativo del \textwidth, #2 = alto relativo del \textheight, #3 = texto de la caja
+  \IfFileExists{#3}{%
+    \includegraphics[width=#1\textwidth,height=#2\textheight,keepaspectratio]{#3}%
+  }{%
+    \fbox{\begin{minipage}[c][#2\textheight][c]{#1\textwidth}%
+      \centering\itshape\color{gray} Insertar aquí el diagrama:\\ \texttt{#3}
+    \end{minipage}}%
+  }%
+}
+
+% Genera una subsección con un diagrama a página completa, su
+% descripción y la herramienta utilizada. Uso:
+% \DiagramaPagina{Título del diagrama}{ruta/archivo.png}{etiqueta}{Descripción}
+\newcommand{\DiagramaPagina}[4]{%
+  \subsection{#1}
+  \begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.55}{#2}
+    \caption{#1}
+    \label{fig:#3}
+  \end{figure}
+  \noindent\textbf{Descripción:} #4\par
+  \bigskip
+  \noindent\textbf{Herramienta de modelado utilizada:} \textit{[Ej. Visual Paradigm, StarUML, Draw.io]}
+  \clearpage
+}
+
+\begin{document}
+
+% ---------------- Portada ----------------
+\input{secciones/portada}
+
+% ---------------- Acta de conformidad del cliente (OBLIGATORIA) ----------------
+\chapter*{Acta de Conformidad del Cliente}
+\addcontentsline{toc}{chapter}{Acta de Conformidad del Cliente}
+\thispagestyle{empty}
+\noindent\textbf{Importante:} La ausencia de esta acta firmada implica una penalidad de -100 según la rúbrica de calificación. Adjunte el documento escaneado/firmado.
+
+\bigskip
+\IfFileExists{imagenes/acta_conformidad.pdf}{%
+  \includepdf[pages=-]{imagenes/acta_conformidad.pdf}
+}{%
+  \begin{center}
+  \fbox{\begin{minipage}[c][0.6\textheight][c]{0.9\textwidth}
+    \centering\itshape\color{gray}
+    Insertar aquí el acta de conformidad firmada por el representante del cliente.\\
+    (Reemplazar por: \texttt{imagenes/acta\_conformidad.pdf} usando \texttt{includepdf}, \\
+    o insertar una imagen escaneada con \texttt{includegraphics})
+  \end{minipage}}
+  \end{center}
+}
+\clearpage
+
+% ---------------- Índices ----------------
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+
+% ---------------- Información general del proyecto ----------------
+\input{secciones/informacion_general}
+
+% ============================================================
+% SECCIÓN A
+% ============================================================
+\input{secciones/seccionA}
+
+% ============================================================
+% SECCIÓN B
+% ============================================================
+\input{secciones/seccionB}
+
+% ============================================================
+% SECCIÓN C
+% ============================================================
+\input{secciones/seccionC}
+
+% ============================================================
+% CONTRIBUCIONES INDIVIDUALES
+% ============================================================
+\input{secciones/contribuciones}
+
+% ============================================================
+% REFERENCIAS
+% ============================================================
+\input{secciones/referencias}
+
+% ============================================================
+% ANEXOS
+% ============================================================
+\appendix
+\input{secciones/anexos}
+
+\end{document}

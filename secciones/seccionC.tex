@@ -1,0 +1,54 @@
+% ============================================================
+% SECCIÓN C: Modelamiento del comportamiento del sistema
+% ============================================================
+\chapter{Sección C: Modelamiento del Comportamiento del Sistema}
+
+% ------------------------------------------------------------
+\section{Diagramas de Actividad}
+\noindent Se documenta un diagrama de actividad por cada proceso relevante del sistema.
+
+\DiagramaPagina{Diagrama de Actividad 01 -- [Nombre del proceso]}{imagenes/actividad_01.png}{actividad01}{[Descripción del proceso de negocio modelado: actores/carriles (swimlanes) involucrados, puntos de decisión y flujos paralelos si aplica.]}
+
+\DiagramaPagina{Diagrama de Actividad 02 -- [Nombre del proceso]}{imagenes/actividad_02.png}{actividad02}{[Descripción del proceso.]}
+
+\DiagramaPagina{Diagrama de Actividad 03 -- [Nombre del proceso]}{imagenes/actividad_03.png}{actividad03}{[Descripción del proceso.]}
+
+\noindent\textit{Nota: Duplique el llamado a \texttt{\textbackslash DiagramaPagina} anterior hasta cubrir TODOS los procesos del sistema, según lo requiere la rúbrica.}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Diagramas de Secuencia}
+\noindent Se documentan a continuación los diagramas de secuencia de los algoritmos transaccionales relevantes del sistema. La rúbrica exige un mínimo de \textbf{32} diagramas de secuencia; las siguientes páginas se generan automáticamente mediante un bucle de LaTeX (\texttt{pgffor}) para facilitar su llenado.
+
+\medskip
+\noindent\textit{Instrucciones: para cada uno de los 32 bloques generados, reemplace "[Nombre del proceso transaccional]" por el nombre real del escenario (p. ej. "Registrar usuario", "Procesar pago"), y coloque la imagen exportada en \texttt{imagenes/secuencia\_NN.png} (NN = 01..32). Si su sistema requiere más de 32, agregue llamados adicionales de \texttt{\textbackslash DiagramaPagina} después del bucle.}
+
+\bigskip
+
+\foreach \n in {1,...,32} {%
+  \DiagramaPagina{Diagrama de Secuencia \n\ -- [Nombre del proceso transaccional \n]}{imagenes/secuencia_\n.png}{seq\n}{[Descripción del escenario: actores/objetos participantes, mensajes intercambiados en orden temporal, y condiciones o bucles relevantes (alt/opt/loop) del algoritmo transaccional.]}
+}
+
+% ------------------------------------------------------------
+\section{Diagramas de Colaboración / Comunicación}
+\noindent Con fines ilustrativos, se presentan versiones en diagrama de comunicación de algunos de los escenarios de secuencia más representativos.
+
+\DiagramaPagina{Diagrama de Comunicación 01 -- [Escenario ilustrado, ej. correspondiente a Secuencia \#1]}{imagenes/comunicacion_01.png}{com01}{[Descripción del escenario y correspondencia con el diagrama de secuencia equivalente.]}
+
+\DiagramaPagina{Diagrama de Comunicación 02 -- [Escenario ilustrado]}{imagenes/comunicacion_02.png}{com02}{[Descripción del escenario.]}
+
+\DiagramaPagina{Diagrama de Comunicación 03 -- [Escenario ilustrado]}{imagenes/comunicacion_03.png}{com03}{[Descripción del escenario.]}
+
+\noindent\textit{Nota: Agregue más bloques si desea ilustrar escenarios adicionales.}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Diagramas de Estado}
+\noindent Se documenta el ciclo de vida de los objetos/clases más relevantes del sistema cuyo comportamiento depende significativamente de su estado interno.
+
+\DiagramaPagina{Diagrama de Estado -- Clase [Nombre de la clase 1]}{imagenes/estado_01.png}{estado01}{[Descripción de los estados, eventos de transición, y acciones de entrada/salida relevantes para esta clase.]}
+
+\DiagramaPagina{Diagrama de Estado -- Clase [Nombre de la clase 2]}{imagenes/estado_02.png}{estado02}{[Descripción de los estados y transiciones.]}
+
+\noindent\textit{Nota: Agregue un diagrama de estado por cada objeto/clase pertinente identificado en el diagrama de clases (Sección B) cuyo comportamiento sea dependiente de estado.}
+\clearpage

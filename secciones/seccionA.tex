@@ -1,0 +1,222 @@
+% ============================================================
+% SECCIÓN A: Gestión de riesgos, sprint backlogs y cronograma
+% ============================================================
+\chapter{Sección A: Gestión del Proyecto}
+
+% ------------------------------------------------------------
+\section{Gestión de Riesgos}
+
+\subsection{Marco de Identificación y Análisis}
+
+Los riesgos del proyecto se identificaron mediante tres técnicas complementarias: listas de chequeo de riesgos típicos de proyectos de software, categorías documentadas de riesgo (técnico, de alcance, de recursos/equipo, de cronograma, de seguridad y externo/regulatorio) y sesiones de tormenta de ideas del equipo, contrastadas contra los artefactos de planificación del proyecto (historias de usuario, cronograma PERT/CPM y estimación funcional COSMIC, ver Sección~\ref{sec:cronograma-a}).
+
+Cada riesgo identificado se evalúa según dos dimensiones cualitativas de 5 niveles:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Probabilidad de ocurrencia:} (1) No probable [1--20\%], (2) Posible [20--40\%], (3) Poco probable [40--60\%], (4) Probable [60--80\%], (5) Muy probable [80--100\%].
+    \item \textbf{Impacto potencial:} (1) Mínimo, (2) Obstáculo menor --- podría no afectar la satisfacción del cliente, presupuesto, cronograma o desempeño---, (3) Obstáculo --- potencial insatisfacción del cliente, sobrecosto, retraso o degradación del sistema---, (4) Obstáculo mayor --- efecto significativo sobre cliente, cronograma, presupuesto o desempeño---, (5) Seria amenaza --- severa insatisfacción del cliente, sobrecosto grave, retraso grave o degradación severa del sistema.
+\end{itemize}
+
+El nivel de riesgo resultante (Probabilidad $\times$ Impacto) se clasifica de acuerdo con la matriz de calor 5$\times$5 de la Tabla~\ref{tab:matriz-riesgo}, la cual determina el orden de prioridad de atención: primero los riesgos de alta probabilidad y alto impacto, luego los de alto impacto con baja probabilidad, después los de bajo impacto con alta probabilidad, y por último los de bajo impacto y baja probabilidad.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de riesgo 5$\times$5 (Probabilidad $\times$ Impacto)}
+\label{tab:matriz-riesgo}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor{cajagris}
+\textbf{Prob. $\downarrow$ / Impacto $\rightarrow$} & \textbf{Insign. (1)} & \textbf{Menor (2)} & \textbf{Signif. (3)} & \textbf{Mayor (4)} & \textbf{Severo (5)} \\
+\hline
+\textbf{5 -- Casi seguro} & \cellcolor{riskmedio}Medio 5 & \cellcolor{riskalto}Alto 10 & \cellcolor{riskmuyalto}Muy alto 15 & \cellcolor{riskextremo}Extremo 20 & \cellcolor{riskextremo}Extremo 25 \\
+\hline
+\textbf{4 -- Probable} & \cellcolor{riskmedio}Medio 4 & \cellcolor{riskmedio}Medio 8 & \cellcolor{riskalto}Alto 12 & \cellcolor{riskmuyalto}Muy alto 16 & \cellcolor{riskextremo}Extremo 20 \\
+\hline
+\textbf{3 -- Moderado} & \cellcolor{riskbajo}Bajo 3 & \cellcolor{riskmedio}Medio 6 & \cellcolor{riskmedio}Medio 9 & \cellcolor{riskalto}Alto 12 & \cellcolor{riskmuyalto}Muy alto 15 \\
+\hline
+\textbf{2 -- Poco probable} & \cellcolor{riskmuybajo}Muy bajo 2 & \cellcolor{riskbajo}Bajo 4 & \cellcolor{riskmedio}Medio 6 & \cellcolor{riskmedio}Medio 8 & \cellcolor{riskalto}Alto 10 \\
+\hline
+\textbf{1 -- Raro} & \cellcolor{riskmuybajo}Muy bajo 1 & \cellcolor{riskmuybajo}Muy bajo 2 & \cellcolor{riskbajo}Bajo 3 & \cellcolor{riskmedio}Medio 4 & \cellcolor{riskmedio}Medio 5 \\
+\hline
+\end{tabular}
+\end{table}
+
+Para el manejo de cada riesgo se aplica una (o una combinación) de las siguientes seis estrategias:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Evitar el riesgo:} remover por completo la causa del riesgo.
+    \item \textbf{Reducción de la probabilidad:} disminuir la probabilidad de que el riesgo ocurra.
+    \item \textbf{Reducción de impacto:} disminuir la severidad de las consecuencias si el riesgo ocurre.
+    \item \textbf{Transferencia del riesgo:} trasladar el impacto (típicamente financiero) a un tercero, p. ej. mediante librerías/servicios ya auditados o subcontratación.
+    \item \textbf{Planes de contingencia:} acciones predefinidas que se ejecutan si la amenaza se materializa.
+    \item \textbf{Aceptación del riesgo:} riesgos de bajo impacto y baja probabilidad que se monitorean sin actuar activamente sobre ellos, salvo que su probabilidad o impacto cambie.
+\end{enumerate}
+
+\subsection{Registro de Riesgos del Proyecto}
+
+La Tabla~\ref{tab:riesgos-eval} presenta los riesgos identificados para Leodega, ordenados de mayor a menor nivel de riesgo. Los riesgos R-01 y R-02 están directamente vinculados a la concentración de tamaño funcional revelada por la estimación COSMIC del proyecto (el módulo Cliente concentra 120 de 324 puntos de función, el 37\,\% del total) y a la ausencia de holgura en la ruta crítica del cronograma (Sección~\ref{sec:cronograma-a}).
+
+\begin{longtable}{|c|p{5.3cm}|p{2.0cm}|p{1.9cm}|p{1.9cm}|p{1.8cm}|}
+\caption{Identificación y evaluación de riesgos} \label{tab:riesgos-eval} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Riesgo} & \textbf{Categoría} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
+\hline
+\endfirsthead
+\multicolumn{6}{c}{\textit{Tabla~\ref{tab:riesgos-eval} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Riesgo} & \textbf{Categoría} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
+\hline
+\endhead
+\hline \multicolumn{6}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+R-01 & Retraso o falla en la integración con los sistemas de inventario externos de los clientes (HUC-10 a HUC-13): Leodega depende de APIs de terceros no controladas por el equipo y de un modelo de sincronización \textit{pull} cuyo comportamiento real se desconoce hasta la integración. & Técnico / Integración & 4 -- Probable & 4 -- Obstáculo mayor & \cellcolor{riskmuyalto}Muy alto (16) \\
+\hline
+R-02 & Subestimación del esfuerzo del módulo Cliente, que concentra el 37\,\% del tamaño funcional total del sistema (120 de 324 CFP según la estimación COSMIC), lo que puede provocar desbordes de cronograma en los Sprints 2, 4 y 5. & Técnico / Complejidad & 4 -- Probable & 4 -- Obstáculo mayor & \cellcolor{riskmuyalto}Muy alto (16) \\
+\hline
+R-03 & Retraso en cascada sobre la ruta crítica del proyecto si cualquiera de sus actividades se atrasa, dado que ninguna tiene holgura (float = 0). & Cronograma & 3 -- Poco probable & 5 -- Seria amenaza & \cellcolor{riskmuyalto}Muy alto (15) \\
+\hline
+R-04 & Indisponibilidad o rotación de un integrante del equipo, dado que la planificación con recursos limitados ya asume el uso máximo de personal disponible sin holgura adicional en las tareas críticas. & Recursos / Equipo & 3 -- Poco probable & 4 -- Obstáculo mayor & \cellcolor{riskalto}Alto (12) \\
+\hline
+R-05 & Curva de aprendizaje del equipo con la tecnología del acompañante móvil Leodeguita, no utilizada previamente en la plataforma heredada (100\,\% web). & Técnico / Aprendizaje & 4 -- Probable & 3 -- Obstáculo & \cellcolor{riskalto}Alto (12) \\
+\hline
+R-06 & Vulnerabilidades en la autenticación compartida entre la plataforma web y Leodeguita (mismas credenciales, tokens Bearer) si el almacenamiento de tokens en el cliente móvil no es seguro. & Seguridad & 2 -- Posible & 5 -- Seria amenaza & \cellcolor{riskalto}Alto (10) \\
+\hline
+R-07 & Demoras o inconsistencias en la validación del permiso del cuerpo de bomberos por parte del Administrador, al depender de un proceso de revisión documental no automatizado. & Externo / Regulatorio & 3 -- Poco probable & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+R-08 & Cambios o ambigüedades en los requerimientos de las historias de usuario durante el desarrollo que obliguen a retrabajo. & Alcance & 2 -- Posible & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (6) \\
+\hline
+R-09 & Expectativa del cliente/evaluador de un procesamiento de pago real, dado que el flujo de pago está simulado por diseño (fuera de alcance). & Alcance & 2 -- Posible & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (6) \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|c|p{2.3cm}|p{4.7cm}|p{4.7cm}|p{1.9cm}|}
+\caption{Plan de respuesta a riesgos} \label{tab:riesgos-plan} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Estrategia} & \textbf{Acciones de mitigación} & \textbf{Plan de contingencia} & \textbf{Responsable} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:riesgos-plan} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Estrategia} & \textbf{Acciones de mitigación} & \textbf{Plan de contingencia} & \textbf{Responsable} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+R-01 & Reducción de impacto + Plan de contingencia & Diseñar el conector de inventario con una capa de adaptación (patrón \textit{Adapter}) desacoplada del núcleo y definir contratos de API simulados (\textit{mocks}) desde etapas tempranas para pruebas de integración anticipadas. & Si la integración real no está disponible a tiempo, degradar al modo de importación manual vía Excel (HUC-13) para cumplir la fecha de entrega, e integrar el conector en un sprint posterior. & Equipo Sprint 5 \\
+\hline
+R-02 & Reducción de impacto & Usar la estimación funcional COSMIC para re-balancear el personal asignado por sprint y descomponer las historias más grandes (HUC-10 a HUC-13) en subtareas verificables. & Priorizar las funcionalidades de mayor valor de negocio del módulo Cliente (búsqueda, reserva, pago) sobre las de menor prioridad (integración de inventario) si el tiempo se agota. & Líder técnico \\
+\hline
+R-03 & Planes de contingencia + Reducción de probabilidad & Monitorear semanalmente el avance de las actividades de la ruta crítica y reforzar con personal adicional ante cualquier desviación temprana. & Usar la holgura ganada en la optimización de recursos y, de ser necesario, negociar con el cliente una reducción de alcance en funcionalidades no críticas para proteger la fecha de entrega. & Líder de proyecto \\
+\hline
+R-04 & Planes de contingencia + Reducción de probabilidad & Distribuir el conocimiento de los módulos críticos entre al menos dos integrantes (reducir el \textit{bus factor}) y mantener documentación técnica continuamente actualizada. & Reasignar las tareas del integrante ausente al miembro con menor carga según el cronograma nivelado, aceptando una extensión acotada antes de escalar al profesor/cliente. & Todo el equipo \\
+\hline
+R-05 & Reducción de probabilidad + Reducción de impacto & Capacitación express del equipo antes del sprint del acompañante móvil, reutilizando la lógica de negocio y los endpoints REST ya validados en el backend. & Reducir el alcance de Leodeguita a las historias de mayor prioridad (login y exploración) si el aprendizaje consume el margen disponible. & Equipo Sprint 5 (móvil) \\
+\hline
+R-06 & Reducción de impacto + Transferencia & Usar almacenamiento seguro nativo para los tokens, expiración corta de sesión y cumplimiento de los requerimientos de seguridad del ERS (RNF-03/RNF-04). & Revocar de forma centralizada los tokens comprometidos desde el backend y forzar reautenticación de los usuarios afectados. & Responsable de seguridad/backend \\
+\hline
+R-07 & Aceptación + Reducción de impacto & Definir casos de prueba con documentos de permiso simulados (válidos, vencidos, ilegibles) para validar el flujo sin depender de una autoridad real. & Documentar un criterio de validación manual de respaldo si la automatización no cubre todos los casos. & QA \\
+\hline
+R-08 & Reducción de probabilidad & Validar cada historia de usuario con el representante del cliente antes de iniciar el sprint correspondiente y mantener trazabilidad HU $\rightarrow$ RF (Sección B). & Congelar el alcance del sprint en curso y trasladar el cambio solicitado al backlog del siguiente sprint. & Product Owner \\
+\hline
+R-09 & Reducción de probabilidad & Documentar explícitamente el alcance y las exclusiones del proyecto (Capítulo~1) y validarlo con el cliente en el acta de conformidad. & Aclarar en la demostración del sistema que el pago es simulado por diseño. & Product Owner \\
+\hline
+\end{longtable}
+
+\clearpage
+
+% ------------------------------------------------------------
+\section{Sprint Backlogs}
+[Indicar la cantidad total de sprints planificados, su duración y la herramienta de gestión ágil utilizada (p. ej. Jira, Trello, Azure DevOps).]
+
+\subsection{Sprint 1}
+\textbf{Objetivo del Sprint:} [Meta principal del sprint]\\
+\textbf{Duración:} [Fecha inicio] -- [Fecha fin]
+
+\begin{table}[H]
+\centering
+\caption{Sprint Backlog - Sprint 1}
+\label{tab:sprint1}
+\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+\hline
+\rowcolor{cajagris}
+\textbf{ID Historia} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+HU-01 & [Como... quiero... para...] & [pts] & [Integrante] & [Pendiente/En progreso/Hecho] \\ \hline
+HU-02 & [Descripción] & & & \\ \hline
+HU-03 & [Descripción] & & & \\ \hline
+\end{tabularx}
+\end{table}
+\clearpage
+
+\subsection{Sprint 2}
+\textbf{Objetivo del Sprint:} [Meta principal del sprint]\\
+\textbf{Duración:} [Fecha inicio] -- [Fecha fin]
+
+\begin{table}[H]
+\centering
+\caption{Sprint Backlog - Sprint 2}
+\label{tab:sprint2}
+\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+\hline
+\rowcolor{cajagris}
+\textbf{ID Historia} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+HU-04 & [Descripción] & & & \\ \hline
+HU-05 & [Descripción] & & & \\ \hline
+\end{tabularx}
+\end{table}
+
+\bigskip
+\noindent\textit{Nota: Duplique la subsección "Sprint N" para cada sprint adicional planificado en el proyecto.}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Cronograma del Proyecto}
+\label{sec:cronograma-a}
+
+\subsection{Tabla de Actividades}
+\begin{table}[H]
+\centering
+\caption{Actividades, duraciones y dependencias del proyecto}
+\label{tab:cronograma_tabla}
+\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Actividad} & \textbf{Duración (días)} & \textbf{Predecesora(s)} & \textbf{Responsable} \\
+\hline
+A & [Ej. Levantamiento de requerimientos] & [n] & -- & [Integrante] \\ \hline
+B & [Actividad] & [n] & A & \\ \hline
+C & [Actividad] & [n] & A & \\ \hline
+D & [Actividad] & [n] & B, C & \\ \hline
+E & [Actividad] & [n] & D & \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Diagrama de Red del Proyecto (Activity-on-Arrow)}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.5}{imagenes/diagrama_aoa.png}
+    \caption{Diagrama de red del proyecto (Activity-on-Arrow) con ruta crítica}
+    \label{fig:aoa}
+\end{figure}
+\noindent\textbf{Ruta crítica:} [Indicar la secuencia de actividades que conforman la ruta crítica y la duración total del proyecto en días.]
+
+\subsection{Diagrama de Gantt}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.5}{imagenes/diagrama_gantt.png}
+    \caption{Cronograma del proyecto (diagrama de Gantt)}
+    \label{fig:gantt}
+\end{figure}
+\noindent\textbf{Herramienta utilizada:} \textit{[Ej. Microsoft Project, GanttProject, Excel]}
+\clearpage

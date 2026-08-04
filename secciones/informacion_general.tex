@@ -1,0 +1,54 @@
+% ============================================================
+% INFORMACIÓN GENERAL DEL PROYECTO
+% Fuente: recursos/informacion_general/proyecto1P.tex
+% (Documento de Especificación de Requerimientos, 1er parcial)
+% ============================================================
+\chapter{Información General del Proyecto}
+
+\section{Descripción General}
+
+\textbf{Leodega} es un \textit{marketplace} colaborativo de espacios de almacenamiento que conecta a propietarios de espacios ---arrendadores, en adelante \textbf{Storage Managers}--- con personas y organizaciones que necesitan almacenar sus bienes ---arrendatarios, en adelante \textbf{Clientes}---, bajo la supervisión de un \textbf{Administrador} del sistema. El proyecto parte de una plataforma web \textit{full-stack} ya existente, desarrollada bajo metodología Scrum, la cual se encontraba en fase de integración y pruebas al momento de ser entregada al equipo como punto de partida.
+
+La plataforma heredada está construida sobre la siguiente base tecnológica:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Backend:} Laravel 12 (PHP 8.2+), autenticación basada en tokens con Laravel Sanctum, ORM Eloquent y base de datos PostgreSQL en producción (SQLite en desarrollo local), contenerizada con Docker Compose y desplegable en Railway.
+    \item \textbf{Frontend:} React 19 con TypeScript y Vite, React Router DOM con rutas protegidas por rol, Tailwind CSS, Axios con interceptor de token Bearer, mapas con Leaflet/React-Leaflet, e internacionalización con i18next; desplegable en Vercel.
+    \item \textbf{Capacidades existentes:} autenticación y registro de usuarios, control de acceso basado en roles (administrador, arrendador, arrendatario), publicación y moderación de espacios de almacenamiento, búsqueda y vistas de detalle, reservas con detección de conflictos, calificaciones, reportes, notificaciones dentro de la aplicación, conversaciones y mensajería, registro de pagos, y paneles (\textit{dashboards}) por rol.
+\end{itemize}
+
+El presente proyecto tiene como propósito evolucionar Leodega para que soporte cuentas organizacionales (empresas), un acompañante móvil denominado \textbf{Leodeguita}, integración con sistemas de inventario externos, importación de inventario desde archivos Excel, validación del permiso del cuerpo de bomberos, un panel de control administrativo, y moderación de cuentas de usuario. Estas capacidades están especificadas mediante historias de usuario, las cuales constituyen la fuente primaria de los requerimientos funcionales del sistema (ver Anexo~\ref{anexo:ers}). El diseño presentado en las Secciones A, B y C de este documento es consistente con dicha especificación y con el prototipo de alta fidelidad aprobado por el cliente.
+
+\section{Objetivos del Proyecto}
+
+\subsection*{Objetivo General}
+Evolucionar la plataforma Leodega hacia un \textit{marketplace} de almacenamiento completo, confiable y accesible desde dispositivos móviles, que conecte a Storage Managers y Clientes ---de forma individual o bajo organizaciones--- a través de un sistema moderado y confiable que integre capacidades de reserva, pago, comunicación, reporte de incidentes e integración de inventario.
+
+\subsection*{Objetivos Específicos}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Gestión de almacenamiento.} Permitir a los Storage Managers registrar, editar y eliminar bodegas ---incluyendo el permiso obligatorio del cuerpo de bomberos---, así como visualizar, cancelar y comunicarse sobre sus reservas. (Referencias: HUG-01 a HUG-08.)
+    \item \textbf{Experiencia del cliente.} Permitir a los Clientes buscar y filtrar bodegas, ver su detalle, reservarlas y pagarlas, gestionar sus reservas, comunicarse con los gestores, reportar incidentes, calificar arriendos finalizados, e integrar sus sistemas de inventario externos o importar inventario desde archivos Excel. (Referencias: HUC-01 a HUC-14.)
+    \item \textbf{Administración de la plataforma.} Permitir a los Administradores validar permisos del cuerpo de bomberos y moderar publicaciones, bloquear y reactivar cuentas de usuario, monitorear un panel de control con métricas clave, y revisar y resolver reportes. (Referencias: HUA-01 a HUA-04.)
+    \item \textbf{Cuentas organizacionales.} Habilitar la creación de organizaciones, la invitación y aceptación de clientes miembros, el cambio entre contexto personal y organizacional, las reservas a nivel empresarial, y la administración y auditoría de la actividad organizacional. (Referencias: HUE-01 a HUE-06.)
+    \item \textbf{Acompañante móvil (Leodeguita).} Proveer acceso móvil para autenticarse con las credenciales de Leodega, seleccionar la empresa operadora, publicar bodegas, y explorar bodegas disponibles. (Referencias: HUL-01 a HUL-06.)
+\end{enumerate}
+
+\section{Alcance}
+
+El alcance del sistema está definido por los requerimientos funcionales derivados de las historias de usuario, resumidos en la Sección B de este documento y detallados en el Anexo~\ref{anexo:ers}.
+
+\subsection*{Alcance funcional por rol de usuario}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Storage Manager (arrendador).} Recibir y responder consultas previas a la reserva; recibir notificaciones de confirmación de pago y ver contratos activos; chatear con clientes durante arriendos activos; registrar una bodega con dimensiones, ubicación, fotografías, tarifa mensual y permiso del cuerpo de bomberos; ver reservas con filtros y detalle; cancelar reservas futuras pagadas con motivo obligatorio; eliminar bodegas sin reservas activas o futuras; y editar la información de una bodega. (HUG-01 a HUG-08.)
+    \item \textbf{Cliente (arrendatario).} Buscar y filtrar bodegas por ubicación, tamaño y precio, con vista de mapa; ver el detalle de una bodega; reservar bodegas disponibles con validación de conflicto de fechas; completar un pago simulado para confirmar una reserva; comunicarse con los gestores antes y durante el arriendo; ver y gestionar reservas activas e históricas; cancelar reservas futuras confirmadas; reportar incidentes; calificar arriendos finalizados; aceptar o rechazar invitaciones a organizaciones; registrar un endpoint de inventario externo y su mapeo de campos; ver el inventario sincronizado; e importar inventario desde un archivo Excel. (HUC-01 a HUC-14.)
+    \item \textbf{Administrador.} Validar el permiso del cuerpo de bomberos y aprobar o rechazar publicaciones de bodegas; bloquear y reactivar cuentas de usuario con registro de auditoría; monitorear un panel de control con métricas de bodegas, usuarios, transacciones, reservas y reportes sin resolver; y revisar, responder y resolver reportes. (HUA-01 a HUA-04.)
+    \item \textbf{Administrador de Organización y miembros.} Crear una organización; invitar clientes como miembros; acceder a un panel administrativo empresarial con miembros, reservas e historial; y eliminar reservas empresariales con motivo obligatorio. Los miembros clientes pueden cambiar entre contexto personal y organizacional, reservar en nombre de la organización, y compartir visibilidad de las reservas empresariales, sin poder eliminarlas. (HUE-01 a HUE-06.)
+    \item \textbf{Usuarios de Leodeguita (todos los roles).} El acompañante móvil permite a cualquier usuario de Leodega autenticarse con sus credenciales existentes; permite a un cliente seleccionar la empresa operadora; permite a un Storage Manager publicar una bodega para revisión y ver sus bodegas publicadas; y permite a un cliente explorar y ver el detalle de bodegas disponibles. (HUL-01 a HUL-06.)
+\end{itemize}
+
+\subsection*{Fuera de alcance}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Procesamiento de pagos reales.} El flujo de pago es simulado; no se requiere integración con pasarelas de pago o procesadores bancarios reales.
+    \item \textbf{Integración con ERP y facturación electrónica.} Forman parte de la visión del producto pero no están implementadas ni cubiertas por ninguna historia de usuario; quedan excluidas de esta especificación.
+    \item \textbf{Aplicación móvil React Native de propósito general.} Se planifica para versiones futuras; solo los flujos del acompañante Leodeguita (HUL-01 a HUL-06) están dentro del alcance.
+    \item \textbf{Funcionalidades heredadas no re-especificadas} (por ejemplo, favoritos, gestión de tokens de sesión y recuperación de contraseña) se mantienen de la plataforma heredada tal como están y no se re-especifican como requerimientos funcionales en este documento.
+\end{itemize}

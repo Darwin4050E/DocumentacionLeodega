@@ -1,0 +1,131 @@
+% ============================================================
+% SECCIÓN B: Modelamiento de la parte estática del sistema
+% ============================================================
+\chapter{Sección B: Modelamiento Estático del Sistema}
+
+% ------------------------------------------------------------
+\section{Diagrama de Casos de Uso}
+
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.6}{imagenes/diagrama_casos_uso.png}
+    \caption{Diagrama general de casos de uso del sistema}
+    \label{fig:casos_uso}
+\end{figure}
+\noindent\textbf{Herramienta de modelado utilizada:} \textit{[Ej. Visual Paradigm, StarUML]}
+\clearpage
+
+\subsection{Documentación de Casos de Uso}
+\noindent A continuación se documenta cada caso de uso identificado en el diagrama anterior, siguiendo el formato de la plantilla de Project Management Docs \cite{ref21}.
+
+\bigskip
+\noindent\textbf{Caso de Uso UC-01}
+\begin{longtable}{|p{3.5cm}|p{10.5cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
+\endhead
+ID & UC-01 \\ \hline
+Nombre & [Nombre del caso de uso] \\ \hline
+Actor(es) & [Actor principal, actor(es) secundario(s)] \\ \hline
+Descripción & [Breve descripción del propósito del caso de uso] \\ \hline
+Disparador (Trigger) & [Evento que inicia la ejecución] \\ \hline
+Precondiciones & [Lista de condiciones que deben cumplirse antes de iniciar] \\ \hline
+Postcondiciones & [Lista de condiciones resultantes al finalizar con éxito] \\ \hline
+Flujo Normal &
+\begin{enumerate}[leftmargin=*,nosep]
+  \item [Paso 1 del flujo principal]
+  \item [Paso 2 del flujo principal]
+  \item [Paso 3 del flujo principal]
+\end{enumerate} \\ \hline
+Flujos Alternativos & [Ej. A1: si ocurre... entonces...] \\ \hline
+Excepciones & [Manejo de errores, ej. datos inválidos, tiempo de espera agotado] \\ \hline
+Reglas de Negocio & [Reglas de negocio aplicables al caso de uso] \\ \hline
+Supuestos & [Supuestos considerados para este caso de uso] \\ \hline
+\end{longtable}
+
+\bigskip
+\noindent\textbf{Caso de Uso UC-02}
+\begin{longtable}{|p{3.5cm}|p{10.5cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
+\endhead
+ID & UC-02 \\ \hline
+Nombre & [Nombre del caso de uso] \\ \hline
+Actor(es) & [Actor principal, actor(es) secundario(s)] \\ \hline
+Descripción & [Breve descripción] \\ \hline
+Disparador (Trigger) & [Evento que inicia la ejecución] \\ \hline
+Precondiciones & [Precondiciones] \\ \hline
+Postcondiciones & [Postcondiciones] \\ \hline
+Flujo Normal & \begin{enumerate}[leftmargin=*,nosep]\item [Paso 1]\item [Paso 2]\end{enumerate} \\ \hline
+Flujos Alternativos & [Flujos alternativos] \\ \hline
+Excepciones & [Excepciones] \\ \hline
+Reglas de Negocio & [Reglas de negocio] \\ \hline
+Supuestos & [Supuestos] \\ \hline
+\end{longtable}
+
+\bigskip
+\noindent\textit{Nota: Duplique el bloque "Caso de Uso UC-XX" anterior para documentar cada caso de uso presente en el diagrama de la sección \ref{fig:casos_uso}.}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Diagrama de Clases}
+
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.65}{imagenes/diagrama_clases.png}
+    \caption{Diagrama de clases del sistema (lógica de negocio)}
+    \label{fig:clases}
+\end{figure}
+\noindent\textbf{Herramienta de modelado utilizada:} \textit{[Ej. Visual Paradigm, StarUML]}
+\clearpage
+
+\subsection{Cumplimiento de Principios SOLID}
+\begin{table}[H]
+\centering
+\caption{Aplicación de principios SOLID en el diseño de clases}
+\label{tab:solid}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{cajagris} \textbf{Principio} & \textbf{Justificación / Clases involucradas} \\ \hline
+S -- Single Responsibility & [Explicar cómo se aplica y en qué clases] \\ \hline
+O -- Open/Closed & [Explicar cómo se aplica y en qué clases] \\ \hline
+L -- Liskov Substitution & [Explicar cómo se aplica y en qué clases] \\ \hline
+I -- Interface Segregation & [Explicar cómo se aplica y en qué clases] \\ \hline
+D -- Dependency Inversion & [Explicar cómo se aplica y en qué clases] \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Patrones de Diseño Aplicados}
+\begin{table}[H]
+\centering
+\caption{Patrones de diseño utilizados en el sistema \cite{ref22}}
+\label{tab:patrones}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\ \hline
+[Ej. Singleton] & Creacional & [Clases involucradas y motivo de uso] \\ \hline
+[Ej. Strategy] & Comportamiento & [Clases involucradas y motivo de uso] \\ \hline
+[Ej. Adapter] & Estructural & [Clases involucradas y motivo de uso] \\ \hline
+\end{tabularx}
+\end{table}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Diagramas de Objetos}
+
+\DiagramaPagina{Diagrama de Objetos 01 -- [Escenario ilustrado]}{imagenes/objetos_01.png}{objetos01}{[Descripción del escenario/instante del sistema representado por este diagrama de objetos y su relación con el diagrama de clases.]}
+
+\DiagramaPagina{Diagrama de Objetos 02 -- [Escenario ilustrado]}{imagenes/objetos_02.png}{objetos02}{[Descripción del escenario/instante del sistema representado.]}
+
+\noindent\textit{Nota: Agregue tantos diagramas de objetos como aspectos medulares del sistema se deseen ilustrar, duplicando el llamado a \texttt{\textbackslash DiagramaPagina}.}
+\clearpage
+
+% ------------------------------------------------------------
+\section{Diagrama de Componentes}
+
+\DiagramaPagina{Diagrama de Componentes del Sistema}{imagenes/diagrama_componentes.png}{componentes}{[Descripción de los componentes de software identificados (módulos, servicios, librerías), sus interfaces provistas/requeridas y dependencias entre ellos.]}
+
+% ------------------------------------------------------------
+\section{Diagrama de Despliegue}
+
+\DiagramaPagina{Diagrama de Despliegue del Sistema}{imagenes/diagrama_despliegue.png}{despliegue}{[Descripción de los nodos físicos/virtuales (servidores, dispositivos cliente, servicios en la nube), artefactos desplegados en cada nodo y protocolos de comunicación entre nodos.]}
