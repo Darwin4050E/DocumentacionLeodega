@@ -23,6 +23,7 @@ El nivel de riesgo resultante (Probabilidad $\times$ Impacto) se clasifica de ac
 \centering
 \caption{Matriz de riesgo 5$\times$5 (Probabilidad $\times$ Impacto)}
 \label{tab:matriz-riesgo}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 \rowcolor{cajagris}
@@ -38,7 +39,8 @@ El nivel de riesgo resultante (Probabilidad $\times$ Impacto) se clasifica de ac
 \hline
 \textbf{1 -- Raro} & \cellcolor{riskmuybajo}Muy bajo 1 & \cellcolor{riskmuybajo}Muy bajo 2 & \cellcolor{riskbajo}Bajo 3 & \cellcolor{riskmedio}Medio 4 & \cellcolor{riskmedio}Medio 5 \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 Para el manejo de cada riesgo se aplica una (o una combinación) de las siguientes seis estrategias:
@@ -56,7 +58,8 @@ Para el manejo de cada riesgo se aplica una (o una combinación) de las siguient
 
 La Tabla~\ref{tab:riesgos-eval} presenta los riesgos identificados para Leodega, ordenados de mayor a menor nivel de riesgo. Los riesgos R-01 y R-02 están directamente vinculados a la concentración de tamaño funcional revelada por la estimación COSMIC del proyecto (el módulo Cliente concentra 120 de 324 puntos de función, el 37\,\% del total) y a la ausencia de holgura en la ruta crítica del cronograma (Sección~\ref{sec:cronograma-a}).
 
-\begin{longtable}{|c|p{5.3cm}|p{2.0cm}|p{1.9cm}|p{1.9cm}|p{1.8cm}|}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.3cm}|L{5.3cm}|M{2.0cm}|M{1.9cm}|M{1.9cm}|M{1.8cm}|}
 \caption{Identificación y evaluación de riesgos} \label{tab:riesgos-eval} \\
 \hline
 \rowcolor{cajagris}
@@ -93,8 +96,10 @@ R-08 & Cambios o ambigüedades en los requerimientos de las historias de usuario
 R-09 & Expectativa del cliente/evaluador de un procesamiento de pago real, dado que el flujo de pago está simulado por diseño (fuera de alcance). & Alcance & 2 -- Posible & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (6) \\
 \hline
 \end{longtable}
+}
 
-\begin{longtable}{|c|p{2.3cm}|p{4.7cm}|p{4.7cm}|p{1.9cm}|}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{0.9cm}|M{2.0cm}|L{4.5cm}|L{4.5cm}|M{2.4cm}|}
 \caption{Plan de respuesta a riesgos} \label{tab:riesgos-plan} \\
 \hline
 \rowcolor{cajagris}
@@ -131,85 +136,279 @@ R-08 & Reducción de probabilidad & Validar cada historia de usuario con el repr
 R-09 & Reducción de probabilidad & Documentar explícitamente el alcance y las exclusiones del proyecto (Capítulo~1) y validarlo con el cliente en el acta de conformidad. & Aclarar en la demostración del sistema que el pago es simulado por diseño. & Product Owner \\
 \hline
 \end{longtable}
+}
 
 \clearpage
 
 % ------------------------------------------------------------
 \section{Sprint Backlogs}
-[Indicar la cantidad total de sprints planificados, su duración y la herramienta de gestión ágil utilizada (p. ej. Jira, Trello, Azure DevOps).]
+El proyecto se organizó en \textbf{5 sprints}, con una duración total planificada de 52 días según el cronograma PERT/CPM (Sección~\ref{sec:cronograma-a}), gestionados mediante un tablero ágil tipo Scrum en \textit{[herramienta de gestión ágil utilizada, p. ej. Jira, Trello, Azure DevOps]}. Cada historia de usuario se prioriza con la escala MoSCoW (Must/Should/Could Have) y se estima en puntos de historia.
 
-\subsection{Sprint 1}
-\textbf{Objetivo del Sprint:} [Meta principal del sprint]\\
-\textbf{Duración:} [Fecha inicio] -- [Fecha fin]
+\subsection{Sprint 1 --- Fundamentos de Autenticación y Gestión de Almacenes}
+\textbf{Objetivo del Sprint:} Establecer el inicio de sesión compartido web/móvil y las operaciones básicas de registro, edición, eliminación y moderación de almacenes.\\
+\textbf{Duración:} Día 1 -- Día 11 (11 días)
 
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog - Sprint 1}
-\label{tab:sprint1}
-\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.6cm}|L{7.0cm}|M{1.4cm}|M{2.4cm}|M{1.8cm}|}
+\caption{Sprint Backlog -- Sprint 1} \label{tab:sprint1} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID Historia} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
 \hline
-HU-01 & [Como... quiero... para...] & [pts] & [Integrante] & [Pendiente/En progreso/Hecho] \\ \hline
-HU-02 & [Descripción] & & & \\ \hline
-HU-03 & [Descripción] & & & \\ \hline
-\end{tabularx}
-\end{table}
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:sprint1} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+HUG-04 & Como Gestor de Almacenamiento, quiero registrar un nuevo almacén (dimensiones, ubicación, fotos, tarifa y permiso de bomberos vigente), para ofrecer mi espacio en alquiler. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUG-07 & Como Gestor, quiero eliminar un almacén sin reservas activas o futuras, para retirar espacios que ya no ofrezco. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUG-08 & Como Gestor, quiero editar la información de un almacén ya publicado, para mantener actualizada mi oferta sin recrearlo. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUA-01 & Como Administrador, quiero revisar y validar el permiso de bomberos subido por el Gestor, para asegurar el cumplimiento legal antes de habilitar el espacio. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUA-03 & Como Administrador, quiero bloquear o reactivar cuentas de usuario, para actuar como moderador ante incumplimientos de las políticas de uso. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUL-01 & Como usuario (Administrador, Gestor o Cliente), quiero iniciar sesión en Leodeguita con mis credenciales de Leodega, para acceder a mis datos sin crear una cuenta aparte. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUL-03 & Como Gestor, quiero registrar un almacén disponible con el mínimo de pasos, para publicarlo rápidamente desde mi dispositivo móvil. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUL-04 & Como Gestor, quiero ver la lista de almacenes que he publicado, para monitorear mis espacios y su estado actual. & 2 & Equipo Leodega & Pendiente \\ \hline
+\end{longtable}
+}
 \clearpage
 
-\subsection{Sprint 2}
-\textbf{Objetivo del Sprint:} [Meta principal del sprint]\\
-\textbf{Duración:} [Fecha inicio] -- [Fecha fin]
+\subsection{Sprint 2 --- Catálogo, Reservas y Pago}
+\textbf{Objetivo del Sprint:} Habilitar la búsqueda y reserva de almacenes por parte del cliente, el pago simulado y la gestión de reservas por parte del Gestor.\\
+\textbf{Duración:} Día 12 -- Día 21 (10 días)
 
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog - Sprint 2}
-\label{tab:sprint2}
-\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.6cm}|L{7.0cm}|M{1.4cm}|M{2.4cm}|M{1.8cm}|}
+\caption{Sprint Backlog -- Sprint 2} \label{tab:sprint2} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID Historia} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
 \hline
-HU-04 & [Descripción] & & & \\ \hline
-HU-05 & [Descripción] & & & \\ \hline
-\end{tabularx}
-\end{table}
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:sprint2} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
 
-\bigskip
-\noindent\textit{Nota: Duplique la subsección "Sprint N" para cada sprint adicional planificado en el proyecto.}
+HUG-02 & Como Gestor, quiero recibir una notificación cuando un cliente confirme el pago de una reserva, para saber en tiempo real qué contratos se formalizaron. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUG-05 & Como Gestor, quiero ver todas las reservas de mis almacenes con fecha, cliente y estado de pago, para gestionar el uso de mi espacio. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUG-06 & Como Gestor, quiero cancelar una reserva pagada indicando un motivo obligatorio, para liberar mi espacio ante imprevistos manteniendo transparencia con el cliente. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUC-01 & Como Cliente, quiero buscar y filtrar almacenes disponibles por ubicación, tamaño y precio, para encontrar el espacio que mejor se ajuste a mis necesidades y presupuesto. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUC-02 & Como Cliente, quiero ver el detalle completo de un almacén antes de reservar, para evaluar si cumple mis requisitos de condiciones, capacidad, precio y ubicación. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUC-03 & Como Cliente, quiero reservar un almacén disponible seleccionando el período de alquiler deseado, para asegurar el espacio que necesito en las fechas requeridas. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUC-05 & Como Cliente, quiero completar un proceso de pago simulado para confirmar y activar mi reserva, para formalizar el acuerdo de alquiler. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUL-06 & Como Cliente, quiero ver la información detallada de un espacio disponible desde el móvil, para evaluar si cumple mis necesidades antes de alquilarlo. & 2 & Equipo Leodega & Pendiente \\ \hline
+\end{longtable}
+}
+\clearpage
+
+\subsection{Sprint 3 --- Organizaciones (Multiempresa)}
+\textbf{Objetivo del Sprint:} Incorporar la operación multiempresa: creación de organizaciones, invitación de miembros, cambio de contexto y reservas a nombre de la organización.\\
+\textbf{Duración:} Día 22 -- Día 32 (11 días)
+
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.6cm}|L{7.0cm}|M{1.4cm}|M{2.4cm}|M{1.8cm}|}
+\caption{Sprint Backlog -- Sprint 3} \label{tab:sprint3} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:sprint3} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+HUC-14 & Como Cliente, quiero aceptar o rechazar una invitación de una organización para unirme como miembro, para decidir si opero bajo su nombre en la plataforma. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUE-01 & Como Administrador de Organización, quiero invitar a usuarios clientes a unirse a mi organización como miembros, para que mis colaboradores operen bajo el nombre de la empresa. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUE-02 & Como Cliente perteneciente a una organización, quiero cambiar entre mi contexto personal y el de cada organización desde un selector, para operar bajo el nombre correcto sin cerrar sesión. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUE-03 & Como Administrador de Organización, quiero acceder a un panel administrativo con miembros, reservas activas e historial, para tener visibilidad y control total de las operaciones de mi empresa. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUE-04 & Como Administrador de Organización, quiero crear una organización desde mi cuenta de cliente ingresando sus datos (razón social, RUC y correo), para gestionar alquileres a nombre de mi organización. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUE-05 & Como Cliente perteneciente a una organización, quiero reservar un almacén disponible a nombre de la organización, para asegurar espacio de almacenamiento para la empresa. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUE-06 & Como Cliente perteneciente a una organización, quiero que el sistema me impida eliminar almacenes reservados por la organización, para proteger los contratos empresariales de eliminaciones no autorizadas. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUL-02 & Como Cliente, quiero seleccionar la empresa bajo la cual operar dentro de Leodeguita, para ver solo los almacenes e ítems correspondientes a esa empresa. & 3 & Equipo Leodega & Pendiente \\ \hline
+\end{longtable}
+}
+\clearpage
+
+\subsection{Sprint 4 --- Mensajería, Reportes y Reseñas}
+\textbf{Objetivo del Sprint:} Habilitar la comunicación cliente--gestor (consultas y chat de reserva activa), el reporte de incidentes y el sistema de calificaciones.\\
+\textbf{Duración:} Día 33 -- Día 42 (10 días)
+
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.6cm}|L{7.0cm}|M{1.4cm}|M{2.4cm}|M{1.8cm}|}
+\caption{Sprint Backlog -- Sprint 4} \label{tab:sprint4} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:sprint4} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+HUG-01 & Como Gestor, quiero recibir y responder mensajes de consulta previa de clientes interesados, para brindar información oportuna y generar confianza antes de la reserva formal. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUG-03 & Como Gestor, quiero tener un canal de chat activo con mis clientes durante el período de alquiler vigente, para coordinar accesos y resolver incidencias sin salir de la plataforma. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUC-04 & Como Cliente, quiero enviar un mensaje al Gestor de un almacén antes de reservar para aclarar dudas, para obtener información que no está en la descripción. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUC-06 & Como Cliente, quiero comunicarme con el Gestor mediante un chat vinculado a mi reserva activa, para coordinar accesos y resolver situaciones operativas menores. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUC-07 & Como Cliente, quiero ver y gestionar mis reservas activas e históricas desde mi panel personal, para tener visibilidad y control sobre mis contratos de alquiler vigentes. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUC-08 & Como Cliente, quiero reportar un problema relacionado con un almacén o una reserva activa desde mi panel personal, para notificar al Administrador incumplimientos, daños o situaciones anómalas. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUC-09 & Como Cliente, quiero calificar y dejar una reseña sobre el Gestor y el almacén al finalizar mi alquiler, para compartir mi experiencia y aportar a la reputación del Gestor. & 3 & Equipo Leodega & Pendiente \\ \hline
+HUA-04 & Como Administrador, quiero revisar y dar seguimiento a los reportes que envían los clientes, pudiendo responder y cambiar su estado, para gestionar incidencias y mantener la calidad del servicio. & 3 & Equipo Leodega & Pendiente \\ \hline
+\end{longtable}
+}
+\clearpage
+
+\subsection{Sprint 5 --- Integración de Inventario y Métricas}
+\textbf{Objetivo del Sprint:} Incorporar la integración con sistemas de inventario externos (conexión, mapeo y visualización), la importación vía Excel y el panel de métricas del administrador.\\
+\textbf{Duración:} Día 43 -- Día 52 (10 días)
+
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.6cm}|L{7.0cm}|M{1.4cm}|M{2.4cm}|M{1.8cm}|}
+\caption{Sprint Backlog -- Sprint 5} \label{tab:sprint5} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:sprint5} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Descripción (Historia de Usuario)} & \textbf{Puntos} & \textbf{Responsable} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+HUC-10 & Como Cliente, quiero registrar la URL del endpoint de mi sistema de inventario externo junto con la credencial de acceso, para que Leodega consulte automáticamente los productos almacenados sin modificar mi sistema. & 8 & Equipo Leodega & Pendiente \\ \hline
+HUC-11 & Como Cliente, quiero configurar la correspondencia entre los campos devueltos por el endpoint de mi sistema externo y los campos de Leodega, para que mis datos de inventario se registren correctamente. & 8 & Equipo Leodega & Pendiente \\ \hline
+HUC-12 & Como Cliente, quiero ver la lista actualizada de productos almacenados en mi espacio reservado, obtenida directamente de mi sistema externo, para controlar mi inventario sin depender de canales externos. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUC-13 & Como Cliente, quiero subir un archivo Excel con la lista de mis productos directamente a la plataforma, para registrar mi inventario rápidamente cuando mi sistema externo no expone un endpoint. & 5 & Equipo Leodega & Pendiente \\ \hline
+HUA-02 & Como Administrador, quiero ver un panel de control con métricas clave del estado de la plataforma, para tomar decisiones informadas sobre la operación del negocio y monitorear la rentabilidad mensual. & 8 & Equipo Leodega & Pendiente \\ \hline
+HUL-05 & Como Cliente, quiero ver todos los espacios de almacenamiento disponibles en una sola lista desde el móvil, para encontrar un espacio que se ajuste a mis necesidades. & 5 & Equipo Leodega & Pendiente \\ \hline
+\end{longtable}
+}
 \clearpage
 
 % ------------------------------------------------------------
 \section{Cronograma del Proyecto}
 \label{sec:cronograma-a}
 
+El cronograma se construyó a partir de 38 actividades (\textbf{HST-001} a \textbf{HST-038}), derivadas de las historias de usuario de la Sección~2.2\footnote{Los identificadores HST-XXX numeran secuencialmente las actividades del análisis PERT/CPM y del diagrama Activity-on-Arrow; no coinciden con los códigos HUG/HUC/HUA/HUE/HUL de las historias de usuario porque responden a una convención de numeración independiente, propia del análisis de cronograma.}, con sus dependencias, duraciones en días y personal asignado. Para cada actividad se calculó el tiempo más próximo del evento (\textbf{EET}), la holgura total y el tiempo más lejano del evento (\textbf{LET}); las actividades con holgura cero pertenecen a la ruta crítica (\textbf{RC}) y se marcan con $\bullet$.
+
 \subsection{Tabla de Actividades}
-\begin{table}[H]
-\centering
-\caption{Actividades, duraciones y dependencias del proyecto}
-\label{tab:cronograma_tabla}
-\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.9cm}|M{1.3cm}|M{1.6cm}|M{1.3cm}|M{1.7cm}|M{1.1cm}|M{1.7cm}|M{1.1cm}|M{1.0cm}|}
+\caption{Actividades, duraciones, dependencias y análisis CPM del proyecto} \label{tab:cronograma_tabla} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID} & \textbf{Actividad} & \textbf{Duración (días)} & \textbf{Predecesora(s)} & \textbf{Responsable} \\
+\textbf{ID} & \textbf{Sprint} & \textbf{Predec.} & \textbf{Dur.} & \textbf{Personal} & \textbf{EET} & \textbf{Holgura} & \textbf{LET} & \textbf{RC} \\
 \hline
-A & [Ej. Levantamiento de requerimientos] & [n] & -- & [Integrante] \\ \hline
-B & [Actividad] & [n] & A & \\ \hline
-C & [Actividad] & [n] & A & \\ \hline
-D & [Actividad] & [n] & B, C & \\ \hline
-E & [Actividad] & [n] & D & \\ \hline
-\end{tabularx}
-\end{table}
+\endfirsthead
+\multicolumn{9}{c}{\textit{Tabla~\ref{tab:cronograma_tabla} (continuación)}} \\
+\hline
+\rowcolor{cajagris}
+\textbf{ID} & \textbf{Sprint} & \textbf{Predec.} & \textbf{Dur.} & \textbf{Personal} & \textbf{EET} & \textbf{Holgura} & \textbf{LET} & \textbf{RC} \\
+\hline
+\endhead
+\hline \multicolumn{9}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+
+HST-001 & 1 & -- & 3 & 1 & 0 & 0 & 3 & $\bullet$ \\ \hline
+HST-002 & 1 & HST-001 & 5 & 2 & 3 & 0 & 8 & $\bullet$ \\ \hline
+HST-003 & 1 & HST-001 & 5 & 2 & 3 & 0 & 8 & $\bullet$ \\ \hline
+HST-004 & 1 & HST-002 & 5 & 2 & 8 & 39 & 52 & \\ \hline
+HST-005 & 1 & HST-002 & 3 & 1 & 8 & 41 & 52 & \\ \hline
+HST-006 & 1 & HST-002, HST-003 & 2 & 1 & 8 & 42 & 52 & \\ \hline
+HST-007 & 1 & HST-002, HST-003 & 5 & 2 & 8 & 0 & 13 & $\bullet$ \\ \hline
+HST-008 & 1 & HST-001 & 5 & 2 & 3 & 36 & 44 & \\ \hline
+HST-009 & 2 & HST-007 & 5 & 2 & 13 & 0 & 18 & $\bullet$ \\ \hline
+HST-010 & 2 & HST-007 & 3 & 1 & 13 & 34 & 50 & \\ \hline
+HST-011 & 2 & HST-009 & 3 & 1 & 18 & 0 & 21 & $\bullet$ \\ \hline
+HST-012 & 2 & HST-010 & 2 & 1 & 16 & 34 & 52 & \\ \hline
+HST-013 & 2 & HST-011 & 5 & 2 & 21 & 0 & 26 & $\bullet$ \\ \hline
+HST-014 & 2 & HST-013 & 5 & 2 & 26 & 0 & 31 & $\bullet$ \\ \hline
+HST-015 & 2 & HST-014 & 3 & 1 & 31 & 18 & 52 & \\ \hline
+HST-016 & 2 & HST-014 & 3 & 1 & 31 & 15 & 49 & \\ \hline
+HST-017 & 2 & HST-016 & 3 & 1 & 34 & 15 & 52 & \\ \hline
+HST-018 & 3 & HST-001 & 5 & 2 & 3 & 28 & 36 & \\ \hline
+HST-019 & 3 & HST-018 & 5 & 2 & 8 & 31 & 44 & \\ \hline
+HST-020 & 3 & HST-018 & 3 & 1 & 8 & 41 & 52 & \\ \hline
+HST-021 & 3 & HST-018 & 5 & 2 & 8 & 28 & 41 & \\ \hline
+HST-022 & 3 & HST-021 & 3 & 1 & 13 & 28 & 44 & \\ \hline
+HST-023 & 3 & HST-019, HST-022 & 5 & 2 & 16 & 23 & 49 & \\ \hline
+HST-024 & 3 & HST-019, HST-014 & 5 & 2 & 31 & 13 & 49 & \\ \hline
+HST-025 & 3 & HST-023, HST-024 & 3 & 1 & 36 & 13 & 52 & \\ \hline
+HST-026 & 4 & HST-011 & 3 & 1 & 21 & 23 & 47 & \\ \hline
+HST-027 & 4 & HST-026 & 5 & 2 & 24 & 23 & 52 & \\ \hline
+HST-028 & 4 & HST-014 & 5 & 2 & 31 & 11 & 47 & \\ \hline
+HST-029 & 4 & HST-028 & 5 & 2 & 36 & 11 & 52 & \\ \hline
+HST-030 & 4 & HST-014 & 3 & 1 & 31 & 18 & 52 & \\ \hline
+HST-031 & 4 & HST-014 & 3 & 1 & 31 & 15 & 49 & \\ \hline
+HST-032 & 4 & HST-031 & 3 & 1 & 34 & 15 & 52 & \\ \hline
+HST-033 & 4 & HST-014 & 3 & 1 & 31 & 18 & 52 & \\ \hline
+HST-034 & 5 & HST-014 & 8 & 3 & 31 & 0 & 39 & $\bullet$ \\ \hline
+HST-035 & 5 & HST-034 & 8 & 3 & 39 & 0 & 47 & $\bullet$ \\ \hline
+HST-036 & 5 & HST-035 & 5 & 2 & 47 & 0 & 52 & $\bullet$ \\ \hline
+HST-037 & 5 & HST-014 & 5 & 2 & 31 & 16 & 52 & \\ \hline
+HST-038 & 5 & HST-007, HST-008, HST-014 & 8 & 3 & 31 & 13 & 52 & \\ \hline
+\end{longtable}
+}
 
 \subsection{Diagrama de Red del Proyecto (Activity-on-Arrow)}
 \begin{figure}[H]
     \centering
-    \DiagramaImagen{0.95}{0.5}{imagenes/diagrama_aoa.png}
+    \DiagramaImagen{0.95}{0.5}{imagenes/activity-on-arrow.png}
     \caption{Diagrama de red del proyecto (Activity-on-Arrow) con ruta crítica}
     \label{fig:aoa}
 \end{figure}
-\noindent\textbf{Ruta crítica:} [Indicar la secuencia de actividades que conforman la ruta crítica y la duración total del proyecto en días.]
+\noindent\textbf{Ruta crítica:} HST-001 $\rightarrow$ HST-002 $\rightarrow$ HST-007 $\rightarrow$ HST-009 $\rightarrow$ HST-011 $\rightarrow$ HST-013 $\rightarrow$ HST-014 $\rightarrow$ HST-034 $\rightarrow$ HST-035 $\rightarrow$ HST-036, con una duración total de \textbf{52 días} bajo el supuesto de recursos ilimitados. Esta secuencia va desde la autenticación y el registro de almacenes, pasa por la moderación del Administrador, la búsqueda y el detalle del almacén, la reserva y el pago simulado, y finaliza en el módulo de integración de inventario (conexión externa, mapeo de campos y visualización), que concentra las tres actividades más largas del proyecto (8, 8 y 5 días).
+
+\subsection{Planificación con Recursos Limitados}
+Dado que la ruta crítica de 52 días asume disponibilidad ilimitada de personal, se elaboró además una planificación con recursos limitados, restringida a un máximo de \textbf{4 integrantes} trabajando en paralelo (el tamaño real del equipo). Una primera versión sin optimizar extiende la duración total del proyecto a \textbf{87 días}. Tras nivelar la carga de trabajo y reordenar las actividades no críticas dentro de su holgura disponible, se obtuvo un cronograma optimizado de \textbf{85 días}, que ahorra 2 días respecto a la versión sin optimizar sin exceder el límite de 4 personas ni retrasar ninguna actividad de la ruta crítica.
+
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.45}{imagenes/resoruce-limited-without-optimizatio.png}
+    \caption{Planificación con recursos limitados sin optimizar (límite = 4 personas, duración total = 87 días)}
+    \label{fig:rl-noopt}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.45}{imagenes/resource-limited-optimization.png}
+    \caption{Planificación con recursos limitados optimizada (límite = 4 personas, duración total = 85 días)}
+    \label{fig:rl-opt}
+\end{figure}
 
 \subsection{Diagrama de Gantt}
 \begin{figure}[H]
@@ -218,5 +417,5 @@ E & [Actividad] & [n] & D & \\ \hline
     \caption{Cronograma del proyecto (diagrama de Gantt)}
     \label{fig:gantt}
 \end{figure}
-\noindent\textbf{Herramienta utilizada:} \textit{[Ej. Microsoft Project, GanttProject, Excel]}
+\noindent\textbf{Herramienta utilizada:} Generado programáticamente (Python/Matplotlib) a partir de los datos EET/duración/ruta crítica de la Tabla~\ref{tab:cronograma_tabla}.
 \clearpage

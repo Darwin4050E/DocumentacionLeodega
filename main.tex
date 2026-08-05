@@ -43,6 +43,12 @@
 \usepackage{multirow}
 \usepackage{colortbl}
 
+% Tipos de columna con centrado vertical (requiere \usepackage{array}):
+% M{ancho} = centrado horizontal y vertical (para valores cortos: IDs, categorías, estados, etc.)
+% L{ancho} = alineado a la izquierda y centrado vertical (para texto largo/párrafos)
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+
 % ---------------- Color, listas, enlaces ----------------
 \usepackage[table]{xcolor}
 \usepackage{enumitem}

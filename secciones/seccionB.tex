@@ -20,7 +20,7 @@
 
 \bigskip
 \noindent\textbf{Caso de Uso UC-01}
-\begin{longtable}{|p{3.5cm}|p{10.5cm}|}
+\begin{longtable}{|M{3.5cm}|L{10.5cm}|}
 \hline
 \rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
 \endhead
@@ -45,7 +45,7 @@ Supuestos & [Supuestos considerados para este caso de uso] \\ \hline
 
 \bigskip
 \noindent\textbf{Caso de Uso UC-02}
-\begin{longtable}{|p{3.5cm}|p{10.5cm}|}
+\begin{longtable}{|M{3.5cm}|L{10.5cm}|}
 \hline
 \rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
 \endhead
@@ -84,7 +84,8 @@ Supuestos & [Supuestos] \\ \hline
 \centering
 \caption{Aplicación de principios SOLID en el diseño de clases}
 \label{tab:solid}
-\begin{tabularx}{\textwidth}{|l|X|}
+{\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|M{3.3cm}|L{11cm}|}
 \hline
 \rowcolor{cajagris} \textbf{Principio} & \textbf{Justificación / Clases involucradas} \\ \hline
 S -- Single Responsibility & [Explicar cómo se aplica y en qué clases] \\ \hline
@@ -92,7 +93,8 @@ O -- Open/Closed & [Explicar cómo se aplica y en qué clases] \\ \hline
 L -- Liskov Substitution & [Explicar cómo se aplica y en qué clases] \\ \hline
 I -- Interface Segregation & [Explicar cómo se aplica y en qué clases] \\ \hline
 D -- Dependency Inversion & [Explicar cómo se aplica y en qué clases] \\ \hline
-\end{tabularx}
+\end{tabular}
+}
 \end{table}
 
 \subsection{Patrones de Diseño Aplicados}
@@ -100,13 +102,15 @@ D -- Dependency Inversion & [Explicar cómo se aplica y en qué clases] \\ \hlin
 \centering
 \caption{Patrones de diseño utilizados en el sistema \cite{ref22}}
 \label{tab:patrones}
-\begin{tabularx}{\textwidth}{|l|l|X|}
+{\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|M{2.6cm}|M{2.6cm}|L{9cm}|}
 \hline
 \rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\ \hline
 [Ej. Singleton] & Creacional & [Clases involucradas y motivo de uso] \\ \hline
 [Ej. Strategy] & Comportamiento & [Clases involucradas y motivo de uso] \\ \hline
 [Ej. Adapter] & Estructural & [Clases involucradas y motivo de uso] \\ \hline
-\end{tabularx}
+\end{tabular}
+}
 \end{table}
 \clearpage
 
