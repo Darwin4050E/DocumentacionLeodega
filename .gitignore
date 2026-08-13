@@ -23,3 +23,6 @@ Thumbs.db
 
 # ---- Claude Code local settings (machine-specific, not shared) ----
 .claude/settings.local.json
+
+# ---- Código fuente de Leodega (repo git propio, solo referencia local) ----
+recursos/leodega_codigo/
