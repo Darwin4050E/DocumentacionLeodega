@@ -1,0 +1,116 @@
+@startuml diagrama_componentes
+title Diagrama de Componentes del Sistema — Leodega
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 40
+skinparam component {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam database {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam folder {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#D5F5E3>| Nuevo (planificado, ERS) |
+endlegend
+
+package "Cliente Web (React 19 + TypeScript + Vite)" as FE <<Heredado>> {
+  [UI: Páginas y Componentes\n(Dashboard, Pages, Components)] as UI <<Heredado>>
+  [Contexto de Autenticación\n(AuthContext)] as AuthCtx <<Heredado>>
+  [Guards de Ruta\n(Protected, Role)] as Guards <<Heredado>>
+  [Cliente API\n(axios.ts + services/*.ts)] as ApiClient <<Heredado>>
+}
+
+package "Leodeguita (App móvil)" as MOB <<Nuevo>> {
+  [App React Native\nLogin, selección de empresa,\npublicación y exploración] as MobApp <<Nuevo>>
+}
+
+package "Backend API (Laravel 12 / PHP 8.2)" as BE {
+  [Capa de Enrutamiento\n(routes/api.php)] as Routes <<Heredado>>
+  [Middleware\n(ApiAuthenticate, EnsureUserHasRole,\nSetLocale, HandleCors)] as MW <<Heredado>>
+  [Controladores\n(ApiController + 20 controladores)] as Ctrl <<Heredado>>
+  [Form Requests\n(validación de entrada)] as Requests <<Heredado>>
+  [Servicios de Aplicación\n(AuthService, ReservationService,\nRatingsService, ReportService,\nNotificationService, UserRegistrationService)] as Svc <<Heredado>>
+  [Policies\n(ConversationPolicy,\nReservationsPolicy)] as Pol <<Heredado>>
+  [Modelos Eloquent\n(User, StoreRooms, Reservations,\nPayments, Ratings, Reports, ...)] as Models <<Heredado>>
+  [Adaptador de Almacenamiento\n(Storage facade, disco "public")] as StorageAdapter <<Heredado>>
+
+  [Módulo de Organizaciones\n(cuentas multiempresa,\ninvitaciones, contexto negocio)] as OrgMod <<Nuevo>>
+  [Módulo de Integración\nde Inventario\n(endpoint externo + import Excel)] as InvMod <<Nuevo>>
+  [Módulo de Permiso\nde Bomberos\n(registro + validación admin)] as FireMod <<Nuevo>>
+  [Módulo de Moderación\nde Cuentas\n(bloqueo/reactivación + auditoría)] as ModMod <<Nuevo>>
+  [Panel de Control\nAdministrativo (métricas)] as DashMod <<Nuevo>>
+}
+
+database "Base de Datos Relacional\n(PostgreSQL en producción /\nSQLite en desarrollo)" as DB <<Heredado>>
+folder "Almacenamiento de Archivos\n(storage/app/public,\nlisto para S3)" as FS <<Heredado>>
+
+interface "REST API\n(JSON sobre HTTPS)" as IRest
+
+ApiClient -down-> IRest
+MobApp ..> IRest : consume (planificado)
+IRest -down- Routes
+
+UI --> ApiClient
+UI --> AuthCtx
+UI --> Guards
+Guards --> AuthCtx
+
+Routes --> MW
+MW --> Ctrl
+Ctrl --> Requests
+Ctrl --> Svc
+Ctrl --> Pol
+Ctrl --> StorageAdapter
+Svc --> Models
+Models --> DB
+StorageAdapter --> FS
+
+Ctrl ..> OrgMod
+Ctrl ..> InvMod
+Ctrl ..> FireMod
+Ctrl ..> ModMod
+Ctrl ..> DashMod
+OrgMod ..> Models
+InvMod ..> Models
+FireMod ..> Models
+ModMod ..> Models
+DashMod ..> Models
+
+note right of Ctrl
+  Líneas punteadas = módulos planificados (ERS)
+end note
+
+' --- Enlaces invisibles para forzar layout en columnas verticales ---
+Requests -[hidden]d-> Svc
+Svc -[hidden]d-> Pol
+Pol -[hidden]d-> StorageAdapter
+
+OrgMod -[hidden]d-> InvMod
+InvMod -[hidden]d-> FireMod
+FireMod -[hidden]d-> ModMod
+ModMod -[hidden]d-> DashMod
+
+@enduml

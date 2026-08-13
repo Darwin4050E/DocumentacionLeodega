@@ -127,9 +127,75 @@ D -- Dependency Inversion & [Explicar cómo se aplica y en qué clases] \\ \hlin
 % ------------------------------------------------------------
 \section{Diagrama de Componentes}
 
-\DiagramaPagina{Diagrama de Componentes del Sistema}{imagenes/diagrama_componentes.png}{componentes}{[Descripción de los componentes de software identificados (módulos, servicios, librerías), sus interfaces provistas/requeridas y dependencias entre ellos.]}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.6}{0.9}{imagenes/diagrama_componentes.png}
+    \caption{Diagrama de Componentes del Sistema}
+    \label{fig:componentes}
+\end{figure}
+
+\noindent\textbf{Descripción:} El diagrama modela los componentes de software del sistema completo, organizados en tres niveles. El \textbf{cliente web} (React 19 + TypeScript + Vite, heredado) se compone de la capa de UI (páginas y componentes, incluidos los dashboards por rol), el contexto de autenticación (\texttt{AuthContext}), los guardias de ruta (\texttt{Protected}, \texttt{Role}) y el cliente API (\texttt{axios.ts} + \url{services/*.ts}), que consume la interfaz \texttt{REST API (JSON sobre HTTPS)} expuesta por el backend. El \textbf{backend} (Laravel 12 / PHP 8.2, heredado) sigue una arquitectura en capas: enrutamiento (\url{routes/api.php}) $\rightarrow$ middleware de autenticación/rol/CORS/locale $\rightarrow$ controladores delgados (que heredan de \texttt{ApiController}, con operaciones CRUD genéricas) $\rightarrow$ servicios de aplicación que concentran la lógica de negocio (p. ej. \texttt{ReservationService} resuelve conflictos de fechas y notifica al arrendador) $\rightarrow$ modelos Eloquent $\rightarrow$ base de datos relacional. Un adaptador de almacenamiento (\texttt{Storage} facade) gestiona los archivos (fotos de bodegas) en disco local, con soporte de configuración ya listo para S3. Sobre esa base heredada se incorporan cinco módulos \textbf{nuevos}, aún no implementados en el código y derivados directamente del ERS (\S1.3 Alcance): organizaciones (cuentas multiempresa), integración de inventario externo, permiso de bomberos, moderación de cuentas (bloqueo/reactivación con auditoría) y el panel de control administrativo con métricas; además de un cliente adicional, la app móvil \textbf{Leodeguita} (React Native), que según el ERS comparte el mismo backend y modelo de datos que la web.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (renderizado localmente con \texttt{plantuml.jar} sobre OpenJDK, motor de layout Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/diagrama_componentes.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{6cm}|L{6.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+UI: Páginas y Componentes & \url{frontend/src/Components/*}, \url{Dashboard/*}, \url{Pages/*} & \cellcolor{heredadobg}Heredado \\ \hline
+Contexto de Autenticación & \url{frontend/src/context/AuthContext.tsx} & \cellcolor{heredadobg}Heredado \\ \hline
+Guards de Ruta & \url{frontend/src/Routes/Protected.tsx}, \texttt{Role.tsx} & \cellcolor{heredadobg}Heredado \\ \hline
+Cliente API & \url{frontend/src/api/axios.ts}, \url{frontend/src/services/*.ts} & \cellcolor{heredadobg}Heredado \\ \hline
+App Leodeguita & ERS \S1.3 ``Mobile companion'', HUL-01 a HUL-06 (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Capa de Enrutamiento & \url{backend/routes/api.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Middleware (Auth/Rol/Locale/CORS) & \url{backend/app/Http/Middleware/ApiAuthenticate.php}, \texttt{EnsureUserHasRole.php}, \texttt{SetLocale.php}; \url{bootstrap/app.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Controladores & \url{backend/app/Http/Controllers/*.php} (extienden \texttt{ApiController}) & \cellcolor{heredadobg}Heredado \\ \hline
+Form Requests & \url{backend/app/Http/Requests/*.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Servicios de Aplicación & \url{backend/app/Services/*.php} (Auth, Reservation, Ratings, Report, Notification, UserRegistration) & \cellcolor{heredadobg}Heredado \\ \hline
+Policies & \url{backend/app/Policies/ConversationPolicy.php}, \texttt{ReservationsPolicy.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Modelos Eloquent & \url{backend/app/Models/*.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Adaptador de Almacenamiento & \texttt{StorePhotoController.php} (\texttt{Storage::disk('public')}), \url{config/filesystems.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Base de Datos Relacional & \url{backend/config/database.php} (pgsql prod / sqlite dev); ERS \S1.2 & \cellcolor{heredadobg}Heredado \\ \hline
+Almacenamiento de Archivos & \url{backend/config/filesystems.php} (disco \texttt{public}) & \cellcolor{heredadobg}Heredado \\ \hline
+Módulo de Organizaciones & ERS \S1.3, HUE-01 a HUE-06 (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Módulo de Integración de Inventario & ERS \S1.3 (HUC-13/HUC-14, integración externa + import Excel), sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Módulo de Permiso de Bomberos & ERS \S1.3 (registro en HUG, validación en HUA-01), sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Módulo de Moderación de Cuentas & Campo \texttt{User.state} ya existe (\url{Models/User.php}); flujo de bloqueo/reactivación + auditoría: ERS HUA-02, sin código & \cellcolor{heredadobg}Heredado (campo) / \cellcolor{nuevobg}Nuevo (flujo) \\ \hline
+Panel de Control Administrativo & ERS \S1.3, HUA-03 (métricas), sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage
 
 % ------------------------------------------------------------
 \section{Diagrama de Despliegue}
 
-\DiagramaPagina{Diagrama de Despliegue del Sistema}{imagenes/diagrama_despliegue.png}{despliegue}{[Descripción de los nodos físicos/virtuales (servidores, dispositivos cliente, servicios en la nube), artefactos desplegados en cada nodo y protocolos de comunicación entre nodos.]}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.6}{imagenes/diagrama_despliegue.png}
+    \caption{Diagrama de Despliegue del Sistema}
+    \label{fig:despliegue}
+\end{figure}
+
+\noindent\textbf{Descripción:} El diagrama refleja la topología de despliegue real declarada en el propio repositorio de código. El \textbf{navegador del cliente} descarga el bundle estático de la SPA React 19 (generado por Vite) desde \textbf{Vercel}, el nodo de hosting/CDN del frontend (dominio \texttt{leodegafront.vercel.app}; ver \url{frontend/vercel.json} y el origen habilitado en \url{backend/config/cors.php}). Desde ahí, el navegador consume la API vía \texttt{HTTPS/REST JSON}, autenticado con token Bearer (Laravel Sanctum), apuntando a la URL configurada en \texttt{VITE\_API\_URL}. El backend corre como contenedor de aplicación en \textbf{Railway} (\url{backend/railway.json}, \url{backend/Procfile}), que arranca el servidor embebido de Laravel con el comando \texttt{php artisan serve --host 0.0.0.0 --port \$PORT}. Su dominio, \url{leodega-soft-ll-production-a8de.up.railway.app}, junto con el del frontend, están confirmados como \texttt{trustHosts} en \url{backend/bootstrap/app.php}. Ese contenedor se comunica por \texttt{TCP/5432} con un servidor \textbf{PostgreSQL 15} (motor de base de datos en producción según el ERS \S1.2 y \url{config/database.php}) y escribe las fotos de bodegas en almacenamiento local del propio contenedor (\url{storage/app/public}). Se documenta además, como evidencia real del repositorio, el \textbf{entorno de desarrollo local} definido en \url{backend/docker-compose.yml} (contenedor \texttt{laravel\_app} en el puerto 8080 y \texttt{postgres\_db} en el 5432), que no es el nodo de producción. Como elemento \textbf{nuevo} (planificado, sin infraestructura desplegada aún) se incorpora el \textbf{dispositivo móvil} que ejecutará la app Leodeguita (React Native), la cual —según el ERS— compartirá la misma API y modelo de datos que la web.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (renderizado localmente con \texttt{plantuml.jar} sobre OpenJDK, motor de layout Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/diagrama_despliegue.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5.5cm}|L{7cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / configuración)} & \textbf{Estado} \\ \hline
+\endhead
+Navegador del Cliente (SPA React) & \url{frontend/index.html}, \url{frontend/vite.config.ts} & \cellcolor{heredadobg}Heredado \\ \hline
+Vercel (hosting frontend) & \url{frontend/vercel.json}; \url{backend/config/cors.php} (origen \url{https://leodegafront.vercel.app}); \url{backend/bootstrap/app.php} (\texttt{trustHosts}) & \cellcolor{heredadobg}Heredado \\ \hline
+Railway (contenedor de aplicación) & \url{backend/railway.json}, \url{backend/Procfile}, \url{backend/DockerFIle}; \url{bootstrap/app.php} (\texttt{trustHosts}: \url{leodega-soft-ll-production-a8de.up.railway.app}) & \cellcolor{heredadobg}Heredado \\ \hline
+API Laravel (\texttt{php artisan serve}) & \url{backend/railway.json} (\texttt{startCommand}), \url{backend/Procfile} & \cellcolor{heredadobg}Heredado \\ \hline
+Almacenamiento local & \url{backend/config/filesystems.php} (\texttt{storage\_path('app/public')}) & \cellcolor{heredadobg}Heredado \\ \hline
+Servidor PostgreSQL & ERS \S1.2 (``PostgreSQL database in production''); \url{backend/config/database.php} (conexión \texttt{pgsql}) & \cellcolor{heredadobg}Heredado \\ \hline
+Entorno de desarrollo local & \url{backend/docker-compose.yml} (servicios \texttt{app} + \texttt{db}) & \cellcolor{heredadobg}Heredado \\ \hline
+Dispositivo Móvil (Leodeguita) & ERS \S1.3, HUL-01 a HUL-06; explícitamente fuera de alcance como app general (``Out of scope''), sin infraestructura de despliegue aún & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage

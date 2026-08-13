@@ -1,0 +1,73 @@
+@startuml diagrama_despliegue
+title Diagrama de Despliegue del Sistema — Leodega
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment center
+skinparam nodesep 60
+skinparam ranksep 70
+skinparam node {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam database {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam artifact {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#D5F5E3>| Nuevo (planificado, ERS) |
+endlegend
+
+' --- Capa 1: clientes -----------------------------------------------
+node "Navegador del Cliente\n(Chrome, Firefox, Edge, ...)" as Browser <<Heredado>> {
+  artifact "SPA React 19\n(bundle generado por Vite)" as SPA
+}
+
+node "Dispositivo Móvil\n(Leodeguita — planificado)" as Mobile <<Nuevo>> {
+  artifact "App React Native\n(Leodeguita)" as MobApp
+}
+
+' --- Capa 2: hosting / aplicación -------------------------------------
+node "Vercel\nHosting Frontend (CDN/Edge)\nhost: leodegafront.vercel.app" as Vercel <<Heredado>> {
+  artifact "Build estático\n(HTML / CSS / JS)" as StaticBuild
+}
+
+node "Railway\nContenedor de Aplicación (PHP 8.2-fpm)\nhost: leodega-soft-ll-production-a8de.up.railway.app" as Railway <<Heredado>> {
+  artifact "API Laravel 12\n(php artisan serve, puerto $PORT)" as API
+  artifact "Almacenamiento local\n(storage/app/public)" as LocalStorage
+}
+
+' --- Capa 3: datos -----------------------------------------------------
+database "Servidor PostgreSQL 15\n(base de datos de producción)" as DB <<Heredado>>
+
+Browser -down-> Vercel : HTTPS\n(descarga del bundle)
+Browser -down-> Railway : HTTPS / REST JSON\nBearer Token (Sanctum)\nVITE_API_URL
+Mobile -down-> Railway : HTTPS / REST JSON\n(planificado)
+API -down-> DB : TCP/5432\nPDO pgsql (Eloquent)
+API -right-> LocalStorage : E/S de archivos\n(fotos de bodegas)
+
+' --- Entorno de desarrollo local, aislado del flujo de producción ------
+node "Entorno de Desarrollo Local\n(docker-compose.yml)" as DevEnv <<Heredado>> {
+  node "laravel_app\npuerto 8080:8080" as DevApp <<Heredado>>
+  database "postgres_db\npostgres:15 — puerto 5432:5432" as DevDB <<Heredado>>
+  DevApp -down-> DevDB : TCP/5432\n(red interna docker-compose)
+}
+
+note bottom of DevEnv
+  Entorno alterno de desarrollo/pruebas locales
+  (no es el nodo de producción; DB_CONNECTION=sqlite
+  también se usa para tests/CI, ver .env.example).
+end note
+
+@enduml
