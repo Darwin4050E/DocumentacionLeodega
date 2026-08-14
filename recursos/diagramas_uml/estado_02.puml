@@ -1,0 +1,59 @@
+@startuml estado_02
+title Diagrama de Estado — Clase StoreRooms (StoreRooms.publication_status)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam state {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Transición |
+  |<#D6EAF8>| Heredado (implementado en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin endpoint dedicado) |
+endlegend
+
+[*] --> Pending : store()\n(ApiController::storeModel)\npublication_status = pending\n(default de la migración)
+
+state Pending <<Heredado>> {
+  Pending : Bodega creada, oculta del catálogo\npúblico hasta ser aprobada
+}
+
+state Approved <<Heredado>> {
+  Approved : entry / StoreModerationService::moderate()\ncrea StoreModeration (auditoría)\nentry / NotificationService::send(\n  STORE_APPROVED -> landlord)
+  Approved : Visible en el catálogo público\n(ERS HUA-01, escenario 1)
+}
+
+state Rejected <<Heredado>> {
+  Rejected : entry / StoreModerationService::moderate()\ncrea StoreModeration (auditoría)\nentry / NotificationService::send(\n  STORE_REJECTED -> landlord)
+  Rejected : reason_rejected obligatorio;\nqueda registrado en StoreModeration
+}
+
+Pending --> Approved : update()\n[publication_status = approved]\n[requiere rol admin]\n(StoreRoomsController::update()\n-> StoreModerationService::moderate())
+
+Pending --> Rejected : update()\n[publication_status = rejected,\nreason_rejected requerido]\n[requiere rol admin]\n(StoreRoomsController::update()\n-> StoreModerationService::moderate())
+
+Rejected -[#27AE60,dashed]-> Pending : reenvío tras corrección\n(planificado -- ERS HUA-01 escenario 2:\n"debe subir un documento válido\npara reiniciar el proceso";\nsin endpoint dedicado hoy)
+
+note bottom of Rejected
+  StoreModerationService centraliza la
+  notificación y el chequeo de rol admin,
+  invocado desde StoreRoomsController::update()
+  y también desde StoreModerationController::
+  store() -- un solo punto de verdad para las
+  dos vías de escritura.
+end note
+
+note right of Approved
+  Pendiente (sin cambios en este pase): la
+  validación del permiso de bomberos adjunto
+  (PermisoBomberos, clase nueva planificada,
+  Sección B) sigue sin existir en el código.
+end note
+
+@enduml

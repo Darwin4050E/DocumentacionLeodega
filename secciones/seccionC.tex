@@ -21,7 +21,7 @@
 \noindent Se documentan a continuación los diagramas de secuencia de los algoritmos transaccionales relevantes del sistema. La rúbrica exige un mínimo de \textbf{32} diagramas de secuencia; las siguientes páginas se generan automáticamente mediante un bucle de LaTeX (\texttt{pgffor}) para facilitar su llenado.
 
 \medskip
-\noindent\textit{Instrucciones: para cada uno de los 32 bloques generados, reemplace "[Nombre del proceso transaccional]" por el nombre real del escenario (p. ej. "Registrar usuario", "Procesar pago"), y coloque la imagen exportada en \texttt{imagenes/secuencia\_NN.png} (NN = 01..32). Si su sistema requiere más de 32, agregue llamados adicionales de \texttt{\textbackslash DiagramaPagina} después del bucle.}
+\noindent\textit{Instrucciones: para cada uno de los 32 bloques generados, reemplace ``[Nombre del proceso transaccional]'' por el nombre real del escenario (p. ej. ``Registrar usuario'', ``Procesar pago''), y coloque la imagen exportada en \texttt{imagenes/secuencia\_NN.png} (NN = 01..32). Si su sistema requiere más de 32, agregue llamados adicionales de \texttt{\textbackslash DiagramaPagina} después del bucle.}
 
 \bigskip
 
@@ -46,9 +46,146 @@
 \section{Diagramas de Estado}
 \noindent Se documenta el ciclo de vida de los objetos/clases más relevantes del sistema cuyo comportamiento depende significativamente de su estado interno.
 
-\DiagramaPagina{Diagrama de Estado -- Clase [Nombre de la clase 1]}{imagenes/estado_01.png}{estado01}{[Descripción de los estados, eventos de transición, y acciones de entrada/salida relevantes para esta clase.]}
+\subsection{Diagrama de Estado -- Clase Reservations}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.75}{0.68}{imagenes/estado_01.png}
+    \caption{Diagrama de Estado -- Clase Reservations}
+    \label{fig:estado01}
+\end{figure}
 
-\DiagramaPagina{Diagrama de Estado -- Clase [Nombre de la clase 2]}{imagenes/estado_02.png}{estado02}{[Descripción de los estados y transiciones.]}
+\noindent\textbf{Descripción:} Ciclo de vida de \texttt{Reservations.status}, la entidad transaccional central del \textit{marketplace} de almacenamiento. Extraído directamente de \texttt{ReservationService} (\url{backend/app/Services/ReservationService.php}) y de la restricción \texttt{enum} de tres valores (\texttt{pending}, \texttt{confirmed}, \texttt{canceled}) declarada en la migración \url{database/migrations/2025_10_15_012859_create_reservations_table.php}: toda reserva nace en \emph{Pending} al ejecutar \texttt{create()} (el tenant solicita); pasa a \emph{Confirmed} vía \texttt{confirm()} solo si no hay otra reserva \texttt{confirmed} solapada en fechas para la misma bodega (guarda \texttt{ReservationConflictException} en caso contrario, sin cambiar de estado); y pasa a \emph{Canceled} vía \texttt{cancel()}, ya sea por rechazo directo del arrendador o \textbf{automáticamente en cascada} cuando otra reserva de la misma bodega se confirma en fechas solapadas (\texttt{reason = Blocked by confirmed reservation}). La transición a \emph{Confirmed} tiene dos disparadores: el arrendador aceptando vía \texttt{ReservationsController::updateStatus()}, o \texttt{PaymentService::process()} (\url{backend/app/Services/PaymentService.php}) invocando el mismo \texttt{ReservationService::confirm()} dentro de su propia transacción cuando un pago se registra con \texttt{payment\_state = paid} (ver Diagrama de Estado -- Payments, Figura~\ref{fig:estado04}); esta segunda vía omite la llamada si la reserva ya está \texttt{confirmed}, para no reenviar la notificación. Cada transición dispara una notificación real (\texttt{RESERVATION\_REQUEST}, \texttt{RESERVATION\_CONFIRMED} o \texttt{RESERVATION\_CANCELED} vía \texttt{NotificationService::send()}). Se documenta además, marcado como \textbf{nuevo (planificado)}, un estado \emph{Finalizada} sugerido por el ERS (HUG-08 menciona reservas ``ya finalizadas'' para efectos de auditoría al eliminar una bodega) que \textbf{no existe todavía} en el código: el \texttt{enum} de la base de datos solo contempla los tres estados heredados, sin ningún job automático que cierre una reserva al vencer su \texttt{end\_date}.
 
-\noindent\textit{Nota: Agregue un diagrama de estado por cada objeto/clase pertinente identificado en el diagrama de clases (Sección B) cuyo comportamiento sea dependiente de estado.}
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (renderizado localmente con \texttt{plantuml.jar} sobre OpenJDK, motor de layout Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/estado_01.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Pending (estado inicial) & \texttt{ReservationService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Confirmed (arrendador acepta) & \texttt{ReservationService::confirm()} vía \texttt{ReservationsController} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Confirmed (pago exitoso) & \texttt{ReservationService::confirm()} vía \texttt{PaymentService::process()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Canceled (rechazo) & \texttt{ReservationService::cancel()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Canceled (cascada automática) & \texttt{ReservationService::confirm()}, bloque de cancelación en cascada & \cellcolor{heredadobg}Heredado \\ \hline
+Confirmed $\to$ Canceled & \texttt{ReservationService::cancel()} & \cellcolor{heredadobg}Heredado \\ \hline
+Guarda de conflicto (auto-transición) & \texttt{ReservationConflictException} (\url{backend/app/Exceptions/ReservationConflictException.php}) & \cellcolor{heredadobg}Heredado \\ \hline
+Finalizada (estado planificado) & ERS HUG-08 (reservas \emph{ya finalizadas}), sin código todavía & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+
+\subsection{Diagrama de Estado -- Clase StoreRooms}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.72}{0.62}{imagenes/estado_02.png}
+    \caption{Diagrama de Estado -- Clase StoreRooms}
+    \label{fig:estado02}
+\end{figure}
+
+\noindent\textbf{Descripción:} Ciclo de vida de \texttt{StoreRooms.publication\_status} (\texttt{pending}, \texttt{approved}, \texttt{rejected}), el campo que determina si una bodega es visible en el catálogo público (ERS HUA-01, ``Fire department permit validation''). El cambio de \texttt{publication\_status} a \texttt{approved}/\texttt{rejected} se enruta por \texttt{StoreModerationService::moderate()} (\url{backend/app/Services/StoreModerationService.php}), que en una sola transacción actualiza \texttt{StoreRooms}, crea el registro de auditoría en \texttt{store\_moderation} y notifica al arrendador (\texttt{NotificationType::STORE\_APPROVED}/\texttt{STORE\_REJECTED}). El servicio se invoca desde el mismo endpoint que ya usan el frontend y los tests (\texttt{PUT /storeRooms/\{id\}}): \texttt{StoreRoomsController::update()} detecta cuando el payload trae ese cambio específico y lo enruta por el servicio, con un chequeo de rol \texttt{admin} exigido específicamente en esa rama (cualquier otro autenticado, incluido el propio arrendador dueño de la bodega, recibe 403 si intenta cambiar \texttt{publication\_status}). \texttt{StoreModerationController::store()} (\texttt{POST /store\_moderation}) también se enruta por el mismo servicio, de modo que ambas vías de escritura queden sincronizadas.
+
+\noindent\textbf{Pendiente:} la transición \emph{Rejected} $\to$ \emph{Pending} (reenvío tras corrección) sigue sin un endpoint dedicado, y la validación del permiso de bomberos adjunto (\texttt{PermisoBomberos}, clase nueva planificada, Sección B) sigue sin existir en el código.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/estado_02.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Pending (estado inicial) & \texttt{StoreRoomsController::store()} (default de la migración) & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Approved / Rejected & \texttt{StoreRoomsController::update()} $\to$ \texttt{StoreModerationService::moderate()} & \cellcolor{heredadobg}Heredado \\ \hline
+Registro de auditoría + notificación & \texttt{StoreModerationService.php} (\texttt{StoreModeration::create()}, \texttt{NotificationService::send()}) & \cellcolor{heredadobg}Heredado \\ \hline
+Chequeo de rol admin en la transición & \texttt{StoreRoomsController::update()} & \cellcolor{heredadobg}Heredado \\ \hline
+Sincronización con StoreModeration & \texttt{StoreModerationController::store()} $\to$ mismo servicio & \cellcolor{heredadobg}Heredado \\ \hline
+Rejected $\to$ Pending (reenvío) & ERS HUA-01, escenario 2; sin endpoint dedicado hoy & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Validación de PermisoBomberos & ERS HUG-04 / HUA-01; sin código todavía & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Estado -- Clase Reports}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.75}{0.62}{imagenes/estado_03.png}
+    \caption{Diagrama de Estado -- Clase Reports}
+    \label{fig:estado03}
+\end{figure}
+
+\noindent\textbf{Descripción:} Ciclo de vida de \texttt{Reports.status}, creado por \texttt{ReportService::create()} (\url{backend/app/Services/ReportService.php}) en estado \emph{Pending} y notificando en cascada a administradores y al arrendador. Desde \emph{Pending}, \texttt{ReportsController::updateStatus()} transiciona a \emph{Resolved} o \emph{Canceled} según el valor de \texttt{status} recibido, validado por \texttt{UpdateReportStatusRequest::rules()} contra \texttt{in:resolved,canceled}. El enum de la columna, declarado en la migración \url{database/migrations/2026_08_14_000001_fix_reports_status_enum.php}, contempla exactamente esos tres valores (\texttt{pending}/\texttt{resolved}/\texttt{canceled}) --- consistente con la validación del \textit{request} y con lo que persiste el controlador. Esa migración reconstruye el \texttt{CHECK constraint} con SQL específico por driver (\texttt{Schema::getConnection()->getDriverName()}), porque el \texttt{\$table->enum(...)->change()} nativo de Laravel 12 genera SQL inválido para PostgreSQL aunque funciona en SQLite; se verificó empíricamente contra un PostgreSQL 16 real, no solo contra SQLite.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/estado_03.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Pending (estado inicial) & \texttt{ReportService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Resolved & \texttt{ReportsController::updateStatus()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Canceled & \texttt{ReportsController::updateStatus()} & \cellcolor{heredadobg}Heredado \\ \hline
+Enum de la columna (\texttt{pending}/\texttt{resolved}/\texttt{canceled}) & \url{backend/database/migrations/2026_08_14_000001_fix_reports_status_enum.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Estado -- Clase Payments}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.6}{0.65}{imagenes/estado_04.png}
+    \caption{Diagrama de Estado -- Clase Payments}
+    \label{fig:estado04}
+\end{figure}
+
+\noindent\textbf{Descripción:} Ciclo de vida de \texttt{Payments.payment\_state} (\texttt{pending}, \texttt{paid}, \texttt{failed}). A diferencia de las demás entidades transaccionales, \texttt{payment\_state} es un campo \textbf{requerido} en la creación (\texttt{StorePaymentRequest::rules()}, \url{backend/app/Http/Requests/StorePaymentRequest.php}: \texttt{'required|in:paid,pending,failed'}), sin valor por defecto de negocio: quien invoca el endpoint decide el estado inicial, simulando el resultado de una pasarela de pago (ERS: ``complete a simulated payment to confirm a reservation''). \texttt{PaymentService::process()} (\url{backend/app/Services/PaymentService.php}) crea el \texttt{Payments} y, si \texttt{payment\_state = paid} y la reserva no está ya \texttt{confirmed}, invoca \texttt{ReservationService::confirm()} dentro de la misma transacción --- registrar el pago y confirmar la reserva quedan como una sola operación de servidor. \texttt{PaymentsPolicy::create()} exige, además, que quien registra el pago sea el \textit{tenant} dueño de la reserva.
+
+\noindent\textbf{Pendiente:} no existe una regla que impida más de un pago \texttt{paid} por reserva.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/estado_04.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Pending / Paid / Failed (creación) & \texttt{PaymentsController::store()} $\to$ \texttt{PaymentService::process()} & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Paid / Failed & \texttt{PaymentsController::update()}, CRUD genérico & \cellcolor{heredadobg}Heredado \\ \hline
+Paid confirma la reserva asociada & \texttt{PaymentService.php} $\to$ \texttt{ReservationService::confirm()}, misma transacción & \cellcolor{heredadobg}Heredado \\ \hline
+Autorización de ownership & \texttt{PaymentsPolicy::create()} (\url{backend/app/Policies/PaymentsPolicy.php}) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Estado -- Clase User}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.72}{0.68}{imagenes/estado_05.png}
+    \caption{Diagrama de Estado -- Clase User}
+    \label{fig:estado05}
+\end{figure}
+
+\noindent\textbf{Descripción:} Ciclo de vida de \texttt{User.state} (\texttt{pending}, \texttt{active}, \texttt{blocked}), el campo base para la moderación de cuentas (ERS HUA-03, ``User account blocking and reactivation''). \texttt{AuthController::register()} (\url{backend/app/Http/Controllers/AuthController.php}) no asigna \texttt{state} explícitamente, por lo que toda cuenta nueva nace en \texttt{pending} (valor por defecto real de la migración \url{database/migrations/2025_10_15_009000_create_user_table.php}, la tabla \texttt{user} en minúscula que referencian las llaves foráneas). Las transiciones \texttt{pending}$\to$\texttt{active} y \texttt{active}$\leftrightarrow$\texttt{blocked} solo son alcanzables a través del CRUD genérico (\texttt{UserController::update()}), \textbf{sin} invalidar tokens de acceso activos y \textbf{sin} registrar auditoría --- ambos requisitos explícitos de HUA-03 (mapeados a la clase planificada \texttt{RegistroAuditoria}, Sección B), historia de sprint que define ese diseño y que queda fuera del alcance de este código. \texttt{AuthController::login()} invoca \texttt{AuthService::ensureUserIsNotBlocked()} (\url{backend/app/Services/AuthService.php}), que rechaza con 403 (\texttt{AccountBlockedException}) cuando \texttt{state = blocked}; el guard es deliberadamente mínimo y no toca el significado de \texttt{pending} (una cuenta así sigue iniciando sesión con éxito), porque decidir eso es parte del diseño de HUA-03.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/estado_05.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Pending (estado inicial) & \texttt{AuthController::register()} (default de la migración) & \cellcolor{heredadobg}Heredado \\ \hline
+Pending $\to$ Active, Active $\leftrightarrow$ Blocked (CRUD) & \texttt{UserController::update()}, sin invalidar tokens ni auditar & \cellcolor{heredadobg}Heredado \\ \hline
+Guard de \texttt{state = blocked} en el login & \texttt{AuthService::ensureUserIsNotBlocked()} & \cellcolor{heredadobg}Heredado \\ \hline
+\texttt{pending} sin guard en el login (a propósito) & \url{backend/app/Http/Controllers/AuthController.php} (\texttt{login()}) & \cellcolor{heredadobg}Heredado \\ \hline
+Bloqueo/reactivación con auditoría y revocación de tokens & ERS HUA-03; \texttt{RegistroAuditoria} (Sección B), sin código todavía & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+
+\bigskip
+\noindent\textit{Nota: Los cinco diagramas anteriores cubren las clases del sistema cuyo comportamiento depende significativamente de su estado interno, identificadas en el Diagrama de Clases (Sección B) y en la tabla de Malos Olores (\S3.2.3): \texttt{Reservations}, \texttt{StoreRooms}, \texttt{Reports}, \texttt{Payments} y \texttt{User}. \texttt{StoreModeration.status} no recibió un diagrama propio porque su ciclo de vida ahora está gobernado por el mismo \texttt{StoreModerationService} que \texttt{StoreRooms.publication\_status} (documentado en la Figura~\ref{fig:estado02}).}
 \clearpage

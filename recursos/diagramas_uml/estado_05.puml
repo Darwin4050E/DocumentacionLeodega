@@ -1,0 +1,65 @@
+@startuml estado_05
+title Diagrama de Estado — Clase User (User.state)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam state {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Transición |
+  |<#D6EAF8>| Heredado (campo y valor por defecto existen) |
+  |<#D5F5E3>| Nuevo (planificado, ERS HUA-03 -- sin endpoint hoy) |
+endlegend
+
+[*] --> Pending : AuthController::register()\n(state = pending, DEFAULT de la\nmigración create_user_table;\nno se asigna explícitamente\nen el código)
+
+state Pending <<Heredado>> {
+  Pending : Valor por defecto real de la tabla\n"user" (la que referencian las FKs)
+}
+
+state Active <<Heredado>> {
+  Active : Alcanzable hoy solo vía\nUserController::update() genérico\n(CRUD, sin validación de negocio)
+}
+
+state Blocked <<Heredado>> {
+  Blocked : Alcanzable hoy solo vía\nUserController::update() genérico;\nNO invalida tokens activos,\nNO registra auditoría
+  Blocked : entry / AuthController::login()\nrechaza con 403\n(AuthService::ensureUserIsNotBlocked())
+}
+
+Pending -[#27AE60,dashed]-> Active : aprobación de cuenta\n(planificado -- ERS no detalla\nun paso explícito de aprobación\nmanual; sin endpoint hoy)
+
+Pending --> Active : update()\n[state = active]\n(UserController::update,\nCRUD genérico)
+
+Active -[#27AE60,dashed]-> Blocked : bloqueo con motivo\n+ registro de auditoría\n(planificado, ERS HUA-03:\n"records the action in the\naudit log with the entered reason")
+
+Blocked -[#27AE60,dashed]-> Active : reactivación\n+ registro de auditoría\n(planificado, ERS HUA-03)
+
+Active --> Blocked : update()\n[state = blocked]\n(UserController::update,\nCRUD genérico -- sin auditoría,\nsin invalidar tokens)
+
+Blocked --> Active : update()\n[state = active]\n(UserController::update,\nCRUD genérico)
+
+note bottom of Blocked
+  ERS HUA-03 exige que bloquear invalide TODOS
+  los tokens de acceso activos del usuario y
+  registre la acción en RegistroAuditoria (clase
+  nueva planificada, Sección B). Ninguna de las
+  dos cosas ocurre en el código actual.
+end note
+
+note right of Pending
+  AuthController::login() rechaza state =
+  blocked (403, ver entry de Blocked). Un
+  usuario pending sigue pudiendo iniciar
+  sesión con éxito -- ese significado es parte
+  del diseño de HUA-03 (Sprint 1), todavía sin
+  planificar en detalle.
+end note
+
+@enduml

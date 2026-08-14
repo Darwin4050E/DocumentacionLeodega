@@ -1,0 +1,67 @@
+@startuml estado_01
+title Diagrama de Estado — Clase Reservations (Reservations.status)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam state {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Transición |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+[*] --> Pending : create()\nTenant solicita reserva\n(ReservationService::create)
+
+state Pending <<Heredado>> {
+  Pending : entry / NotificationService::send(\n  RESERVATION_REQUEST -> landlord)
+}
+
+state Confirmed <<Heredado>> {
+  Confirmed : entry / NotificationService::send(\n  RESERVATION_CONFIRMED -> tenant)
+  Confirmed : entry / cancela en cascada otras\n  reservas "pending" solapadas\n  de la misma bodega
+}
+
+state Canceled <<Heredado>> {
+  Canceled : entry / NotificationService::send(\n  RESERVATION_CANCELED -> tenant)
+  Canceled : cancelation_reason queda registrado
+}
+
+state "Finalizada\n(planificado)" as Finished <<Nuevo>> {
+  Finished : Estado sugerido por el ERS\n(HUG-08: "reservas ya finalizadas");\nno existe en el enum de código\n(solo pending/confirmed/canceled)
+}
+
+Pending --> Confirmed : confirm()\n[sin conflicto con otra\nreserva "confirmed" solapada]\n(ReservationService::confirm(),\nllamado por el landlord vía\nReservationsController::updateStatus()\no automáticamente por\nPaymentService::process()\ncuando payment_state = paid)
+
+Pending --> Canceled : cancel()\n[landlord rechaza]\nreason = "Rejected by landlord"\n(ReservationService::cancel)
+
+Pending --> Canceled : [automático]\notra reserva de la misma bodega\nse confirma en fechas solapadas\nreason = "Blocked by confirmed reservation"
+
+Confirmed --> Canceled : cancel()\n[landlord o tenant cancela\nuna reserva ya confirmada]\n(ReservationService::cancel)
+
+Pending -[#C0392B,dashed]-> Pending : confirm()\n[HAY conflicto de fechas]\nthrows ReservationConflictException\n(estado no cambia)
+
+Confirmed -[#27AE60,dashed]-> Finished : fin de end_date\n(planificado — sin job\nautomático en el código actual)
+
+note right of Confirmed
+  confirm() se dispara tanto desde el landlord
+  aceptando (updateStatus) como desde
+  PaymentService::process(), en la misma
+  transacción del pago, cuando payment_state
+  = paid (ver Diagrama de Estado -- Payments).
+  Se salta la llamada si la reserva ya está
+  confirmed, para no reenviar la notificación.
+end note
+
+Confirmed --> [*]
+Canceled --> [*]
+Finished -[#27AE60,dashed]-> [*]
+
+@enduml

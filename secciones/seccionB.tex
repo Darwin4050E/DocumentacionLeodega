@@ -64,7 +64,7 @@ Supuestos & [Supuestos] \\ \hline
 \end{longtable}
 
 \bigskip
-\noindent\textit{Nota: Duplique el bloque "Caso de Uso UC-XX" anterior para documentar cada caso de uso presente en el diagrama de la sección \ref{fig:casos_uso}.}
+\noindent\textit{Nota: Duplique el bloque ``Caso de Uso UC-XX'' anterior para documentar cada caso de uso presente en el diagrama de la sección \ref{fig:casos_uso}.}
 \clearpage
 
 % ------------------------------------------------------------
@@ -72,56 +72,164 @@ Supuestos & [Supuestos] \\ \hline
 
 \begin{figure}[H]
     \centering
-    \DiagramaImagen{0.95}{0.65}{imagenes/diagrama_clases.png}
+    \DiagramaImagen{0.98}{0.62}{imagenes/diagrama_clases.png}
     \caption{Diagrama de clases del sistema (lógica de negocio)}
     \label{fig:clases}
 \end{figure}
-\noindent\textbf{Herramienta de modelado utilizada:} \textit{[Ej. Visual Paradigm, StarUML]}
+
+\noindent\textbf{Descripción:} El diagrama modela la capa de \textbf{lógica de negocio} completa: 19 modelos Eloquent \textbf{heredados} (agrupados en los paquetes Usuarios y Roles, Almacenes, Reservas y Pagos, Comunicación, y Moderación y Reportes), los 8 \textbf{servicios de aplicación} que concentran las reglas de negocio reales (p. ej. \texttt{ReservationService} resuelve conflictos de fechas y cancela en cascada; \texttt{ReportService} notifica en cascada a administradores y al arrendador; \texttt{StoreModerationService} sincroniza \texttt{StoreRooms} con su historial de moderación y notifica al arrendador; \texttt{PaymentService} confirma la reserva asociada cuando un pago se registra como exitoso), las 3 \textbf{policies} de autorización (incluida \texttt{PaymentsPolicy}, que valida que quien paga sea el \textit{tenant} dueño de la reserva), el enum \texttt{NotificationType} (incluye \texttt{STORE\_APPROVED}/\texttt{STORE\_REJECTED}) y las 3 \textbf{excepciones de dominio} (\texttt{DuplicateRatingException}, \texttt{ReservationConflictException}, \texttt{AccountBlockedException}, todas extienden \texttt{RuntimeException}). El patrón \texttt{User} 1 -- (0..1) \texttt{Landlords}/\texttt{Tenants}/\texttt{Admin} refleja una decisión real de diseño del código: los roles se modelan como \textbf{perfiles compuestos} (relación \texttt{hasOne}, no herencia de clases), lo que permite añadir nuevos roles sin modificar \texttt{User} (ver Open/Closed en la Tabla~\ref{tab:solid}). \texttt{StoreModerationService}, \texttt{PaymentService}, \texttt{PaymentsPolicy} y \texttt{AccountBlockedException} se clasifican como \textbf{heredado} (no \textbf{nuevo}): pertenecen a módulos que el ERS ya declara completos (moderación de bodegas, registro de pagos, autenticación), no a requerimientos nuevos del alcance. Se añade además el paquete \textbf{Nuevo (planificado)} con 6 clases derivadas directamente del ERS (\S1.3 Alcance) para los módulos aún sin código: \texttt{Organizacion}, \texttt{OrganizacionMiembro}, \texttt{ConexionInventario}, \texttt{ProductoInventario}, \texttt{PermisoBomberos} y \texttt{RegistroAuditoria}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (renderizado localmente con \texttt{plantuml.jar} sobre OpenJDK, motor de layout Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/diagrama_clases.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5.5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+User, Landlords, Tenants, Admin & \url{backend/app/Models/User.php}, \texttt{Landlords.php}, \texttt{Tenants.php}, \texttt{Admin.php} & \cellcolor{heredadobg}Heredado \\ \hline
+StoreRooms, StorePrices, StorePhoto, StoreDisponibility, StoreModeration, CancelationsPolices & \url{backend/app/Models/StoreRooms.php} y modelos relacionados & \cellcolor{heredadobg}Heredado \\ \hline
+Reservations, Payments, Ratings, Favorites & \url{backend/app/Models/Reservations.php}, \texttt{Payments.php}, \texttt{Ratings.php}, \texttt{Favorites.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Conversation, Message, Notifications, NotificationType & \url{backend/app/Models/Conversation.php}, \texttt{Message.php}, \texttt{Notifications.php}; \url{backend/app/Enums/NotificationType.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Reports, ReportEvidences & \url{backend/app/Models/Reports.php}, \texttt{ReportEvidences.php} & \cellcolor{heredadobg}Heredado \\ \hline
+AuthService, NotificationService, RatingsService, ReportService, ReservationService, UserRegistrationService, StoreModerationService, PaymentService & \url{backend/app/Services/*.php} & \cellcolor{heredadobg}Heredado \\ \hline
+ConversationPolicy, ReservationsPolicy, PaymentsPolicy & \url{backend/app/Policies/*.php} & \cellcolor{heredadobg}Heredado \\ \hline
+DuplicateRatingException, ReservationConflictException, AccountBlockedException & \url{backend/app/Exceptions/*.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Organizacion, OrganizacionMiembro & ERS \S1.3, HUE-01/HUE-04 (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+ConexionInventario, ProductoInventario & ERS \S1.3, HUC-10/HUC-11/HUC-12/HUC-13 (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+PermisoBomberos & ERS HUG-04 (registro), HUA-01 (validación) (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+RegistroAuditoria & ERS HUA-03 (bloqueo/reactivación con auditoría) (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
 \clearpage
 
 \subsection{Cumplimiento de Principios SOLID}
-\begin{table}[H]
-\centering
-\caption{Aplicación de principios SOLID en el diseño de clases}
-\label{tab:solid}
 {\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|M{3.3cm}|L{11cm}|}
+\begin{longtable}{|M{3.3cm}|L{11cm}|}
+\caption{Aplicación de principios SOLID en el diseño de clases} \label{tab:solid} \\
 \hline
-\rowcolor{cajagris} \textbf{Principio} & \textbf{Justificación / Clases involucradas} \\ \hline
-S -- Single Responsibility & [Explicar cómo se aplica y en qué clases] \\ \hline
-O -- Open/Closed & [Explicar cómo se aplica y en qué clases] \\ \hline
-L -- Liskov Substitution & [Explicar cómo se aplica y en qué clases] \\ \hline
-I -- Interface Segregation & [Explicar cómo se aplica y en qué clases] \\ \hline
-D -- Dependency Inversion & [Explicar cómo se aplica y en qué clases] \\ \hline
-\end{tabular}
+\rowcolor{cajagris} \textbf{Principio} & \textbf{Justificación / Clases involucradas} \\
+\hline
+\endfirsthead
+\multicolumn{2}{c}{\textit{Tabla~\ref{tab:solid} (continuación)}} \\
+\hline
+\rowcolor{cajagris} \textbf{Principio} & \textbf{Justificación / Clases involucradas} \\
+\hline
+\endhead
+\hline \multicolumn{2}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+S -- Single Responsibility &
+Los controladores quedan delgados (validan y delegan) mientras cada regla de negocio no trivial vive en un servicio dedicado con una sola razón para cambiar: \texttt{ReservationService} solo resuelve conflictos de fechas y transiciones de estado de \texttt{Reservations}; \texttt{RatingsService} solo valida la regla ``una calificación por usuario/bodega''; \texttt{ReportService} solo orquesta creación de reportes y su notificación en cascada. Antes esta lógica vivía inline en los controladores (ver comentarios de \texttt{app/Services/*.php}); extraerla es la aplicación más clara de SRP en el código real. \\ \hline
+O -- Open/Closed &
+\texttt{NotificationType} es un \textit{enum} PHP: agregar un nuevo tipo de notificación (p. ej. para los módulos nuevos) no requiere modificar \texttt{NotificationService::send()}. De igual forma, el patrón de \textbf{perfil compuesto} (\texttt{User} 1--(0..1) \texttt{Landlords}/\texttt{Tenants}/\texttt{Admin}, en vez de subclases de \texttt{User}) permite agregar un futuro rol (p.\,ej. \texttt{OrganizacionAdmin}) sin tocar la clase \texttt{User} ni el esquema de autenticación (Sanctum) que depende de ella. \\ \hline
+L -- Liskov Substitution &
+Todas las excepciones de dominio (\texttt{DuplicateRatingException}, \texttt{ReservationConflictException}) extienden \texttt{RuntimeException} sin alterar su contrato (no fuerzan \textit{catch} obligatorio ni cambian la semántica de ``excepción no verificada'' de PHP), por lo que son sustituibles en cualquier bloque que ya capture \texttt{RuntimeException} o \texttt{Throwable}. Los controladores (\texttt{ReservationsController}, \texttt{RatingsController}) las capturan por su tipo concreto sin depender de detalles internos, respetando el contrato de la clase base. \\ \hline
+I -- Interface Segregation &
+No hay interfaces PHP explícitas en el código actual (todas las clases de servicio y policy son concretas) --- ver \S\ref{sssec:malos-olores}, ``Ausencia de contratos/interfaces'', como oportunidad de mejora identificada. En su forma actual, cada \textit{policy} (\texttt{ConversationPolicy}, \texttt{ReservationsPolicy}) expone un único método de autorización específico a su caso de uso, en vez de un contrato genérico ``autorizable'' con métodos que la clase implementante no necesitaría, lo cual sí respeta el \emph{espíritu} de ISP aunque no exista una interfaz formal. \\ \hline
+D -- Dependency Inversion &
+Laravel resuelve los servicios (\texttt{ReservationService}, \texttt{RatingsService}, etc.) por \textit{method injection} en la firma de las acciones del controlador (p.\,ej. \texttt{ReservationsController::store(StoreReservationRequest \$request, ReservationService \$reservationService)}), en vez de instanciarlos con \texttt{new} dentro del método. Esto desacopla el controlador de la construcción concreta del servicio y permite sustituirlo (p.\,ej. en tests) sin modificar el controlador. \\ \hline
+\end{longtable}
 }
-\end{table}
 
 \subsection{Patrones de Diseño Aplicados}
-\begin{table}[H]
-\centering
-\caption{Patrones de diseño utilizados en el sistema \cite{ref22}}
-\label{tab:patrones}
 {\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|M{2.6cm}|M{2.6cm}|L{9cm}|}
+\begin{longtable}{|M{2.9cm}|M{2.4cm}|L{8.8cm}|}
+\caption{Patrones de diseño utilizados en el sistema \cite{ref22}} \label{tab:patrones} \\
 \hline
-\rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\ \hline
-[Ej. Singleton] & Creacional & [Clases involucradas y motivo de uso] \\ \hline
-[Ej. Strategy] & Comportamiento & [Clases involucradas y motivo de uso] \\ \hline
-[Ej. Adapter] & Estructural & [Clases involucradas y motivo de uso] \\ \hline
-\end{tabular}
+\rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\
+\hline
+\endfirsthead
+\multicolumn{3}{c}{\textit{Tabla~\ref{tab:patrones} (continuación)}} \\
+\hline
+\rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\
+\hline
+\endhead
+\hline \multicolumn{3}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+Service Layer & Arquitectónico &
+\texttt{AuthService}, \texttt{NotificationService}, \texttt{RatingsService}, \texttt{ReportService}, \texttt{ReservationService}, \texttt{UserRegistrationService}, \texttt{StoreModerationService}, \texttt{PaymentService} (\url{backend/app/Services/}). Separa la lógica de negocio de los controladores HTTP, que quedan como adaptadores delgados de entrada/salida. \\ \hline
+Template Method & Comportamiento &
+\texttt{ApiController} (\url{backend/app/Http/Controllers/ApiController.php}) define el esqueleto genérico de operaciones CRUD (\texttt{indexModel}, \texttt{showModel}, \texttt{storeModel}, \texttt{updateModel}, \texttt{destroyModel}) parametrizado por \texttt{\$modelClass}; 13 controladores concretos (\texttt{AdminController}, \texttt{PaymentsController}, \texttt{TenantsController}, \texttt{RatingsController}, \texttt{ReportsController}, etc.) heredan ese esqueleto y solo indican a qué modelo aplicarlo. \\ \hline
+Static Factory Method & Creacional &
+\texttt{NotificationService::send(...)} (método estático) centraliza y abstrae la construcción de instancias de \texttt{Notifications} a partir de un \texttt{NotificationType}, usado por \texttt{ReservationService} y \texttt{ReportService} en vez de que cada uno llame directamente a \texttt{Notifications::create(...)}. \\ \hline
+Strategy (autorización) & Comportamiento &
+Las \textit{Policies} de Laravel (\texttt{ConversationPolicy::view}, \texttt{ReservationsPolicy::updateStatus}, \texttt{PaymentsPolicy::create}, invocadas vía \texttt{Gate::authorize}) encapsulan cada regla de autorización como una unidad intercambiable y testeable por separado, en vez de condicionales \texttt{if} inline en el controlador (así vivía antes en \texttt{MessageController} y \texttt{ReservationsController}, según sus propios comentarios). \\ \hline
+Fail-Fast con excepciones de dominio & Comportamiento &
+\texttt{DuplicateRatingException}, \texttt{ReservationConflictException} y \texttt{AccountBlockedException} (\url{backend/app/Exceptions/}) reemplazan códigos de error genéricos por tipos de excepción específicos del dominio, capturados explícitamente en el controlador para traducirlos a la respuesta HTTP correcta (409 Conflict / 403 Forbidden). Coincide con las prácticas recomendadas en \cite{ref17,ref19,ref20}. \\ \hline
+\end{longtable}
 }
-\end{table}
+
+\subsection{Malos Olores Identificados (Oportunidades de Mejora)}
+\label{sssec:malos-olores}
+{\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{3.6cm}|L{10.7cm}|}
+\caption{Code smells detectados en la revisión del código real} \label{tab:smells} \\
+\hline
+\rowcolor{cajagris} \textbf{Code smell} & \textbf{Evidencia / Recomendación} \\
+\hline
+\endfirsthead
+\multicolumn{2}{c}{\textit{Tabla~\ref{tab:smells} (continuación)}} \\
+\hline
+\rowcolor{cajagris} \textbf{Code smell} & \textbf{Evidencia / Recomendación} \\
+\hline
+\endhead
+\hline \multicolumn{2}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+Obsesión por primitivos (\textit{Primitive Obsession}) en estados &
+Seis atributos de estado distintos (\texttt{Reservations.status}, \texttt{StoreRooms.publication\_status}, \texttt{StoreModeration.status}, \texttt{Payments.payment\_state}, \texttt{Reports.status}, \texttt{User.state}) se validan como \textit{strings} de un \texttt{enum} de base de datos, sin un tipo PHP dedicado que centralice las transiciones válidas --- a diferencia de \texttt{NotificationType}, que sí usa un \textit{backed enum} de PHP. Se recomienda migrar estos campos a \textit{enums} de PHP 8.1+ para que las transiciones inválidas (ver Diagrama de Estado, Sección C) se detecten en tiempo de análisis estático, no solo en tiempo de ejecución. \\ \hline
+Ausencia de contratos/interfaces &
+Ningún servicio o \textit{policy} implementa una interfaz PHP (una búsqueda de la palabra clave \texttt{interface} en \texttt{app/} no arroja resultados); todo el desacople depende del contenedor de Laravel resolviendo clases concretas. Funciona hoy porque cada servicio tiene un único caso de uso, pero limita la sustituibilidad explícita (ISP/DIP formales) si el sistema crece con los módulos nuevos del ERS. \\ \hline
+Ausencia de máquina de estados explícita &
+Las transiciones de \texttt{Reservations.status} (\texttt{pending}/\texttt{confirmed}/\texttt{canceled}) se implementan como actualizaciones de \textit{string} dispersas en \texttt{ReservationService} (ver Diagrama de Estado, Sección C) en vez de un objeto \texttt{State} explícito (patrón \textit{State} de GoF). Es una decisión razonable dado el tamaño actual (solo 3 estados), pero sería una refactorización útil si se añade el estado ``Finalizada'' planificado. \\ \hline
+\end{longtable}
+}
 \clearpage
 
 % ------------------------------------------------------------
 \section{Diagramas de Objetos}
 
-\DiagramaPagina{Diagrama de Objetos 01 -- [Escenario ilustrado]}{imagenes/objetos_01.png}{objetos01}{[Descripción del escenario/instante del sistema representado por este diagrama de objetos y su relación con el diagrama de clases.]}
+\subsection{Diagrama de Objetos 01 -- Reserva confirmada con pago}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.7}{0.6}{imagenes/objetos_01.png}
+    \caption{Diagrama de Objetos 01 -- Reserva confirmada con pago}
+    \label{fig:objetos01}
+\end{figure}
 
-\DiagramaPagina{Diagrama de Objetos 02 -- [Escenario ilustrado]}{imagenes/objetos_02.png}{objetos02}{[Descripción del escenario/instante del sistema representado.]}
+\noindent\textbf{Descripción:} Instancia concreta del núcleo transaccional del sistema en el instante en que el arrendador (\texttt{user7}, landlord) confirma una solicitud de reserva del arrendatario \texttt{user12} sobre la bodega \texttt{room101} (\texttt{ReservationService::confirm()}). Se muestran valores realistas y coherentes entre sí (mismos IDs enlazados entre \texttt{reservation501}, \texttt{tenant1}, \texttt{room101} y \texttt{payment501}) y la notificación \texttt{RESERVATION\_CONFIRMED} generada como efecto de la transición. El estado \texttt{status = confirmed} de \texttt{reservation501} corresponde exactamente al estado \emph{Confirmed} del Diagrama de Estado (Sección C, Figura~\ref{fig:estado01}).
 
-\noindent\textit{Nota: Agregue tantos diagramas de objetos como aspectos medulares del sistema se deseen ilustrar, duplicando el llamado a \texttt{\textbackslash DiagramaPagina}.}
+\bigskip
+\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/objetos_01.puml}.
+
+\bigskip
+\noindent\textbf{Trazabilidad:} Todos los tipos de objetos instanciados (\texttt{User}, \texttt{Landlords}, \texttt{Tenants}, \texttt{StoreRooms}, \texttt{StorePrices}, \texttt{Reservations}, \texttt{Payments}, \texttt{Notifications}) corresponden a clases \cellcolor{heredadobg}Heredadas documentadas en la tabla de trazabilidad del Diagrama de Clases (\S3.2).
+\clearpage
+
+\subsection{Diagrama de Objetos 02 -- Reporte de incidente sobre una bodega}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.65}{0.55}{imagenes/objetos_02.png}
+    \caption{Diagrama de Objetos 02 -- Reporte de incidente sobre una bodega}
+    \label{fig:objetos02}
+\end{figure}
+
+\noindent\textbf{Descripción:} Instancia concreta del flujo de moderación/reportes: el tenant \texttt{user12} reporta un incidente (\texttt{report301}) sobre la bodega \texttt{room101}, adjuntando evidencia (\texttt{evidence1}). Refleja fielmente la orquestación real de \texttt{ReportService::create()} (\url{backend/app/Services/ReportService.php}) que notifica en cascada a \emph{todos} los administradores (\texttt{user1}) y al arrendador dueño de la bodega (\texttt{user7}), evitando duplicar la notificación si el arrendador también fuera administrador. \texttt{report301.status = pending} refleja el valor por defecto asignado en la creación.
+
+\bigskip
+\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/objetos_02.puml}.
+
+\bigskip
+\noindent\textbf{Trazabilidad:} Todos los tipos de objetos instanciados (\texttt{User}, \texttt{StoreRooms}, \texttt{Reports}, \texttt{ReportEvidences}, \texttt{Notifications}) corresponden a clases \cellcolor{heredadobg}Heredadas documentadas en la tabla de trazabilidad del Diagrama de Clases (\S3.2).
+
+\bigskip
+\noindent\textit{Nota: Agregue tantos diagramas de objetos como aspectos medulares del sistema se deseen ilustrar, duplicando alguno de los dos bloques anteriores.}
+\clearpage
 \clearpage
 
 % ------------------------------------------------------------

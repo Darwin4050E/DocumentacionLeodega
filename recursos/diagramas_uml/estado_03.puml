@@ -1,0 +1,44 @@
+@startuml estado_03
+title Diagrama de Estado — Clase Reports (Reports.status)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam state {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Transición |
+  |<#D6EAF8>| Heredado (existe y es alcanzable en código) |
+endlegend
+
+[*] --> Pending : ReportService::create()\n(status = pending, valor por defecto)
+
+state Pending <<Heredado>> {
+  Pending : Notifica a todos los admins\ny al landlord (ReportService::\nnotifyAdminsAndLandlord)
+}
+
+state Resolved <<Heredado>> {
+  Resolved : cancelation_reason = null
+}
+
+state Canceled <<Heredado>> {
+  Canceled : cancelation_reason queda registrado
+}
+
+Pending --> Resolved : updateStatus()\n[status = resolved]\n(ReportsController::updateStatus)
+
+Pending --> Canceled : updateStatus()\n[status = canceled]\n(ReportsController::updateStatus)
+
+note bottom of Canceled
+  Migración fix_reports_status_enum: el enum
+  de la columna es pending / resolved /
+  canceled, verificado contra SQLite y
+  PostgreSQL reales. in_review no forma parte
+  del enum -- ningún endpoint lo asigna.
+end note
+
+@enduml

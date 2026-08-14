@@ -1,0 +1,98 @@
+@startuml objetos_02
+title Diagrama de Objetos 02 — Reporte de incidente sobre una bodega (instante t)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 200
+skinparam defaultTextAlignment left
+skinparam object {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+endlegend
+
+object "user12 : User" as user12 <<Heredado>> {
+  id = 12
+  name = "María"
+  lastname = "Vera"
+  role = "tenant"
+  state = "active"
+}
+
+object "room101 : StoreRooms" as room101 <<Heredado>> {
+  id = 101
+  landlord_id = 3
+  title = "Bodega Centro"
+  city = "Guayaquil"
+}
+
+object "report301 : Reports" as report301 <<Heredado>> {
+  id = 301
+  user_id = 12
+  store_id = 101
+  reported_user_id = null
+  title = "Acceso bloqueado al pasillo"
+  priority = "high"
+  report_type = "incidente"
+  status = "pending"
+}
+
+object "evidence1 : ReportEvidences" as evidence1 <<Heredado>> {
+  id = 60
+  report_id = 301
+  file_path = "reports/foto1.jpg"
+  file_type = "image/jpeg"
+}
+
+object "user1 : User" as user1 <<Heredado>> {
+  id = 1
+  name = "Admin"
+  role = "admin"
+  state = "active"
+}
+
+object "user7 : User" as user7 <<Heredado>> {
+  id = 7
+  name = "Carlos"
+  lastname = "Piña"
+  role = "landlord"
+}
+
+object "notifAdmin : Notifications" as notifAdmin <<Heredado>> {
+  id = 901
+  sender_id = 12
+  receiver_id = 1
+  type = "store_reported"
+  title = "Nuevo Reporte Creado"
+}
+
+object "notifLandlord : Notifications" as notifLandlord <<Heredado>> {
+  id = 902
+  sender_id = 12
+  receiver_id = 7
+  type = "store_reported"
+  title = "Reporte en tu bodega"
+}
+
+user12 --> report301 : reporta
+room101 --> report301 : objeto de
+report301 -- evidence1 : adjunta
+user12 --> notifAdmin : envía
+user1 --> notifAdmin : recibe
+user12 --> notifLandlord : envía
+user7 --> notifLandlord : recibe
+
+note bottom of report301
+  Instante representado: ReportService::create() crea
+  el reporte con evidencia adjunta y notifica en cascada
+  a TODOS los admins y al landlord dueño de la bodega
+  (evitando duplicar si el landlord también es admin).
+  report301.status = "pending" (recién creado).
+end note
+
+@enduml

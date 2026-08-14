@@ -1,0 +1,113 @@
+@startuml objetos_01
+title Diagrama de Objetos 01 — Reserva confirmada con pago (instante t)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 200
+skinparam defaultTextAlignment left
+skinparam object {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+endlegend
+
+object "user7 : User" as user7 <<Heredado>> {
+  id = 7
+  name = "Carlos"
+  lastname = "Piña"
+  email = "carlos.pina@example.com"
+  role = "landlord"
+  state = "active"
+}
+
+object "landlord1 : Landlords" as landlord1 <<Heredado>> {
+  id = 3
+  user_id = 7
+  optional_company = null
+}
+
+object "user12 : User" as user12 <<Heredado>> {
+  id = 12
+  name = "María"
+  lastname = "Vera"
+  email = "maria.vera@example.com"
+  role = "tenant"
+  state = "active"
+}
+
+object "tenant1 : Tenants" as tenant1 <<Heredado>> {
+  id = 5
+  user_id = 12
+  search_preference = "bodega Guayaquil"
+}
+
+object "room101 : StoreRooms" as room101 <<Heredado>> {
+  id = 101
+  landlord_id = 3
+  room_type = "bodega"
+  city = "Guayaquil"
+  size = 25.50
+  title = "Bodega Centro"
+  publication_status = "approved"
+}
+
+object "price101 : StorePrices" as price101 <<Heredado>> {
+  id = 44
+  store_room_id = 101
+  mode = "mensual"
+  price = 180.00
+}
+
+object "reservation501 : Reservations" as reservation501 <<Heredado>> {
+  id = 501
+  store_room_id = 101
+  tenant_id = 5
+  start_date = "2026-09-01"
+  end_date = "2026-09-30"
+  status = "confirmed"
+  total_mount = 180.00
+  cancelation_reason = null
+}
+
+object "payment501 : Payments" as payment501 <<Heredado>> {
+  id = 88
+  reservation_id = 501
+  payment_method = "credit card"
+  payment_state = "paid"
+  payment_date = "2026-08-30"
+}
+
+object "notif1 : Notifications" as notif1 <<Heredado>> {
+  id = 900
+  sender_id = 7
+  receiver_id = 12
+  type = "reservation_confirmed"
+  title = "Reserva confirmada"
+  body = "Tu reserva ha sido confirmada"
+  is_read = false
+}
+
+user7 -- landlord1 : perfil
+landlord1 -- room101 : publica
+room101 -- price101 : tarifa
+user12 -- tenant1 : perfil
+tenant1 -- reservation501 : reserva
+room101 -- reservation501 : es reservada en
+reservation501 -- payment501 : registra
+user7 --> notif1 : envía
+user12 --> notif1 : recibe
+
+note bottom of reservation501
+  Instante representado: el landlord (user7) confirmó
+  la reserva (ReservationService::confirm()), lo que
+  dispara la notificación RESERVATION_CONFIRMED hacia
+  el tenant (user12). Corresponde al estado "Confirmada"
+  del Diagrama de Estado (Sección C).
+end note
+
+@enduml

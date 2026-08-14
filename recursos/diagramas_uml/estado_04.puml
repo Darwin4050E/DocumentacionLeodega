@@ -1,0 +1,59 @@
+@startuml estado_04
+title Diagrama de Estado — Clase Payments (Payments.payment_state)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam state {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Transición |
+  |<#D6EAF8>| Heredado (implementado en código) |
+endlegend
+
+state Pending <<Heredado>>
+state Paid <<Heredado>> {
+  Paid : entry / si reservation.status\nno es confirmed, invoca\nReservationService::confirm()\n(misma transacción)
+}
+state Failed <<Heredado>>
+
+[*] --> Pending : store()\n[payment_state = pending]\n[requiere ser el tenant dueño\nde la reserva]\n(PaymentService::process(),\nautorizado por PaymentsPolicy::create())
+[*] --> Paid : store()\n[payment_state = paid]
+[*] --> Failed : store()\n[payment_state = failed]
+
+note top of Pending
+  payment_state es REQUERIDO en la creación
+  (StorePaymentRequest: 'required|in:paid,pending,failed'),
+  no tiene un valor por defecto de negocio: quien
+  llama al endpoint decide el estado inicial
+  (simula el resultado de la pasarela de pago,
+  ERS: "complete a simulated payment").
+end note
+
+Pending --> Paid : update()\n[payment_state = paid]\n(PaymentsController::update,\nCRUD genérico -- sin PaymentService)
+Pending --> Failed : update()\n[payment_state = failed]
+
+Paid --> [*]
+Failed --> [*]
+
+note bottom of Paid
+  PaymentService::process() crea el pago y, en
+  la misma transacción DB::transaction(),
+  confirma la reserva asociada
+  (ReservationService::confirm()); si la reserva
+  ya está confirmed, no se reenvía la
+  notificación de confirmación.
+end note
+
+note right of Pending
+  PaymentsPolicy::create() exige que quien
+  registra el pago sea el tenant dueño de la
+  reserva. Pendiente: una regla que impida más
+  de un pago paid por reserva.
+end note
+
+@enduml

@@ -1,0 +1,446 @@
+@startuml diagrama_clases
+title Diagrama de Clases del Sistema — Leodega (lógica de negocio)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Servicio>> #FCF3CF
+  BorderColor<<Servicio>> #B7950B
+  BackgroundColor<<Policy>> #F5EEF8
+  BorderColor<<Policy>> #8E44AD
+  BackgroundColor<<Excepcion>> #FADBD8
+  BorderColor<<Excepcion>> #C0392B
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#D5F5E3>| Nuevo (planificado, ERS) |
+  |<#FCF3CF>| Servicio de aplicación |
+  |<#F5EEF8>| Policy (autorización) |
+  |<#FADBD8>| Excepción de dominio |
+endlegend
+
+' ===================== USUARIOS Y ROLES =====================
+package "Usuarios y Roles" <<Heredado>> {
+  class User <<Heredado>> {
+    - id: int
+    - name: string
+    - lastname: string
+    - email: string
+    - phone: string
+    - password: string
+    - role: enum{admin,landlord,tenant}
+    - state: enum{active,blocked,pending}
+    - start_date: date
+    - enable_messages: bool
+    --
+    + setPasswordAttribute(value): void
+    + sendPasswordResetNotification(token): void
+  }
+
+  class Landlords <<Heredado>> {
+    - id: int
+    - user_id: int
+    - optional_company: string
+  }
+
+  class Tenants <<Heredado>> {
+    - id: int
+    - user_id: int
+    - search_preference: string
+  }
+
+  class Admin <<Heredado>> {
+    - id: int
+    - user_id: int
+    - admin_level: string
+  }
+}
+
+' ===================== ALMACENES / LISTINGS =====================
+package "Almacenes (Listings)" <<Heredado>> {
+  class StoreRooms <<Heredado>> {
+    - id: int
+    - landlord_id: int
+    - room_type: enum{habitacion,garaje,contenedor,sotano,atico,bodega}
+    - storage_type: enum{completa,privado,compartido}
+    - direction: string
+    - city: string
+    - size: decimal
+    - title: string
+    - description: string
+    - security: string
+    - publication_status: enum{pending,approved,rejected}
+    - publication_date: datetime
+  }
+
+  class StorePrices <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - mode: string
+    - price: decimal
+    - disponibility: string
+  }
+
+  class StorePhoto <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - photo_url: string
+  }
+
+  class StoreDisponibility <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - start_date: date
+    - end_date: date
+  }
+
+  class StoreModeration <<Heredado>> {
+    - id: int
+    - store_id: int
+    - status: enum{pending,approved,rejected}
+    - reason_rejected: string
+    - moderation_date: date
+  }
+
+  class CancelationsPolices <<Heredado>> {
+    - id: int
+    - landlord_id: int
+    - policy_name: string
+    - description: string
+    - is_default: bool
+  }
+}
+
+' ===================== RESERVAS Y PAGOS =====================
+package "Reservas y Pagos" <<Heredado>> {
+  class Reservations <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - tenant_id: int
+    - start_date: date
+    - end_date: date
+    - status: enum{pending,confirmed,canceled}
+    - total_mount: decimal
+    - cancelation_reason: string
+    - creation_date: datetime
+  }
+
+  class Payments <<Heredado>> {
+    - id: int
+    - reservation_id: int
+    - payment_method: enum{credit card,debit card}
+    - payment_state: enum{paid,pending,failed}
+    - payment_date: date
+  }
+
+  class Ratings <<Heredado>> {
+    - id: int
+    - store_id: int
+    - user_id: int
+    - stars: int
+    - comment: string
+  }
+
+  class Favorites <<Heredado>> {
+    - id: int
+    - user_id: int
+    - store_room_id: int
+    - save_date: date
+  }
+}
+
+' ===================== COMUNICACIÓN =====================
+package "Comunicación" <<Heredado>> {
+  class Conversation <<Heredado>> {
+    - id: int
+  }
+
+  class Message <<Heredado>> {
+    - id: int
+    - conversation_id: int
+    - sender_id: int
+    - body: string
+    - file_path: string
+    - file_type: string
+    - file_name: string
+    - is_read: bool
+  }
+
+  class Notifications <<Heredado>> {
+    - id: int
+    - sender_id: int
+    - receiver_id: int
+    - type: NotificationType
+    - title: string
+    - body: string
+    - data: json
+    - is_read: bool
+  }
+
+  enum NotificationType <<Heredado>> {
+    MESSAGE
+    RESERVATION_REQUEST
+    RESERVATION_CONFIRMED
+    RESERVATION_CANCELED
+    STORE_CREATED
+    STORE_REPORTED
+    STORE_APPROVED
+    STORE_REJECTED
+  }
+}
+
+' ===================== MODERACIÓN Y REPORTES =====================
+package "Moderación y Reportes" <<Heredado>> {
+  class Reports <<Heredado>> {
+    - id: int
+    - user_id: int
+    - store_id: int
+    - reported_user_id: int
+    - title: string
+    - priority: enum{low,medium,high}
+    - report_type: string
+    - description: string
+    - status: enum{pending,resolved,canceled}
+  }
+
+  class ReportEvidences <<Heredado>> {
+    - id: int
+    - report_id: int
+    - file_path: string
+    - file_type: string
+  }
+}
+
+' ===================== SERVICIOS DE APLICACIÓN =====================
+package "Servicios de Aplicación" <<Servicio>> {
+  class AuthService <<Servicio>> {
+    + issueTokenFor(user: User, request: Request): string
+    + ensureUserIsNotBlocked(user: User): void
+    .. throws ..
+    AccountBlockedException
+  }
+
+  class StoreModerationService <<Servicio>> {
+    + moderate(room: StoreRooms, decision: string,\nreason: ?string, adminId: ?int): StoreModeration
+  }
+
+  class PaymentService <<Servicio>> {
+    + process(reservation: Reservations, data: array,\nactingUserId: ?int): Payments
+    .. throws ..
+    ReservationConflictException
+  }
+
+  class NotificationService <<Servicio>> {
+    + {static} send(senderId, receiverId, type: NotificationType,\ntitle, body, data): Notifications
+  }
+
+  class RatingsService <<Servicio>> {
+    + create(user: User, data: array): Ratings
+    .. throws ..
+    DuplicateRatingException
+  }
+
+  class ReportService <<Servicio>> {
+    + create(reportingUserId, data, files): Reports
+    - notifyAdminsAndLandlord(reportingUserId, report): void
+  }
+
+  class ReservationService <<Servicio>> {
+    + create(tenant, room, data, actingUserId): Reservations
+    + confirm(reservation, actingUserId): Reservations
+    + cancel(reservation, reason, actingUserId): Reservations
+    .. throws ..
+    ReservationConflictException
+  }
+
+  class UserRegistrationService <<Servicio>> {
+    + createProfileForRole(user: User): void
+  }
+}
+
+' ===================== AUTORIZACIÓN (POLICIES) =====================
+package "Autorización (Policies)" <<Policy>> {
+  class ConversationPolicy <<Policy>> {
+    + view(user: User, conversation: Conversation): bool
+  }
+
+  class ReservationsPolicy <<Policy>> {
+    + updateStatus(user: User, reservation: Reservations,\nlandlord: Landlords): bool
+  }
+
+  class PaymentsPolicy <<Policy>> {
+    + create(user: User, reservation: Reservations): bool
+  }
+}
+
+' ===================== EXCEPCIONES DE DOMINIO =====================
+package "Excepciones de Dominio" <<Excepcion>> {
+  class RuntimeException <<Excepcion>> {
+    <<PHP SPL>>
+  }
+  class DuplicateRatingException <<Excepcion>> {
+  }
+  class ReservationConflictException <<Excepcion>> {
+  }
+  class AccountBlockedException <<Excepcion>> {
+  }
+  DuplicateRatingException --|> RuntimeException
+  ReservationConflictException --|> RuntimeException
+  AccountBlockedException --|> RuntimeException
+}
+
+' ===================== NUEVO (PLANIFICADO, SEGÚN ERS) =====================
+package "Nuevo (planificado, según ERS)" <<Nuevo>> {
+  class Organizacion <<Nuevo>> {
+    - id: int
+    - nombre: string
+    - creado_por: int
+  }
+
+  class OrganizacionMiembro <<Nuevo>> {
+    - id: int
+    - organizacion_id: int
+    - user_id: int
+    - estado_invitacion: enum{invitada,aceptada,rechazada}
+  }
+
+  class ConexionInventario <<Nuevo>> {
+    - id: int
+    - tenant_id: int
+    - endpoint_url: string
+    - credencial: string (cifrada)
+    - mapeo_campos: json
+  }
+
+  class ProductoInventario <<Nuevo>> {
+    - id: int
+    - conexion_id: int
+    - nombre: string
+    - cantidad: decimal
+    - unidad_medida: string
+    - fecha_consulta: datetime
+  }
+
+  class PermisoBomberos <<Nuevo>> {
+    - id: int
+    - store_room_id: int
+    - documento_url: string
+    - estado: enum{pendiente,aprobado,rechazado}
+    - fecha_validacion: date
+  }
+
+  class RegistroAuditoria <<Nuevo>> {
+    - id: int
+    - admin_id: int
+    - accion: string
+    - entidad_afectada: string
+    - motivo: string
+    - fecha: datetime
+  }
+}
+
+' ===================== RELACIONES: Usuarios y Roles =====================
+User "1" *-- "0..1" Landlords : perfil
+User "1" *-- "0..1" Tenants : perfil
+User "1" *-- "0..1" Admin : perfil
+
+' ===================== RELACIONES: Almacenes =====================
+Landlords "1" *-- "0..*" StoreRooms : publica
+Landlords "1" *-- "0..*" CancelationsPolices : define
+StoreRooms "1" *-- "0..*" StorePrices : tarifas
+StoreRooms "1" *-- "0..*" StorePhoto : fotos
+StoreRooms "1" *-- "0..*" StoreDisponibility : calendario
+StoreRooms "1" *-- "0..*" StoreModeration : historial moderación
+
+' ===================== RELACIONES: Reservas y Pagos =====================
+Tenants "1" -- "0..*" Reservations : reserva
+StoreRooms "1" -- "0..*" Reservations : es reservada en
+Reservations "1" *-- "0..*" Payments : registra
+StoreRooms "1" -- "0..*" Ratings : es calificada en
+User "1" -- "0..*" Ratings : califica
+User "1" -- "0..*" Favorites : guarda
+StoreRooms "1" -- "0..*" Favorites : guardada en
+
+' ===================== RELACIONES: Comunicación =====================
+User "*" -- "*" Conversation : participa
+Conversation "1" *-- "0..*" Message : contiene
+User "1" -- "0..*" Message : envía
+User "1" -- "0..*" Notifications : envía >
+User "1" -- "0..*" Notifications : recibe >
+Notifications --> NotificationType : tipo
+
+' ===================== RELACIONES: Moderación y Reportes =====================
+User "1" -- "0..*" Reports : reporta
+User "0..1" -- "0..*" Reports : es reportado
+StoreRooms "1" -- "0..*" Reports : objeto de
+Reports "1" *-- "0..*" ReportEvidences : adjunta
+
+' ===================== RELACIONES: Servicios -> Dominio (dependencia) =====================
+AuthService ..> User : usa
+AuthService ..> AccountBlockedException : lanza
+NotificationService ..> Notifications : crea
+NotificationService ..> NotificationType : usa
+StoreModerationService ..> StoreRooms : actualiza
+StoreModerationService ..> StoreModeration : crea
+StoreModerationService ..> NotificationService : usa
+PaymentService ..> Payments : crea
+PaymentService ..> ReservationService : usa
+PaymentService ..> ReservationConflictException : propaga
+RatingsService ..> Ratings : crea
+RatingsService ..> User : usa
+RatingsService ..> DuplicateRatingException : lanza
+ReportService ..> Reports : crea
+ReportService ..> StoreRooms : usa
+ReportService ..> User : usa
+ReportService ..> NotificationService : usa
+ReservationService ..> Reservations : crea/actualiza
+ReservationService ..> StoreRooms : usa
+ReservationService ..> Tenants : usa
+ReservationService ..> NotificationService : usa
+ReservationService ..> ReservationConflictException : lanza
+UserRegistrationService ..> Landlords : crea
+UserRegistrationService ..> Tenants : crea
+UserRegistrationService ..> User : usa
+
+ConversationPolicy ..> Conversation : evalúa
+ConversationPolicy ..> User : evalúa
+ReservationsPolicy ..> Reservations : evalúa
+ReservationsPolicy ..> Landlords : evalúa
+PaymentsPolicy ..> Reservations : evalúa
+PaymentsPolicy ..> User : evalúa
+
+' ===================== RELACIONES: Nuevo (planificado) =====================
+User "*" -- "*" Organizacion : es miembro de
+(User, Organizacion) .. OrganizacionMiembro
+Organizacion ..> Reservations : reserva empresarial\n(planificado, HUE-05)
+Tenants "1" *-- "0..1" ConexionInventario : configura
+ConexionInventario "1" *-- "0..*" ProductoInventario : sincroniza/importa
+StoreRooms "1" *-- "0..1" PermisoBomberos : adjunta
+Admin "1" -- "0..*" RegistroAuditoria : ejecuta
+RegistroAuditoria "0..*" --> User : afecta a
+
+note bottom of RegistroAuditoria
+  Fuente: ERS HUA-03 (bloqueo/reactivación con
+  auditoría), HUE-01..06 (organizaciones).
+  Sin código todavía — clases planificadas.
+end note
+
+@enduml
