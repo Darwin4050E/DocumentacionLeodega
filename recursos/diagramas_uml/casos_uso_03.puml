@@ -1,0 +1,83 @@
+@startuml casos_uso_03
+title Casos de Uso 03 — Arrendador: Gestión de Bodegas y Reservas Recibidas
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 55
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+actor "Arrendador\n(Storage Manager)" as Arrendador <<Heredado>>
+actor "Cliente" as Cliente <<Heredado>>
+actor "Administrador" as Admin <<Heredado>>
+
+package "Publicación de Bodegas" as PPub {
+  usecase "Publicar bodega" as U1 <<Heredado>>
+  usecase "Cargar fotos" as U1a <<Heredado>>
+  usecase "Definir precios" as U1b <<Heredado>>
+  usecase "Definir disponibilidad" as U1c <<Heredado>>
+  usecase "Registrar permiso\nde bomberos" as U1d <<Nuevo>>
+  usecase "Enviar a moderación" as U1e <<Heredado>>
+}
+
+package "Administración de Bodegas" as PAdm {
+  usecase "Editar bodega" as U2 <<Heredado>>
+  usecase "Eliminar bodega" as U3 <<Heredado>>
+  usecase "Verificar sin reservas\nactivas o futuras" as U3a <<Heredado>>
+  usecase "Ver mis bodegas publicadas" as U4 <<Heredado>>
+}
+
+package "Reservas Recibidas" as PRes {
+  usecase "Ver reservas recibidas\n(filtrar y detalle)" as U5 <<Heredado>>
+  usecase "Confirmar reserva" as U6 <<Heredado>>
+  usecase "Rechazar / cancelar reserva" as U7 <<Heredado>>
+  usecase "Cancelar en cascada\nreservas en conflicto" as U6a <<Heredado>>
+  usecase "Notificar al cliente" as UN <<Heredado>>
+}
+
+' Asociaciones
+Arrendador --> U1
+Arrendador --> U2
+Arrendador --> U3
+Arrendador --> U4
+Arrendador --> U5
+Arrendador --> U6
+Arrendador --> U7
+Cliente --> UN
+Admin --> U1e
+
+' include / extend
+U1 ..> U1a : <<include>>
+U1 ..> U1b : <<include>>
+U1 ..> U1c : <<include>>
+U1 ..> U1d : <<include>>
+U1 ..> U1e : <<include>>
+U3 ..> U3a : <<include>>
+U6 ..> U6a : <<include>>
+U6 ..> UN : <<include>>
+U7 ..> UN : <<include>>
+
+
+@enduml

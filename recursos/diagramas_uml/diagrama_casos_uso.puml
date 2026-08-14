@@ -1,0 +1,88 @@
+@startuml diagrama_casos_uso
+title Diagrama General de Casos de Uso — Leodega (visión de contexto)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 200
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 18
+skinparam ranksep 60
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+' ===================== ACTORES =====================
+actor "Visitante\n(no autenticado)" as Visitante <<Heredado>>
+actor "Usuario Registrado" as Usuario <<Heredado>>
+actor "Cliente\n(Arrendatario)" as Cliente <<Heredado>>
+actor "Arrendador\n(Storage Manager)" as Arrendador <<Heredado>>
+actor "Administrador\nde Plataforma" as Admin <<Heredado>>
+actor "Administrador\nde Organización" as OrgAdmin <<Nuevo>>
+actor "Servicio de Correo\nElectrónico" as Correo <<Heredado>>
+actor "Sistema de Inventario\nExterno" as Inventario <<Nuevo>>
+
+' Jerarquía de actores (generalización)
+Cliente --|> Usuario
+Arrendador --|> Usuario
+Admin --|> Usuario
+OrgAdmin --|> Cliente
+
+' ===================== SUBSISTEMAS (1 caso representativo c/u) =====================
+rectangle "Sistema Leodega" {
+  usecase "Autenticación y\ngestión de cuenta" as S1 <<Heredado>>
+  usecase "Catálogo y\nbúsqueda de bodegas" as S2 <<Heredado>>
+  usecase "Reservas y pagos" as S3 <<Heredado>>
+  usecase "Gestión de bodegas" as S4 <<Heredado>>
+  usecase "Comunicación\n(mensajes y notificaciones)" as S5 <<Heredado>>
+  usecase "Moderación y reportes" as S6 <<Heredado>>
+  usecase "Administración\nde plataforma" as S7 <<Heredado>>
+  usecase "Organizaciones" as S8 <<Nuevo>>
+  usecase "Integración de\ninventario externo" as S9 <<Nuevo>>
+}
+
+' ===================== ASOCIACIONES =====================
+Visitante --> S1
+Visitante --> S2
+
+Usuario --> S1
+Usuario --> S5
+
+Cliente --> S2
+Cliente --> S3
+Cliente --> S6
+Cliente --> S8
+Cliente --> S9
+
+Arrendador --> S3
+Arrendador --> S4
+Arrendador --> S6
+
+Admin --> S6
+Admin --> S7
+
+OrgAdmin --> S8
+
+' Actores externos (secundarios)
+S1 ..> Correo : <<include>>
+S8 ..> Correo : <<include>>
+S9 --> Inventario
+
+@enduml

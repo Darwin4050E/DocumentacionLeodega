@@ -1,0 +1,86 @@
+@startuml casos_uso_02
+title Casos de Uso 02 — Cliente: Catálogo, Reservas, Pagos y Calificaciones
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 55
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+actor "Cliente\n(Arrendatario)" as Cliente <<Heredado>>
+actor "Arrendador" as Arrendador <<Heredado>>
+
+package "Catálogo" as PCat {
+  usecase "Buscar y filtrar bodegas\n(vista de mapa)" as U1 <<Heredado>>
+  usecase "Ver detalle de bodega" as U2 <<Heredado>>
+  usecase "Gestionar favoritos" as U3 <<Heredado>>
+}
+
+package "Reservas y Pagos" as PRes {
+  usecase "Reservar bodega" as U4 <<Heredado>>
+  usecase "Verificar conflicto\nde fechas" as U4a <<Heredado>>
+  usecase "Enviar consulta\npre-reserva" as U4b <<Heredado>>
+  usecase "Confirmar pago" as U5 <<Heredado>>
+  usecase "Confirmar reserva asociada" as U5a <<Heredado>>
+  usecase "Gestionar mis reservas" as U6 <<Heredado>>
+  usecase "Cancelar reserva futura" as U6a <<Heredado>>
+  usecase "Notificar a la contraparte" as UN <<Heredado>>
+}
+
+package "Calificaciones y Reportes" as PRat {
+  usecase "Calificar arrendamiento\nfinalizado" as U7 <<Heredado>>
+  usecase "Validar calificación única" as U7a <<Heredado>>
+  usecase "Reportar incidente" as U8 <<Heredado>>
+  usecase "Adjuntar evidencia" as U8a <<Heredado>>
+  usecase "Notificar a administradores\ny al arrendador" as U8b <<Heredado>>
+}
+
+' Asociaciones Cliente
+Cliente --> U1
+Cliente --> U2
+Cliente --> U3
+Cliente --> U4
+Cliente --> U5
+Cliente --> U6
+Cliente --> U7
+Cliente --> U8
+
+' El arrendador es notificado / participa en reserva y reporte
+Arrendador --> UN
+Arrendador --> U8b
+
+' include / extend
+U1 ..> U2 : <<extend>>
+U4 ..> U4a : <<include>>
+U4 ..> U4b : <<extend>>
+U4 ..> UN : <<include>>
+U5 ..> U5a : <<include>>
+U5a ..> UN : <<include>>
+U6 ..> U6a : <<extend>>
+U6a ..> UN : <<include>>
+U7 ..> U7a : <<include>>
+U8 ..> U8a : <<extend>>
+U8 ..> U8b : <<include>>
+
+
+@enduml

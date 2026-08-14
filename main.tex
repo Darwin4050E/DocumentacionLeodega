@@ -147,6 +147,54 @@
   \clearpage
 }
 
+% ============================================================
+% TABLA REUTILIZABLE PARA ESPECIFICACIÓN DE CASOS DE USO
+% ============================================================
+% Rejilla de 4 columnas con bordes completos. La columna de etiqueta
+% (col. 1, y col. 3 en las filas de 4 celdas) es negrita, alineada a la
+% derecha y con fondo gris; las columnas de valor son normales, a la
+% izquierda y con fondo blanco. Uso:
+%   \begin{casouso}{UC-XX -- Nombre}
+%     \CUnombre{...}\CUmeta{autor}{autor}\CUfechas{dd/mm/aaaa}{dd/mm/aaaa}
+%     \CUdescripcion{...}\CUactores{...}\CUprecondiciones{...} ...
+%   \end{casouso}
+% El pie "Tabla N. <nombre>." se genera automáticamente.
+\newcolumntype{K}[1]{>{\columncolor{cajagris}\raggedleft\arraybackslash\bfseries}m{#1}}
+
+\newlength{\cuvalwidth}
+\setlength{\cuvalwidth}{\dimexpr 3.6cm+3.9cm+3.6cm+4\tabcolsep+2\arrayrulewidth\relax}
+
+% Celda de etiqueta para la columna 3 (filas de 4 celdas)
+\newcommand{\cuLabelC}[1]{\multicolumn{1}{>{\columncolor{cajagris}\raggedleft\arraybackslash\bfseries}m{3.9cm}|}{#1}}
+
+% Filas: la etiqueta es fija, solo se pasa el/los valor(es).
+\newcommand{\CUnombre}[1]{Nombre de caso de uso: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUmeta}[2]{Creado por: & #1 & \cuLabelC{Actualizado por última vez por:} & #2 \\ \hline}
+\newcommand{\CUfechas}[2]{Fecha de creación: & #1 & \cuLabelC{Última fecha de revisión:} & #2 \\ \hline}
+\newcommand{\CUdescripcion}[1]{Descripción: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUactores}[1]{Actores: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUprecondiciones}[1]{Precondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUpostcondiciones}[1]{Postcondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUflujo}[1]{Flujo: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUalternativos}[1]{Flujos Alternativos: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUexcepciones}[1]{Excepciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUrequerimientos}[1]{Requerimientos: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+
+% Entorno principal. Argumento: nombre del caso de uso para el pie.
+\newenvironment{casouso}[1]{%
+  \def\cunombrepie{#1}%
+  \par\medskip
+  \setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}%
+  \begin{longtable}{|K{3.4cm}|L{3.6cm}|L{3.9cm}|L{3.6cm}|}
+  \hline
+}{%
+  \end{longtable}%
+  % El propio longtable ya incrementó el contador `table`; solo lo mostramos.
+  \vspace{-0.7\baselineskip}%
+  {\centering\itshape\footnotesize Tabla~\thetable. \cunombrepie.\par}
+  \medskip
+}
+
 \begin{document}
 
 % ---------------- Portada ----------------

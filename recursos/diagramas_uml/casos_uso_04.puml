@@ -1,0 +1,81 @@
+@startuml casos_uso_04
+title Casos de Uso 04 — Administrador: Moderación, Reportes y Cuentas
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 55
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+
+actor "Administrador\nde Plataforma" as Admin <<Heredado>>
+actor "Arrendador" as Arrendador <<Heredado>>
+actor "Cliente" as Cliente <<Heredado>>
+
+package "Moderación de Bodegas" as PMod {
+  usecase "Moderar publicación\nde bodega" as U1 <<Heredado>>
+  usecase "Aprobar bodega" as U1a <<Heredado>>
+  usecase "Rechazar bodega" as U1b <<Heredado>>
+  usecase "Sincronizar estado\nde publicación" as U1c <<Heredado>>
+  usecase "Validar permiso\nde bomberos" as U1d <<Nuevo>>
+  usecase "Notificar al arrendador" as UN <<Heredado>>
+}
+
+package "Reportes" as PRep {
+  usecase "Revisar reportes" as U2 <<Heredado>>
+  usecase "Responder / resolver reporte" as U3 <<Heredado>>
+}
+
+package "Gestión de Cuentas" as PAcc {
+  usecase "Gestionar cuentas\nde usuario" as U4 <<Heredado>>
+  usecase "Gestionar administradores" as U5 <<Heredado>>
+  usecase "Bloquear / Reactivar cuenta" as U6 <<Nuevo>>
+  usecase "Registrar auditoría" as U6a <<Nuevo>>
+}
+
+package "Tablero de Control" as PDash {
+  usecase "Consultar panel\nde métricas" as U7 <<Nuevo>>
+}
+
+' Asociaciones
+Admin --> U1
+Admin --> U2
+Admin --> U3
+Admin --> U4
+Admin --> U5
+Admin --> U6
+Admin --> U7
+Arrendador --> UN
+Cliente --> U2
+
+' include / extend
+U1 ..> U1a : <<extend>>
+U1 ..> U1b : <<extend>>
+U1 ..> U1c : <<include>>
+U1 ..> U1d : <<include>>
+U1 ..> UN : <<include>>
+U6 ..> U6a : <<include>>
+
+@enduml

@@ -5,68 +5,407 @@
 
 % ------------------------------------------------------------
 \section{Diagrama de Casos de Uso}
+\sloppy
 
+El modelado de casos de uso abarca el \textbf{sistema completo} (heredado + nuevo), diferenciando con color cada elemento en \cellcolor{heredadobg}Heredado (entregado por el equipo anterior) y \cellcolor{nuevobg}Nuevo/planificado (agregado por este equipo, aún sin código, con fuente en el ERS). Dada la cantidad de casos de uso, se presenta un \textbf{diagrama general de contexto} y cinco \textbf{diagramas detallados por subsistema}, para preservar la legibilidad exigida por la rúbrica. Todos los elementos fueron verificados contra el código real (\url{recursos/leodega-codigo}) o contra el ERS \cite{ref21}; la tabla de trazabilidad de cada diagrama cita la fuente exacta.
+
+\subsection{Actores del Sistema}
+\begin{longtable}{|M{3.6cm}|M{2.2cm}|L{8.4cm}|}
+\caption{Actores identificados y su clasificación} \label{tab:actores} \\
+\hline
+\rowcolor{cajagris} \textbf{Actor} & \textbf{Tipo} & \textbf{Descripción / Fuente} \\
+\hline
+\endfirsthead
+\multicolumn{3}{c}{\textit{Tabla~\ref{tab:actores} (continuación)}} \\
+\hline
+\rowcolor{cajagris} \textbf{Actor} & \textbf{Tipo} & \textbf{Descripción / Fuente} \\
+\hline
+\endhead
+\hline \multicolumn{3}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+Visitante (no autenticado) & Principal & Usuario sin sesión. Accede a rutas públicas: registro, login, recuperación de contraseña y catálogo público (\url{routes/api.php}). \\ \hline
+Usuario Registrado & Principal (abstracto) & Generaliza a Cliente, Arrendador y Administrador. Concentra la funcionalidad común autenticada: perfil, contraseña, sesiones, mensajería y notificaciones. \\ \hline
+Cliente (Arrendatario) & Principal & Rol \texttt{tenant}. Busca, reserva, paga, califica, reporta e integra inventario (HUC-01..14). \\ \hline
+Arrendador (Storage Manager) & Principal & Rol \texttt{landlord}. Publica y administra bodegas y gestiona las reservas recibidas (HUG-01..08). \\ \hline
+Administrador de Plataforma & Principal & Rol \texttt{admin}. Modera bodegas, resuelve reportes y gestiona cuentas (HUA-01..04). \\ \hline
+Administrador de Organización & Principal (nuevo) & Especialización de Cliente. Crea y administra organizaciones e invita miembros (HUE-01..06). Sin código; fuente ERS. \\ \hline
+Servicio de Correo Electrónico & Secundario & Actor externo. Recibe los envíos de correo de recuperación de contraseña (\texttt{ResetPasswordNotification}) y, planificado, las invitaciones a organizaciones. \\ \hline
+Sistema de Inventario Externo & Secundario (nuevo) & Actor externo del cliente. Origen/destino de la sincronización de inventario (HUC-10..12). Sin código; fuente ERS. \\ \hline
+\end{longtable}
+
+\noindent\textit{Nota:} el pago es \textbf{simulado} (ERS HUC-05, declarado \textit{fuera de alcance} para pasarelas reales), por lo que \emph{no} se modela una pasarela de pago como actor externo. Los flujos móviles de \textbf{Leodeguita} (HUL-01..06) reutilizan los mismos casos de uso sobre el backend compartido, por lo que se documentan como un canal de acceso y no como casos de uso duplicados.
+\clearpage
+
+\subsection{Diagrama General (Contexto)}
 \begin{figure}[H]
     \centering
-    \DiagramaImagen{0.95}{0.6}{imagenes/diagrama_casos_uso.png}
-    \caption{Diagrama general de casos de uso del sistema}
+    \DiagramaImagen{0.75}{0.8}{imagenes/diagrama_casos_uso.png}
+    \caption{Diagrama general de casos de uso del sistema (visión de contexto)}
     \label{fig:casos_uso}
 \end{figure}
-\noindent\textbf{Herramienta de modelado utilizada:} \textit{[Ej. Visual Paradigm, StarUML]}
+\noindent\textbf{Descripción:} Vista de contexto que sitúa a los ocho actores frente a los nueve subsistemas del sistema. Muestra la \textbf{jerarquía de actores} (Cliente, Arrendador y Administrador especializan al actor abstracto \texttt{Usuario Registrado}; el Administrador de Organización especializa a Cliente), los dos actores externos secundarios (Correo e Inventario Externo, vinculados mediante \texttt{\guillemotleft include\guillemotright}) y la separación heredado/nuevo. Cada subsistema se desglosa en los diagramas de las secciones siguientes.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (renderizado local con \texttt{plantuml.jar} sobre OpenJDK). Fuente: \url{recursos/diagramas_uml/diagrama_casos_uso.puml}.\par}
 \clearpage
 
-\subsection{Documentación de Casos de Uso}
-\noindent A continuación se documenta cada caso de uso identificado en el diagrama anterior, siguiendo el formato de la plantilla de Project Management Docs \cite{ref21}.
+\subsection{Casos de Uso 01 -- Autenticación, Cuenta y Comunicación}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.9}{0.85}{imagenes/casos_uso_01.png}
+    \caption{Casos de uso de Autenticación, Gestión de Cuenta y Comunicación}
+    \label{fig:cu01}
+\end{figure}
+\noindent\textbf{Descripción:} El Visitante se registra (\url{routes/api.php}, \texttt{POST /user} y \texttt{/register}) e inicia sesión; el login \texttt{\guillemotleft include\guillemotright} la verificación de que la cuenta no esté bloqueada (\texttt{AuthController::login()} lanza \texttt{AccountBlockedException} si \texttt{state = blocked}). La recuperación de contraseña \texttt{\guillemotleft include\guillemotright} el envío de correo hacia el actor externo (\texttt{ResetPasswordNotification}). El actor abstracto \texttt{Usuario Registrado} agrupa lo común a los tres roles: gestión de perfil, contraseña y sesiones, eliminación de cuenta y la mensajería, donde \texttt{Enviar mensaje} \texttt{\guillemotleft include\guillemotright} \texttt{Notificar a destinatario} (tipo \texttt{MESSAGE} del enum \texttt{NotificationType}).
 
 \bigskip
-\noindent\textbf{Caso de Uso UC-01}
-\begin{longtable}{|M{3.5cm}|L{10.5cm}|}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_01.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
 \hline
-\rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
+\rowcolor{cajagris} \textbf{Caso de uso} & \textbf{Fuente (ruta / clase / método)} & \textbf{Estado} \\ \hline
 \endhead
-ID & UC-01 \\ \hline
-Nombre & [Nombre del caso de uso] \\ \hline
-Actor(es) & [Actor principal, actor(es) secundario(s)] \\ \hline
-Descripción & [Breve descripción del propósito del caso de uso] \\ \hline
-Disparador (Trigger) & [Evento que inicia la ejecución] \\ \hline
-Precondiciones & [Lista de condiciones que deben cumplirse antes de iniciar] \\ \hline
-Postcondiciones & [Lista de condiciones resultantes al finalizar con éxito] \\ \hline
-Flujo Normal &
-\begin{enumerate}[leftmargin=*,nosep]
-  \item [Paso 1 del flujo principal]
-  \item [Paso 2 del flujo principal]
-  \item [Paso 3 del flujo principal]
-\end{enumerate} \\ \hline
-Flujos Alternativos & [Ej. A1: si ocurre... entonces...] \\ \hline
-Excepciones & [Manejo de errores, ej. datos inválidos, tiempo de espera agotado] \\ \hline
-Reglas de Negocio & [Reglas de negocio aplicables al caso de uso] \\ \hline
-Supuestos & [Supuestos considerados para este caso de uso] \\ \hline
+Registrarse, Iniciar sesión, Cerrar sesión & \url{backend/routes/api.php}; \texttt{AuthController}, \texttt{UserRegistrationService} & \cellcolor{heredadobg}Heredado \\ \hline
+Validar cuenta no bloqueada & \texttt{AuthController::login()}; \url{backend/app/Exceptions/AccountBlockedException.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Recuperar contraseña / Enviar correo & \texttt{PasswordResetController}; \url{backend/app/Notifications/ResetPasswordNotification.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Gestionar perfil / contraseña / sesiones / eliminar cuenta & \texttt{ProfileController}, \texttt{SecurityController}, \texttt{SessionController}, \texttt{UserController::destroySelf} & \cellcolor{heredadobg}Heredado \\ \hline
+Conversación, Enviar mensaje, Marcar leídos, Notificaciones & \texttt{ConversationController}, \texttt{MessageController}, \texttt{NotificationsController}; \url{backend/app/Enums/NotificationType.php} & \cellcolor{heredadobg}Heredado \\ \hline
 \end{longtable}
-
-\bigskip
-\noindent\textbf{Caso de Uso UC-02}
-\begin{longtable}{|M{3.5cm}|L{10.5cm}|}
-\hline
-\rowcolor{cajagris} \textbf{Campo} & \textbf{Descripción} \\ \hline
-\endhead
-ID & UC-02 \\ \hline
-Nombre & [Nombre del caso de uso] \\ \hline
-Actor(es) & [Actor principal, actor(es) secundario(s)] \\ \hline
-Descripción & [Breve descripción] \\ \hline
-Disparador (Trigger) & [Evento que inicia la ejecución] \\ \hline
-Precondiciones & [Precondiciones] \\ \hline
-Postcondiciones & [Postcondiciones] \\ \hline
-Flujo Normal & \begin{enumerate}[leftmargin=*,nosep]\item [Paso 1]\item [Paso 2]\end{enumerate} \\ \hline
-Flujos Alternativos & [Flujos alternativos] \\ \hline
-Excepciones & [Excepciones] \\ \hline
-Reglas de Negocio & [Reglas de negocio] \\ \hline
-Supuestos & [Supuestos] \\ \hline
-\end{longtable}
-
-\bigskip
-\noindent\textit{Nota: Duplique el bloque ``Caso de Uso UC-XX'' anterior para documentar cada caso de uso presente en el diagrama de la sección \ref{fig:casos_uso}.}
 \clearpage
 
+\subsection{Casos de Uso 02 -- Cliente: Catálogo, Reservas, Pagos y Calificaciones}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.85}{0.85}{imagenes/casos_uso_02.png}
+    \caption{Casos de uso del Cliente (arrendatario)}
+    \label{fig:cu02}
+\end{figure}
+\noindent\textbf{Descripción:} Núcleo transaccional del arrendatario. \texttt{Reservar bodega} \texttt{\guillemotleft include\guillemotright} \texttt{Verificar conflicto de fechas} y \texttt{Notificar}, y \texttt{\guillemotleft extend\guillemotright} el envío de una consulta pre-reserva (\texttt{ReservationService}). \texttt{Confirmar pago} \texttt{\guillemotleft include\guillemotright} \texttt{Confirmar reserva asociada}, disparada por \texttt{PaymentService} cuando el pago queda en \texttt{paid}, que a su vez notifica. \texttt{Calificar arrendamiento} \texttt{\guillemotleft include\guillemotright} \texttt{Validar calificación única} (\texttt{RatingsService}, \texttt{DuplicateRatingException}). \texttt{Reportar incidente} \texttt{\guillemotleft include\guillemotright} la notificación en cascada a administradores y al arrendador dueño (\texttt{ReportService::create()}).
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_02.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Caso de uso} & \textbf{Fuente (ruta / clase / método)} & \textbf{Estado} \\ \hline
+\endhead
+Buscar/filtrar bodegas, Ver detalle, Favoritos & \url{StoreRoomsController::index/detail}, \texttt{FavoritesController}; HUC-01/02 & \cellcolor{heredadobg}Heredado \\ \hline
+Reservar bodega / Verificar conflicto de fechas & \texttt{ReservationsController::store}; \url{backend/app/Services/ReservationService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Confirmar pago / Confirmar reserva asociada & \texttt{PaymentsController::store}; \url{backend/app/Services/PaymentService.php} $\rightarrow$ \texttt{ReservationService::confirm} & \cellcolor{heredadobg}Heredado \\ \hline
+Gestionar mis reservas / Cancelar reserva futura & \texttt{ReservationsController::tenantIndex}; HUC-07 & \cellcolor{heredadobg}Heredado \\ \hline
+Calificar arrendamiento / Validar calificación única & \texttt{RatingsController}; \url{backend/app/Services/RatingsService.php}; \texttt{DuplicateRatingException} & \cellcolor{heredadobg}Heredado \\ \hline
+Reportar incidente / Notificar en cascada & \texttt{ReportsController::store}; \url{backend/app/Services/ReportService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Casos de Uso 03 -- Arrendador: Gestión de Bodegas y Reservas Recibidas}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.6}{0.9}{imagenes/casos_uso_03.png}
+    \caption{Casos de uso del Arrendador (storage manager)}
+    \label{fig:cu03}
+\end{figure}
+\noindent\textbf{Descripción:} \texttt{Publicar bodega} \texttt{\guillemotleft include\guillemotright} cargar fotos, definir precios, definir disponibilidad y enviar a moderación; incorpora además, como paso \cellcolor{nuevobg}Nuevo, \texttt{Registrar permiso de bomberos} (ERS HUG-04/HUA-01), aún ausente en \texttt{StoreRoomsController::store}. \texttt{Eliminar bodega} \texttt{\guillemotleft include\guillemotright} \texttt{Verificar sin reservas activas o futuras} (HUG-07). En reservas recibidas, \texttt{Confirmar reserva} \texttt{\guillemotleft include\guillemotright} \texttt{Cancelar en cascada las reservas en conflicto} y \texttt{Notificar al cliente} (\texttt{ReservationService::confirm()}, extraído de \texttt{ReservationsController::updateStatus}).
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_03.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Caso de uso} & \textbf{Fuente (ruta / clase / método)} & \textbf{Estado} \\ \hline
+\endhead
+Publicar / Editar / Eliminar bodega, Ver mis bodegas & \url{StoreRoomsController::store/update/destroy/getByLandlord} & \cellcolor{heredadobg}Heredado \\ \hline
+Cargar fotos, Definir precios, Definir disponibilidad & \texttt{StorePhotoController}, \texttt{StorePricesController}, \texttt{StoreDisponibilityController} & \cellcolor{heredadobg}Heredado \\ \hline
+Registrar permiso de bomberos & ERS HUG-04 (registro) / HUA-01 (validación), sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Ver reservas recibidas, Confirmar, Rechazar/cancelar & \url{ReservationsController::landlordIndex/updateStatus}; \texttt{ReservationService} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Casos de Uso 04 -- Administrador: Moderación, Reportes y Cuentas}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.58}{0.9}{imagenes/casos_uso_04.png}
+    \caption{Casos de uso del Administrador de Plataforma}
+    \label{fig:cu04}
+\end{figure}
+\noindent\textbf{Descripción:} \texttt{Moderar publicación de bodega} \texttt{\guillemotleft extend\guillemotright} aprobar/rechazar y \texttt{\guillemotleft include\guillemotright} \texttt{Sincronizar estado de publicación} y \texttt{Notificar al arrendador} (\texttt{StoreModerationService}); incorpora el paso \cellcolor{nuevobg}Nuevo \texttt{Validar permiso de bomberos} (HUA-01). La gestión de cuentas incluye dos casos \cellcolor{nuevobg}Nuevos: \texttt{Bloquear/Reactivar cuenta} (que \texttt{\guillemotleft include\guillemotright} \texttt{Registrar auditoría}, HUA-03) y \texttt{Consultar panel de métricas} (HUA-02). Hoy solo existe el campo \texttt{User.state} como base parcial del bloqueo.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_04.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Caso de uso} & \textbf{Fuente (ruta / clase / método)} & \textbf{Estado} \\ \hline
+\endhead
+Moderar publicación / Sincronizar estado / Notificar & \texttt{StoreModerationController}; \url{backend/app/Services/StoreModerationService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+Validar permiso de bomberos & ERS HUA-01, sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Revisar / Responder / Resolver reportes & \url{ReportsController::index/update/updateStatus} & \cellcolor{heredadobg}Heredado \\ \hline
+Gestionar cuentas de usuario / administradores & \url{UserController::update/destroy}, \texttt{AdminController} & \cellcolor{heredadobg}Heredado \\ \hline
+Bloquear/Reactivar cuenta / Registrar auditoría & ERS HUA-03; campo \texttt{User.state} existe, flujo con auditoría sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Consultar panel de métricas & ERS HUA-02, sin código & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Casos de Uso 05 -- Módulos Nuevos: Organizaciones e Inventario Externo}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.85}{0.82}{imagenes/casos_uso_05.png}
+    \caption{Casos de uso de Organizaciones e Integración de Inventario (planificados)}
+    \label{fig:cu05}
+\end{figure}
+\noindent\textbf{Descripción:} Ambos paquetes son íntegramente \cellcolor{nuevobg}Nuevos/planificados (ERS, sin código todavía). El Administrador de Organización crea la organización e invita miembros; \texttt{Invitar miembro cliente} \texttt{\guillemotleft include\guillemotright} \texttt{Validar que sea rol cliente} (un arrendador no puede unirse a una organización, regla del ERS HUE-01) y \texttt{Enviar invitación por correo} hacia el actor externo. El cliente miembro acepta/rechaza la invitación (\texttt{\guillemotleft extend\guillemotright} cambiar contexto), reserva a nombre de la organización, y opera la integración de inventario: \texttt{Ver inventario sincronizado} \texttt{\guillemotleft include\guillemotright} \texttt{Sincronizar con sistema externo} (actor secundario).
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_05.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Caso de uso} & \textbf{Fuente (ERS)} & \textbf{Estado} \\ \hline
+\endhead
+Crear organización, Panel administrativo de organización & ERS HUE-04, HUE-03/HUE-06 & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Invitar miembro / Validar rol / Enviar invitación & ERS HUE-01; correo por actor externo & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Aceptar/Rechazar invitación, Cambiar contexto, Reservar por organización & ERS HUC-14, HUE-02, HUE-05 & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Registrar endpoint, Mapear campos, Ver inventario sincronizado, Importar Excel & ERS HUC-10/HUC-11/HUC-12/HUC-13 & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Catálogo de Casos de Uso}
+\noindent La Tabla~\ref{tab:cu-catalogo} consolida todos los casos de uso del sistema con su actor principal, relaciones \texttt{\guillemotleft include\guillemotright}/\texttt{\guillemotleft extend\guillemotright}, fuente y estado. Las fichas detalladas (formato \cite{ref21}) se presentan a continuación para los casos transaccionales medulares; el resto comparte la misma plantilla y puede expandirse a partir de esta tabla.
+
+{\setlength{\tabcolsep}{3.5pt}\footnotesize
+\begin{longtable}{|M{1.1cm}|L{3.5cm}|M{2.1cm}|L{4.3cm}|M{1.6cm}|}
+\caption{Catálogo consolidado de casos de uso} \label{tab:cu-catalogo} \\
+\hline
+\rowcolor{cajagris} \textbf{ID} & \textbf{Caso de uso} & \textbf{Actor} & \textbf{Relaciones / Fuente} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}{\textit{Tabla~\ref{tab:cu-catalogo} (continuación)}} \\
+\hline
+\rowcolor{cajagris} \textbf{ID} & \textbf{Caso de uso} & \textbf{Actor} & \textbf{Relaciones / Fuente} & \textbf{Estado} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+UC-01 & Registrarse & Visitante & \texttt{POST /user}, \texttt{/register} & \cellcolor{heredadobg}Her. \\ \hline
+UC-02 & Iniciar sesión & Visitante & incl. Validar cuenta no bloqueada & \cellcolor{heredadobg}Her. \\ \hline
+UC-03 & Recuperar contraseña & Visitante & incl. Enviar correo $\rightarrow$ Correo & \cellcolor{heredadobg}Her. \\ \hline
+UC-04 & Cerrar sesión & Usuario Reg. & \texttt{/logout} & \cellcolor{heredadobg}Her. \\ \hline
+UC-05 & Gestionar perfil & Usuario Reg. & \texttt{/profile} & \cellcolor{heredadobg}Her. \\ \hline
+UC-06 & Cambiar contraseña & Usuario Reg. & \texttt{/password} & \cellcolor{heredadobg}Her. \\ \hline
+UC-07 & Gestionar sesiones activas & Usuario Reg. & \texttt{/sessions} & \cellcolor{heredadobg}Her. \\ \hline
+UC-08 & Eliminar mi cuenta & Usuario Reg. & \texttt{DELETE /account} & \cellcolor{heredadobg}Her. \\ \hline
+UC-09 & Gestionar conversaciones y mensajes & Usuario Reg. & incl. Notificar; extend Enviar mensaje & \cellcolor{heredadobg}Her. \\ \hline
+UC-10 & Consultar notificaciones & Usuario Reg. & \texttt{/notifications} & \cellcolor{heredadobg}Her. \\ \hline
+UC-11 & Buscar y filtrar bodegas (mapa) & Visitante / Cliente & extend Ver detalle; HUC-01 & \cellcolor{heredadobg}Her. \\ \hline
+UC-12 & Ver detalle de bodega & Visitante / Cliente & HUC-02 & \cellcolor{heredadobg}Her. \\ \hline
+UC-13 & Gestionar favoritos & Cliente & \texttt{/favorites} & \cellcolor{heredadobg}Her. \\ \hline
+UC-14 & Reservar bodega & Cliente & incl. Conflicto de fechas, Notificar; extend consulta & \cellcolor{heredadobg}Her. \\ \hline
+UC-15 & Confirmar pago & Cliente & incl. Confirmar reserva; HUC-05 & \cellcolor{heredadobg}Her. \\ \hline
+UC-16 & Gestionar mis reservas & Cliente & extend Cancelar reserva futura; HUC-07 & \cellcolor{heredadobg}Her. \\ \hline
+UC-17 & Calificar arrendamiento & Cliente & incl. Validar calificación única; HUC-09 & \cellcolor{heredadobg}Her. \\ \hline
+UC-18 & Reportar incidente & Cliente & incl. Notificar admins/arrendador; HUC-08 & \cellcolor{heredadobg}Her. \\ \hline
+UC-19 & Publicar bodega & Arrendador & incl. fotos/precios/disp./moderación; HUG-04 & \cellcolor{heredadobg}Her. \\ \hline
+UC-20 & Registrar permiso de bomberos & Arrendador & incl. de UC-19; HUG-04/HUA-01 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-21 & Editar bodega & Arrendador & HUG-08 & \cellcolor{heredadobg}Her. \\ \hline
+UC-22 & Eliminar bodega & Arrendador & incl. Verificar sin reservas; HUG-07 & \cellcolor{heredadobg}Her. \\ \hline
+UC-23 & Ver mis bodegas publicadas & Arrendador & \url{/landlords/{id}/storeRooms} & \cellcolor{heredadobg}Her. \\ \hline
+UC-24 & Ver reservas recibidas & Arrendador & HUG-05 & \cellcolor{heredadobg}Her. \\ \hline
+UC-25 & Confirmar reserva & Arrendador & incl. Cascada conflictos, Notificar; HUG-02 & \cellcolor{heredadobg}Her. \\ \hline
+UC-26 & Rechazar / cancelar reserva & Arrendador & incl. Notificar; HUG-06 & \cellcolor{heredadobg}Her. \\ \hline
+UC-27 & Revisar reportes & Administrador & \texttt{/reports}; HUA-04 & \cellcolor{heredadobg}Her. \\ \hline
+UC-28 & Responder / resolver reporte & Administrador & \texttt{/reports/\{id\}/status}; HUA-04 & \cellcolor{heredadobg}Her. \\ \hline
+UC-29 & Moderar publicación de bodega & Administrador & incl. Sincronizar, Notificar, Validar permiso; HUA-01 & \cellcolor{heredadobg}Her. \\ \hline
+UC-30 & Gestionar cuentas de usuario & Administrador & \texttt{PUT/DELETE /user} & \cellcolor{heredadobg}Her. \\ \hline
+UC-31 & Gestionar administradores & Administrador & \texttt{/admin} & \cellcolor{heredadobg}Her. \\ \hline
+UC-32 & Bloquear / Reactivar cuenta & Administrador & incl. Registrar auditoría; HUA-03 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-33 & Consultar panel de métricas & Administrador & HUA-02 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-34 & Crear organización & Adm. Organización & HUE-04 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-35 & Invitar miembro cliente & Adm. Organización & incl. Validar rol, Enviar correo; HUE-01 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-36 & Aceptar / Rechazar invitación & Cliente & extend Cambiar contexto; HUC-14 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-37 & Cambiar contexto personal/organización & Cliente & HUE-02 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-38 & Reservar a nombre de la organización & Cliente & HUE-05 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-39 & Panel administrativo de organización & Adm. Organización & HUE-03/HUE-06 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-40 & Registrar endpoint de inventario externo & Cliente & $\rightarrow$ Inventario Externo; HUC-10 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-41 & Mapear campos de inventario & Cliente & HUC-11 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-42 & Ver inventario sincronizado & Cliente & incl. Sincronizar $\rightarrow$ Inventario; HUC-12 & \cellcolor{nuevobg}Nuevo \\ \hline
+UC-43 & Importar inventario desde Excel & Cliente & HUC-13 & \cellcolor{nuevobg}Nuevo \\ \hline
+\end{longtable}
+}
+\clearpage
+
+\subsection{Documentación Detallada de Casos de Uso Medulares}
+\noindent Se documentan en formato extendido \cite{ref21} los casos de uso transaccionales más representativos del sistema. Los casos restantes de la Tabla~\ref{tab:cu-catalogo} siguen esta misma plantilla.
+
+\begin{casouso}{UC-14 -- Reservar bodega}
+\CUnombre{UC-14 -- Reservar bodega}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Permite al cliente solicitar la reserva de una bodega disponible en un rango de fechas.}
+\CUactores{Cliente (principal), Arrendador (secundario, notificado).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El cliente está autenticado.\item La bodega existe y está publicada.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item Se crea una \texttt{Reservations} en estado \texttt{pending}.\item Se notifica al arrendador (\texttt{RESERVATION\_REQUEST}).\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El cliente selecciona la bodega y las fechas y confirma la solicitud.\item El sistema \textbf{(include)} verifica que no exista una reserva \texttt{confirmed} solapada en esas fechas.\item El sistema registra la reserva en estado \texttt{pending}.\item El sistema \textbf{(include)} notifica al arrendador.\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item \textbf{(extend)} El cliente envía una consulta pre-reserva al arrendador antes de reservar.\end{enumerate}}
+\CUexcepciones{E1: fechas en conflicto con una reserva confirmada $\rightarrow$ \texttt{ReservationConflictException} (HTTP 409).}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUC-03: reserva de bodega con detección de conflicto de fechas.\item No se permite solapamiento con reservas \texttt{confirmed} (\texttt{ReservationService}).\item El pago se realiza en un paso posterior (UC-15).\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-15 -- Confirmar pago}
+\CUnombre{UC-15 -- Confirmar pago}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Registra un pago simulado que, al quedar exitoso, confirma la reserva asociada.}
+\CUactores{Cliente (principal).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El cliente está autenticado y es dueño de la reserva (\texttt{PaymentsPolicy}).\item La reserva está en estado \texttt{pending}.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El pago queda en estado \texttt{paid}.\item La reserva asociada pasa a estado \texttt{confirmed}.\item El cliente es notificado.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El cliente confirma el pago (simulado) de la reserva.\item El sistema valida la titularidad (\texttt{PaymentsPolicy}).\item El sistema registra el pago como \texttt{paid} dentro de una transacción.\item El sistema \textbf{(include)} confirma la reserva (\texttt{ReservationService::confirm}) y notifica.\end{enumerate}}
+\CUalternativos{---}
+\CUexcepciones{E1: fechas ya ocupadas por otra reserva confirmada $\rightarrow$ \texttt{ReservationConflictException} y \textit{rollback} de la transacción.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUC-05: confirmación de pago simulado.\item Registrar el pago y confirmar la reserva ocurren en una sola transacción (\texttt{PaymentService}).\item No hay pasarela de pago real (fuera de alcance del ERS).\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-25 -- Confirmar reserva (arrendador)}
+\CUnombre{UC-25 -- Confirmar reserva (arrendador)}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{El arrendador acepta una solicitud de reserva sobre una de sus bodegas.}
+\CUactores{Arrendador (principal), Cliente (secundario, notificado).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El arrendador está autenticado y es dueño de la bodega (\texttt{ReservationsPolicy}).\item La reserva está en estado \texttt{pending}.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La reserva pasa a estado \texttt{confirmed}.\item Las reservas en conflicto se cancelan en cascada.\item El cliente es notificado.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El arrendador confirma la reserva.\item El sistema verifica que no exista otra reserva \texttt{confirmed} en conflicto.\item El sistema marca la reserva como \texttt{confirmed}.\item El sistema \textbf{(include)} cancela en cascada las reservas en conflicto y notifica al cliente.\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item El arrendador rechaza o cancela la reserva (UC-26).\end{enumerate}}
+\CUexcepciones{E1: otra reserva ya confirmada en esas fechas $\rightarrow$ \texttt{ReservationConflictException} (HTTP 409).}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUG-02: notificación de pago y activación del contrato.\item Solo el dueño de la bodega puede confirmar la reserva (\texttt{ReservationsPolicy}).\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-18 -- Reportar incidente}
+\CUnombre{UC-18 -- Reportar incidente}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Permite al cliente reportar un incidente sobre una bodega, opcionalmente con evidencia.}
+\CUactores{Cliente (principal), Administrador y Arrendador (secundarios, notificados).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El cliente está autenticado.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item Se crea un \texttt{Reports} en estado \texttt{pending}.\item Se notifica a todos los administradores y al arrendador dueño.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El cliente describe el incidente sobre la bodega y lo envía.\item El sistema registra el reporte en estado \texttt{pending}.\item El sistema \textbf{(include)} notifica en cascada a administradores y al arrendador (\texttt{STORE\_REPORTED}).\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item \textbf{(extend)} El cliente adjunta evidencia (\texttt{ReportEvidences}).\end{enumerate}}
+\CUexcepciones{E1: datos inválidos $\rightarrow$ error de validación (HTTP 422).}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUC-08: reporte y seguimiento de incidentes.\item La notificación evita duplicar el envío si el arrendador también es administrador (\texttt{ReportService::create()}).\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-29 -- Moderar publicación de bodega}
+\CUnombre{UC-29 -- Moderar publicación de bodega}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{El administrador aprueba o rechaza la publicación de una bodega enviada a moderación.}
+\CUactores{Administrador (principal), Arrendador (secundario, notificado).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El administrador está autenticado (\texttt{role:admin}).\item La bodega está en moderación.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item \texttt{StoreModeration.status} queda actualizado.\item \texttt{StoreRooms.publication\_status} queda sincronizado.\item El arrendador es notificado (\texttt{STORE\_APPROVED}/\texttt{STORE\_REJECTED}).\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El administrador revisa la solicitud de publicación.\item El sistema \textbf{(include)} valida el permiso de bomberos \textit{(planificado, HUA-01)}.\item El administrador aprueba \textbf{(extend)} o rechaza \textbf{(extend)} la bodega.\item El sistema \textbf{(include)} sincroniza el estado de la bodega y notifica al arrendador.\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item El administrador rechaza la bodega indicando un motivo.\end{enumerate}}
+\CUexcepciones{E1: usuario sin rol \texttt{admin} $\rightarrow$ HTTP 403.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUA-01: validación del permiso de bomberos y aprobación/rechazo de publicaciones.\item \texttt{StoreModerationService} mantiene consistentes la moderación y el estado de publicación.\item La validación automática del permiso de bomberos aún no está implementada.\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-32 -- Bloquear / Reactivar cuenta (nuevo)}
+\CUnombre{UC-32 -- Bloquear / Reactivar cuenta \textnormal{(nuevo)}}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Permite al administrador bloquear o reactivar la cuenta de un usuario, dejando registro de auditoría.}
+\CUactores{Administrador (principal).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El administrador está autenticado (\texttt{role:admin}).\item La cuenta objetivo existe.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item \texttt{User.state} pasa a \texttt{blocked}/\texttt{active}.\item Se registra la acción en la auditoría.\item El bloqueo impide el login (\texttt{AccountBlockedException}).\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El administrador selecciona la cuenta y la acción (bloquear/reactivar).\item El sistema actualiza \texttt{User.state}.\item El sistema \textbf{(include)} registra la auditoría de la acción.\end{enumerate}}
+\CUalternativos{---}
+\CUexcepciones{E1: usuario sin rol \texttt{admin} $\rightarrow$ HTTP 403.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUA-03: bloqueo y reactivación de cuentas con auditoría (\cellcolor{nuevobg}Nuevo/planificado).\item Hoy el guard de login ya rechaza \texttt{state = blocked}; falta el flujo de administración y la auditoría.\item El campo \texttt{User.state} ya existe como base parcial.\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-35 -- Invitar miembro a organización (nuevo)}
+\CUnombre{UC-35 -- Invitar miembro a organización \textnormal{(nuevo)}}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{El administrador de una organización invita a un cliente a unirse como miembro.}
+\CUactores{Administrador de Organización (principal), Servicio de Correo y Cliente invitado (secundarios).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La organización existe.\item El invitado debe tener rol cliente.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La invitación queda en estado \texttt{pending}.\item El cliente es notificado por panel y por correo.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El administrador busca al usuario por correo.\item El sistema \textbf{(include)} valida que el usuario tenga rol cliente.\item El sistema registra la invitación en estado \texttt{pending}.\item El sistema \textbf{(include)} envía la invitación por correo (actor externo).\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item El usuario objetivo es un arrendador $\rightarrow$ el sistema bloquea la acción con un mensaje.\end{enumerate}}
+\CUexcepciones{E1: el correo no corresponde a ningún usuario $\rightarrow$ error de validación.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUE-01: invitación de miembros a la organización (\cellcolor{nuevobg}Nuevo/planificado, sin código).\item Un arrendador (Storage Manager) no puede unirse a organizaciones.\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-42 -- Ver inventario sincronizado (nuevo)}
+\CUnombre{UC-42 -- Ver inventario sincronizado \textnormal{(nuevo)}}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Muestra al cliente su inventario sincronizado desde un sistema externo previamente configurado.}
+\CUactores{Cliente (principal), Sistema de Inventario Externo (secundario).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El cliente está autenticado.\item El endpoint de inventario está registrado (UC-40) y los campos mapeados (UC-41).\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item Se muestra el inventario según el mapeo configurado.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El cliente abre la sección de inventario.\item El sistema \textbf{(include)} sincroniza con el sistema externo (actor secundario).\item El sistema presenta el inventario mapeado.\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item Importación manual desde un archivo Excel (UC-43).\end{enumerate}}
+\CUexcepciones{E1: el sistema externo no responde $\rightarrow$ se informa el error de sincronización.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUC-10 a HUC-12: registro de endpoint, mapeo y visualización de inventario sincronizado (\cellcolor{nuevobg}Nuevo/planificado).\item Sin código todavía; el contrato del endpoint externo lo define el cliente.\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-01 -- Registrarse}
+\CUnombre{UC-01 -- Registrarse}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Permite a un visitante crear una cuenta seleccionando su rol (cliente o arrendador).}
+\CUactores{Visitante (principal).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El correo no debe estar registrado previamente.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item Se crea el \texttt{User} (estado \texttt{pending} por defecto).\item Se crea su perfil de rol asociado.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El visitante elige su rol e ingresa sus datos.\item El sistema valida los datos (\texttt{RegisterRequest}).\item El sistema crea la cuenta y el perfil (\texttt{UserRegistrationService}).\end{enumerate}}
+\CUalternativos{---}
+\CUexcepciones{E1: intento de auto-asignarse rol \texttt{admin} en una petición anónima $\rightarrow$ rechazado por \texttt{UserController::store}.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item Alta de cuenta con selección de rol (registro público).\item El alta anónima no puede crear administradores.\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-02 -- Iniciar sesión}
+\CUnombre{UC-02 -- Iniciar sesión}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{Autentica al usuario y emite un token de acceso (Laravel Sanctum).}
+\CUactores{Visitante (principal).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La cuenta existe.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La sesión queda iniciada con un token Bearer.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El visitante ingresa correo y contraseña.\item El sistema valida las credenciales (\texttt{Auth::attempt}).\item El sistema \textbf{(include)} verifica que la cuenta no esté bloqueada.\item El sistema emite el token de acceso.\end{enumerate}}
+\CUalternativos{---}
+\CUexcepciones{E1: credenciales inválidas $\rightarrow$ HTTP 401. E2: cuenta \texttt{blocked} $\rightarrow$ \texttt{AccountBlockedException} (HTTP 403).}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item Autenticación con token (Laravel Sanctum).\item Una cuenta con \texttt{state = blocked} no puede iniciar sesión (guard agregado en la refactorización).\end{itemize}}
+\end{casouso}
+
+\begin{casouso}{UC-19 -- Publicar bodega}
+\CUnombre{UC-19 -- Publicar bodega}
+\CUmeta{Equipo Leodega}{Equipo Leodega}
+\CUfechas{14/08/2026}{14/08/2026}
+\CUdescripcion{El arrendador registra una nueva bodega con sus fotos, precios y disponibilidad, y la envía a moderación.}
+\CUactores{Arrendador (principal), Administrador (secundario, modera).}
+\CUprecondiciones{\begin{enumerate}[leftmargin=*,nosep]\item El arrendador está autenticado.\end{enumerate}}
+\CUpostcondiciones{\begin{enumerate}[leftmargin=*,nosep]\item La bodega queda creada y enviada a moderación.\item Queda pendiente de aprobación del administrador.\end{enumerate}}
+\CUflujo{\begin{enumerate}[leftmargin=*,nosep]\item El arrendador ingresa dimensiones, ubicación y tarifa.\item El sistema \textbf{(include)} carga fotos, define precios y disponibilidad.\item El sistema \textbf{(include)} envía la bodega a moderación.\end{enumerate}}
+\CUalternativos{\begin{enumerate}[leftmargin=*,nosep]\item \textbf{(include, planificado)} Registrar el permiso de bomberos (UC-20, HUG-04).\end{enumerate}}
+\CUexcepciones{E1: datos inválidos $\rightarrow$ HTTP 422.}
+\CUrequerimientos{\begin{itemize}[leftmargin=*,nosep,label=--]\item HUG-04: registro de bodega con permiso de bomberos.\item La bodega no es visible en el catálogo hasta ser aprobada por un administrador (UC-29).\item La captura del permiso de bomberos aún no está implementada en \texttt{StoreRoomsController::store}.\end{itemize}}
+\end{casouso}
+\clearpage
+
+\fussy
 % ------------------------------------------------------------
 \section{Diagrama de Clases}
 

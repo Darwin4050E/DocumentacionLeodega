@@ -1,0 +1,79 @@
+@startuml casos_uso_05
+title Casos de Uso 05 — Módulos Nuevos: Organizaciones e Inventario Externo
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 55
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+actor "Administrador\nde Organización" as OrgAdmin <<Nuevo>>
+actor "Cliente\n(miembro)" as Cliente <<Heredado>>
+actor "Servicio de Correo\nElectrónico" as Correo <<Heredado>>
+actor "Sistema de Inventario\nExterno" as Inventario <<Nuevo>>
+
+OrgAdmin --|> Cliente
+
+package "Organizaciones" as POrg {
+  usecase "Crear organización" as U1 <<Nuevo>>
+  usecase "Invitar miembro cliente" as U2 <<Nuevo>>
+  usecase "Validar que sea rol cliente" as U2a <<Nuevo>>
+  usecase "Enviar invitación por correo" as U2b <<Nuevo>>
+  usecase "Aceptar / Rechazar invitación" as U3 <<Nuevo>>
+  usecase "Cambiar contexto\npersonal / organización" as U4 <<Nuevo>>
+  usecase "Reservar a nombre\nde la organización" as U5 <<Nuevo>>
+  usecase "Panel administrativo\nde organización" as U6 <<Nuevo>>
+}
+
+package "Integración de Inventario" as PInv {
+  usecase "Registrar endpoint\nde inventario externo" as U7 <<Nuevo>>
+  usecase "Mapear campos\nde inventario" as U8 <<Nuevo>>
+  usecase "Ver inventario sincronizado" as U9 <<Nuevo>>
+  usecase "Sincronizar con\nsistema externo" as U9a <<Nuevo>>
+  usecase "Importar inventario\ndesde Excel" as U10 <<Nuevo>>
+}
+
+' Asociaciones
+OrgAdmin --> U1
+OrgAdmin --> U2
+OrgAdmin --> U6
+Cliente --> U3
+Cliente --> U4
+Cliente --> U5
+Cliente --> U7
+Cliente --> U8
+Cliente --> U9
+Cliente --> U10
+
+' include / extend
+U2 ..> U2a : <<include>>
+U2 ..> U2b : <<include>>
+U2b --> Correo
+U3 ..> U4 : <<extend>>
+U7 --> Inventario
+U9 ..> U9a : <<include>>
+U9a --> Inventario
+
+@enduml

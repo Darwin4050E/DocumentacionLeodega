@@ -1,0 +1,88 @@
+@startuml casos_uso_01
+title Casos de Uso 01 — Autenticación, Cuenta y Comunicación
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 200
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 55
+left to right direction
+
+skinparam usecase {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+  BorderColor #839192
+}
+skinparam actor {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+
+
+actor "Visitante\n(no autenticado)" as Visitante <<Heredado>>
+actor "Usuario Registrado" as Usuario <<Heredado>>
+actor "Servicio de Correo\nElectrónico" as Correo <<Heredado>>
+
+actor "Cliente" as Cliente <<Heredado>>
+actor "Arrendador" as Arrendador <<Heredado>>
+
+Cliente --|> Usuario
+Arrendador --|> Usuario
+
+package "Autenticación" as PAuth {
+  usecase "Registrarse" as U1 <<Heredado>>
+  usecase "Iniciar sesión" as U2 <<Heredado>>
+  usecase "Validar cuenta no bloqueada" as U2a <<Heredado>>
+  usecase "Recuperar contraseña" as U3 <<Heredado>>
+  usecase "Enviar correo de\nrestablecimiento" as U3a <<Heredado>>
+  usecase "Cerrar sesión" as U4 <<Heredado>>
+}
+
+package "Gestión de Cuenta" as PAcc {
+  usecase "Gestionar perfil" as U5 <<Heredado>>
+  usecase "Cambiar contraseña" as U6 <<Heredado>>
+  usecase "Gestionar sesiones activas" as U7 <<Heredado>>
+  usecase "Eliminar mi cuenta" as U8 <<Heredado>>
+}
+
+package "Comunicación" as PCom {
+  usecase "Iniciar / ver conversación" as U9 <<Heredado>>
+  usecase "Enviar mensaje" as U10 <<Heredado>>
+  usecase "Marcar mensajes como leídos" as U11 <<Heredado>>
+  usecase "Consultar notificaciones" as U12 <<Heredado>>
+  usecase "Notificar a destinatario" as U13 <<Heredado>>
+}
+
+' Visitante
+Visitante --> U1
+Visitante --> U2
+Visitante --> U3
+
+' Usuario Registrado (común)
+Usuario --> U4
+Usuario --> U5
+Usuario --> U6
+Usuario --> U7
+Usuario --> U8
+Usuario --> U9
+Usuario --> U10
+Usuario --> U11
+Usuario --> U12
+
+' Relaciones include / extend
+U2 ..> U2a : <<include>>
+U3 ..> U3a : <<include>>
+U3a --> Correo
+U9 ..> U10 : <<extend>>
+U10 ..> U13 : <<include>>
+
+@enduml
