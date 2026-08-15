@@ -1,0 +1,55 @@
+@startuml secuencia_10_ver_detalle_bodega
+
+title Diagrama de Secuencia 10: Ver detalle de bodega (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Usuario
+participant "Frontend" as FE <<Heredado>>
+participant "StoreRoomsController" as SRC <<Heredado>>
+database "StoreRooms" as SR <<Heredado>>
+database "StorePhoto" as SPH <<Heredado>>
+database "StorePrices" as SP <<Heredado>>
+database "Landlords" as LL <<Heredado>>
+
+Usuario -> FE : Selecciona una bodega de la lista
+activate FE
+
+FE -> SRC : GET /store-rooms/{id}/detail\n(endpoint público)
+activate SRC
+
+SRC -> SR : detail(): carga StoreRooms\ncon fotos, precios e info del arrendador
+activate SR
+SR --> SRC : Datos de la bodega
+deactivate SR
+
+SRC -> SPH : Consulta fotos de la bodega
+activate SPH
+SPH --> SRC : Fotos asociadas
+deactivate SPH
+
+SRC -> SP : Consulta niveles de precios
+activate SP
+SP --> SRC : Precios por nivel
+deactivate SP
+
+SRC -> LL : Consulta Landlords → User\npara info de contacto del arrendador
+activate LL
+LL --> SRC : Datos de contacto del arrendador
+deactivate LL
+
+SRC --> FE : JSON detallado de la bodega
+deactivate SRC
+
+FE -> FE : Renderiza página de detalle\n(componente LeodegaUI)\ncon fotos, mapa y precios
+FE --> Usuario : Muestra detalle de la bodega
+deactivate FE
+
+@enduml

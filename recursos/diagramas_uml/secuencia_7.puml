@@ -1,0 +1,51 @@
+@startuml secuencia_7_publicar_bodega
+title Diagrama de Secuencia — Publicar Bodega
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendador" as A
+participant "Frontend" as FE <<Heredado>>
+participant "StoreRoomsController" as SRC <<Heredado>>
+participant "ApiController" as API <<Heredado>>
+database "StoreRooms" as DB <<Heredado>>
+
+A -> FE : Completa formulario de bodega\n(título, descripción, room_type,\nstorage_type, dirección, ciudad,\ntamaño, seguridad)
+activate FE
+
+FE -> SRC : POST /storeRooms { datos bodega }
+activate SRC
+
+SRC -> API : storeModel(request, StoreRooms)
+activate API
+
+API -> API : Validar datos de entrada
+
+API -> DB : Crear registro StoreRooms\n(publication_status = 'pending')
+activate DB
+DB --> API : storeRoom creado
+deactivate DB
+
+API --> SRC : storeRoom
+deactivate API
+
+SRC --> FE : 201 { storeRoom }
+deactivate SRC
+
+FE --> A : Muestra bodega creada
+
+note right of FE
+  El publication_status permanece
+  en 'pending' hasta que un
+  administrador modere la publicación.
+end note
+
+deactivate FE
+
+@enduml

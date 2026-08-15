@@ -1,0 +1,63 @@
+@startuml secuencia_15_calificar_bodega
+
+title Diagrama de Secuencia 15: Calificar bodega (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendatario
+participant "Frontend" as FE <<Heredado>>
+participant "RatingsController" as RC <<Heredado>>
+participant "StoreRatingRequest" as SRR <<Heredado>>
+participant "RatingsService" as RS <<Heredado>>
+database "Ratings" as RDB <<Heredado>>
+
+Arrendatario -> FE : Navega al detalle de la bodega
+activate FE
+
+Arrendatario -> FE : Completa formulario de calificación\n(estrellas 1-5, comentario)
+
+FE -> RC : POST /ratings\n{store_id, stars, comment}
+activate RC
+
+RC -> SRR : Valida campos de la solicitud
+activate SRR
+SRR --> RC : Validación exitosa
+deactivate SRR
+
+RC -> RS : create(): verifica si el usuario\nya calificó esta bodega
+activate RS
+
+RS -> RDB : Consulta calificaciones del usuario\npara esta bodega
+activate RDB
+RDB --> RS : Resultado de búsqueda
+deactivate RDB
+
+alt Ya calificó anteriormente
+  RS --> RC : Lanza DuplicateRatingException
+  RC --> FE : Respuesta 409: Calificación duplicada
+  FE --> Arrendatario : Muestra error:\n"Ya has calificado esta bodega"
+else Primera calificación
+  RS -> RDB : Crea registro de Ratings
+  activate RDB
+  RDB --> RS : Calificación creada
+  deactivate RDB
+
+  RS --> RC : Calificación creada exitosamente
+  deactivate RS
+
+  RC --> FE : JSON de la calificación
+  deactivate RC
+
+  FE -> FE : Actualiza visualización\nde calificaciones
+  FE --> Arrendatario : Muestra calificación registrada
+  deactivate FE
+end
+
+@enduml

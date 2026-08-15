@@ -1,0 +1,88 @@
+@startuml secuencia_23
+title Panel de control administrativo con métricas (NUEVO — HUA-02)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Administrador <<Nuevo>>
+participant Frontend <<Nuevo>>
+participant DashboardController <<Nuevo>>
+database StoreRooms <<Nuevo>>
+database Reservations <<Nuevo>>
+database Users <<Nuevo>>
+database Reports <<Nuevo>>
+
+Administrador -> Frontend : Accede al panel administrativo
+activate Frontend
+Frontend -> DashboardController : GET /admin/dashboard/metrics
+activate DashboardController
+
+DashboardController -> StoreRooms : Contar por publication_status\n(pending / approved / rejected)
+activate StoreRooms
+StoreRooms --> DashboardController : Conteos de bodegas
+deactivate StoreRooms
+
+DashboardController -> Reservations : Contar por status,\ntotales de ingresos
+activate Reservations
+Reservations --> DashboardController : Conteos y totales de reservas
+deactivate Reservations
+
+DashboardController -> Users : Contar por rol,\ncontar por state (active / blocked)
+activate Users
+Users --> DashboardController : Conteos de usuarios
+deactivate Users
+
+DashboardController -> Reports : Contar por status,\ncontar por prioridad
+activate Reports
+Reports --> DashboardController : Conteos de reportes
+deactivate Reports
+
+DashboardController --> Frontend : JSON con métricas agregadas
+deactivate DashboardController
+
+Frontend --> Administrador : Renderiza gráficos y\ntarjetas KPI
+deactivate Frontend
+
+opt Filtrar por rango de fechas
+    Administrador -> Frontend : Selecciona rango de fechas
+    activate Frontend
+    Frontend -> DashboardController : GET /admin/dashboard/metrics\n?from=...&to=...
+    activate DashboardController
+
+    DashboardController -> StoreRooms : Consulta con filtro de fechas
+    activate StoreRooms
+    StoreRooms --> DashboardController : Datos filtrados
+    deactivate StoreRooms
+
+    DashboardController -> Reservations : Consulta con filtro de fechas
+    activate Reservations
+    Reservations --> DashboardController : Datos filtrados
+    deactivate Reservations
+
+    DashboardController -> Users : Consulta con filtro de fechas
+    activate Users
+    Users --> DashboardController : Datos filtrados
+    deactivate Users
+
+    DashboardController -> Reports : Consulta con filtro de fechas
+    activate Reports
+    Reports --> DashboardController : Datos filtrados
+    deactivate Reports
+
+    DashboardController --> Frontend : JSON con métricas filtradas
+    deactivate DashboardController
+    Frontend --> Administrador : Actualiza gráficos y tarjetas KPI
+    deactivate Frontend
+end
+
+note across
+  Planificado — ERS HUA-02, sin código todavía
+end note
+
+@enduml

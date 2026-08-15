@@ -1,0 +1,77 @@
+@startuml secuencia_20
+title Moderar publicación de bodega (HEREDADO)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Administrador <<Heredado>>
+participant Frontend <<Heredado>>
+participant StoreRoomsController <<Heredado>>
+participant StoreModerationService <<Heredado>>
+database StoreRooms <<Heredado>>
+database StoreModeration <<Heredado>>
+participant NotificationService <<Heredado>>
+actor Arrendador <<Heredado>>
+
+Administrador -> Frontend : Consulta bodegas pendientes
+activate Frontend
+Frontend -> StoreRoomsController : GET /storeRooms?publication_status=pending
+activate StoreRoomsController
+StoreRoomsController -> StoreRooms : Listar bodegas pendientes
+activate StoreRooms
+StoreRooms --> StoreRoomsController : Lista de bodegas
+deactivate StoreRooms
+StoreRoomsController --> Frontend : Lista de bodegas pendientes
+deactivate StoreRoomsController
+Frontend --> Administrador : Muestra bodegas pendientes
+deactivate Frontend
+
+Administrador -> Frontend : Selecciona bodega y decide\naprobar o rechazar
+activate Frontend
+Frontend -> StoreRoomsController : PUT /storeRooms/{id}\n{publication_status: 'approved'|'rejected'}
+activate StoreRoomsController
+StoreRoomsController -> StoreRoomsController : Detecta cambio en publication_status
+StoreRoomsController -> StoreRoomsController : Verifica rol admin\n(retorna 403 si no es admin)
+
+StoreRoomsController -> StoreModerationService : moderate(storeRoom, decision,\nreason, adminId)
+activate StoreModerationService
+
+group Transacción DB
+    StoreModerationService -> StoreRooms : Actualizar publication_status
+    activate StoreRooms
+    StoreRooms --> StoreModerationService : Actualizado
+    deactivate StoreRooms
+
+    StoreModerationService -> StoreModeration : Crear registro de auditoría\n(store_id, status, reason_rejected,\nmoderation_date)
+    activate StoreModeration
+    StoreModeration --> StoreModerationService : Registro creado
+    deactivate StoreModeration
+
+    alt Aprobada
+        StoreModerationService -> NotificationService : send() → STORE_APPROVED\nal arrendador
+        activate NotificationService
+        NotificationService -> Arrendador : Notificación: bodega aprobada
+        deactivate NotificationService
+
+    else Rechazada
+        StoreModerationService -> NotificationService : send() → STORE_REJECTED\nal arrendador (con razón)
+        activate NotificationService
+        NotificationService -> Arrendador : Notificación: bodega rechazada\n(incluye motivo)
+        deactivate NotificationService
+    end
+end
+
+StoreModerationService --> StoreRoomsController : Moderación completada
+deactivate StoreModerationService
+StoreRoomsController --> Frontend : StoreRooms actualizado
+deactivate StoreRoomsController
+Frontend --> Administrador : Muestra resultado de moderación
+deactivate Frontend
+
+@enduml

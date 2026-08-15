@@ -1,0 +1,58 @@
+@startuml secuencia_1_registro_usuario
+title Diagrama de Secuencia — Registro de Usuario
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "UserController" as UC <<Heredado>>
+participant "UserRegistrationService" as URS <<Heredado>>
+database "User" as DB <<Heredado>>
+database "Landlords / Tenants" as LTDB <<Heredado>>
+
+U -> FE : Completa formulario de registro
+activate FE
+
+FE -> UC : POST /user (name, email, password, role)
+activate UC
+
+UC -> UC : Validar datos\n(bloquea creación de rol admin)
+
+UC -> DB : Crear registro User
+activate DB
+DB --> UC : user creado
+deactivate DB
+
+UC -> URS : createProfileForRole(user)
+activate URS
+
+alt role = 'landlord'
+  URS -> LTDB : Crear registro Landlords
+  activate LTDB
+  LTDB --> URS : landlord creado
+  deactivate LTDB
+else role = 'tenant'
+  URS -> LTDB : Crear registro Tenants
+  activate LTDB
+  LTDB --> URS : tenant creado
+  deactivate LTDB
+end
+
+URS --> UC : perfil creado
+deactivate URS
+
+UC --> FE : { user, token }
+deactivate UC
+
+FE -> FE : Redirige a /login
+FE --> U : Muestra pantalla de inicio de sesión
+deactivate FE
+
+@enduml

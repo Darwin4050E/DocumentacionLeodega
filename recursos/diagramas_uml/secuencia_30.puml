@@ -1,0 +1,85 @@
+@startuml secuencia_30_ver_inventario_sincronizado
+title Ver inventario sincronizado (NUEVO — HUC-12)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendatario" as Arrendatario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "InventarioController" as IC <<Nuevo>>
+participant "SincronizacionService" as SS <<Nuevo>>
+database "EndpointInventario (DB)" as DBEnd <<Nuevo>>
+database "MapeoInventario (DB)" as DBMap <<Nuevo>>
+participant "ExternalAPI" as ExtAPI <<Nuevo>>
+database "InventarioCache (DB)" as DBCache <<Nuevo>>
+
+Arrendatario -> FE : Navega a vista de inventario
+activate FE
+
+FE -> IC : GET /inventario/sincronizado
+activate IC
+
+IC -> SS : sincronizar(tenant)
+activate SS
+
+SS -> DBEnd : Consulta endpoints activos
+activate DBEnd
+DBEnd --> SS : lista de endpoints
+deactivate DBEnd
+
+loop Para cada endpoint activo
+    SS -> ExtAPI : Obtiene datos usando\ncredenciales almacenadas
+    activate ExtAPI
+    ExtAPI --> SS : datos externos
+    deactivate ExtAPI
+
+    SS -> DBMap : Consulta mapeos de campos\npara este endpoint
+    activate DBMap
+    DBMap --> SS : mapeos configurados
+    deactivate DBMap
+
+    SS -> SS : Transforma datos externos\nusando mapeos
+
+    SS -> DBCache : Upsert en InventarioCache\n(copia local)
+    activate DBCache
+    DBCache --> SS : datos almacenados
+    deactivate DBCache
+end
+
+SS --> IC : Lista de inventario unificada\n(combinada de todos los endpoints)
+deactivate SS
+
+IC --> FE : 200 OK {inventario unificado}
+deactivate IC
+
+FE --> Arrendatario : Renderiza tabla de inventario\ncon indicadores de origen
+deactivate FE
+
+opt Actualización manual
+    Arrendatario -> FE : Hace clic en "Sincronizar ahora"
+    activate FE
+
+    FE -> IC : POST /inventario/sincronizar
+    activate IC
+    IC -> SS : sincronizar(tenant, forzar=true)
+    activate SS
+    SS --> IC : inventario actualizado
+    deactivate SS
+    IC --> FE : 200 OK {inventario actualizado}
+    deactivate IC
+
+    FE --> Arrendatario : Muestra inventario actualizado
+    deactivate FE
+end
+
+note over FE, DBCache
+  Planificado — ERS HUC-12, sin código todavía
+end note
+
+@enduml

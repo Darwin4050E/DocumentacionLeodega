@@ -1,0 +1,68 @@
+@startuml secuencia_17
+title Resolver o cancelar reporte (HEREDADO)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Administrador <<Heredado>>
+participant Frontend <<Heredado>>
+participant ReportsController <<Heredado>>
+participant UpdateReportStatusRequest <<Heredado>>
+database Reports <<Heredado>>
+
+Administrador -> Frontend : Consulta lista de reportes
+activate Frontend
+Frontend -> ReportsController : GET /reports
+activate ReportsController
+ReportsController -> Reports : Obtener reportes
+activate Reports
+Reports --> ReportsController : Lista de reportes
+deactivate Reports
+ReportsController --> Frontend : Lista de reportes
+deactivate ReportsController
+Frontend --> Administrador : Muestra reportes pendientes
+deactivate Frontend
+
+Administrador -> Frontend : Selecciona un reporte pendiente
+activate Frontend
+
+alt Resolver
+    Frontend -> ReportsController : PATCH /reports/{id}/status\n{status: 'resolved'}
+    activate ReportsController
+    ReportsController -> UpdateReportStatusRequest : Validar (solo admin)
+    activate UpdateReportStatusRequest
+    UpdateReportStatusRequest --> ReportsController : Validación exitosa
+    deactivate UpdateReportStatusRequest
+    ReportsController -> Reports : Actualizar status='resolved',\ncancelation_reason=null
+    activate Reports
+    Reports --> ReportsController : Reporte actualizado
+    deactivate Reports
+    ReportsController --> Frontend : Reporte actualizado
+    deactivate ReportsController
+    Frontend --> Administrador : Muestra reporte resuelto
+
+else Cancelar
+    Frontend -> ReportsController : PATCH /reports/{id}/status\n{status: 'canceled', cancelation_reason}
+    activate ReportsController
+    ReportsController -> UpdateReportStatusRequest : Validar (solo admin)
+    activate UpdateReportStatusRequest
+    UpdateReportStatusRequest --> ReportsController : Validación exitosa
+    deactivate UpdateReportStatusRequest
+    ReportsController -> Reports : Actualizar status='canceled',\ncancelation_reason=razón
+    activate Reports
+    Reports --> ReportsController : Reporte actualizado
+    deactivate Reports
+    ReportsController --> Frontend : Reporte actualizado
+    deactivate ReportsController
+    Frontend --> Administrador : Muestra reporte cancelado
+end
+
+deactivate Frontend
+
+@enduml

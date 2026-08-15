@@ -1,0 +1,71 @@
+@startuml secuencia_2_inicio_sesion
+title Diagrama de Secuencia — Inicio de Sesión
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "AuthController" as AC <<Heredado>>
+participant "AuthService" as AS <<Heredado>>
+database "User" as DB <<Heredado>>
+participant "TokenStore\n(Sanctum)" as TS <<Heredado>>
+
+U -> FE : Ingresa credenciales (email, contraseña)
+activate FE
+
+FE -> AC : POST /login { email, password }
+activate AC
+
+AC -> DB : Buscar usuario por email
+activate DB
+DB --> AC : user
+deactivate DB
+
+AC -> AC : Validar credenciales\n(email / password)
+
+AC -> AS : ensureUserIsNotBlocked(user)
+activate AS
+
+alt Usuario bloqueado
+  AS --> AC : lanza AccountBlockedException
+  AC --> FE : 403 Cuenta bloqueada
+  FE --> U : Muestra error "Cuenta bloqueada"
+else Usuario activo
+  AS --> AC : usuario válido
+  deactivate AS
+
+  AC -> AS : issueTokenFor(user, request)
+  activate AS
+  AS -> TS : Crear token Sanctum\n(guarda IP, user-agent)
+  activate TS
+  TS --> AS : token generado
+  deactivate TS
+  AS --> AC : { token, user }
+  deactivate AS
+
+  AC --> FE : 200 { token, user }
+  deactivate AC
+
+  FE -> FE : Almacena en localStorage\n(auth_token, auth_user)
+
+  alt role = 'landlord'
+    FE -> FE : Redirige a /arrendador/bodegas
+  else role = 'admin'
+    FE -> FE : Redirige a /admin/bodegas
+  else role = 'tenant'
+    FE -> FE : Redirige a /arrendatario/dashboard
+  end
+
+  FE --> U : Muestra panel correspondiente
+end
+
+deactivate FE
+
+@enduml

@@ -1,0 +1,58 @@
+@startuml secuencia_24
+title Crear organización (NUEVO — HUE-04)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Usuario <<Nuevo>>
+participant Frontend <<Nuevo>>
+participant OrganizacionController <<Nuevo>>
+participant OrganizacionService <<Nuevo>>
+database Organizacion <<Nuevo>>
+database MiembroOrganizacion <<Nuevo>>
+
+Usuario -> Frontend : Navega a "Crear organización"
+activate Frontend
+Frontend --> Usuario : Muestra formulario
+deactivate Frontend
+
+Usuario -> Frontend : Completa formulario:\nnombre, RUC/identificación fiscal,\ndirección
+activate Frontend
+Frontend -> OrganizacionController : POST /organizaciones\n{nombre, ruc, dirección}
+activate OrganizacionController
+
+OrganizacionController -> OrganizacionController : Validar campos requeridos
+
+OrganizacionController -> OrganizacionService : create(user, data)
+activate OrganizacionService
+
+OrganizacionService -> Organizacion : Crear registro Organizacion
+activate Organizacion
+Organizacion --> OrganizacionService : Organización creada
+deactivate Organizacion
+
+OrganizacionService -> MiembroOrganizacion : Crear MiembroOrganizacion\n(user como propietario,\nrol='propietario')
+activate MiembroOrganizacion
+MiembroOrganizacion --> OrganizacionService : Membresía creada
+deactivate MiembroOrganizacion
+
+OrganizacionService --> OrganizacionController : Organización con membresía
+deactivate OrganizacionService
+
+OrganizacionController --> Frontend : Organización creada\ncon datos de membresía
+deactivate OrganizacionController
+
+Frontend --> Usuario : Redirige al panel\nde la organización
+deactivate Frontend
+
+note across
+  Planificado — ERS HUE-04, sin código todavía
+end note
+
+@enduml

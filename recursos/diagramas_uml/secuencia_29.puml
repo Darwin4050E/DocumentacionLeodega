@@ -1,0 +1,78 @@
+@startuml secuencia_29_mapear_campos_inventario
+title Mapear campos de inventario (NUEVO — HUC-11)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendatario" as Arrendatario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "InventarioController" as IC <<Nuevo>>
+participant "EndpointInventarioService" as EIS <<Nuevo>>
+database "EndpointInventario (DB)" as DBEnd <<Nuevo>>
+database "MapeoInventario (DB)" as DBMap <<Nuevo>>
+participant "ExternalAPI" as ExtAPI <<Nuevo>>
+
+Arrendatario -> FE : Selecciona endpoint registrado
+activate FE
+
+FE -> IC : GET /inventario/endpoints/{id}/preview
+activate IC
+
+IC -> EIS : obtenerVistaPrevia(endpoint)
+activate EIS
+
+EIS -> DBEnd : Obtiene credenciales del endpoint
+activate DBEnd
+DBEnd --> EIS : datos del endpoint
+deactivate DBEnd
+
+EIS -> ExtAPI : Solicita datos de muestra\n(usando credenciales almacenadas)
+activate ExtAPI
+ExtAPI --> EIS : JSON de muestra
+deactivate ExtAPI
+
+EIS --> IC : campos JSON de muestra
+deactivate EIS
+
+IC --> FE : 200 OK {campos externos}
+deactivate IC
+
+FE --> Arrendatario : Muestra interfaz de mapeo de campos
+
+Arrendatario -> FE : Mapea campos externos a\ncampos Leodega\n(nombre->product_name,\ncantidad->quantity, etc.)
+
+FE -> IC : POST /inventario/endpoints/{id}/mapeo\n{mappings: [{campo_externo, campo_leodega}]}
+activate IC
+
+IC -> IC : Valida mapeos (campos requeridos)
+
+IC -> EIS : guardarMapeo(endpoint, mappings)
+activate EIS
+
+loop Para cada mapeo en el arreglo
+    EIS -> DBMap : Crea/actualiza MapeoInventario\n(campo_externo, campo_leodega, transformacion)
+    activate DBMap
+    DBMap --> EIS : registro guardado
+    deactivate DBMap
+end
+
+EIS --> IC : mapeos guardados
+deactivate EIS
+
+IC --> FE : 200 OK {mappings}
+deactivate IC
+
+FE --> Arrendatario : Muestra "Mapeo guardado exitosamente"
+deactivate FE
+
+note over FE, ExtAPI
+  Planificado — ERS HUC-11, sin código todavía
+end note
+
+@enduml

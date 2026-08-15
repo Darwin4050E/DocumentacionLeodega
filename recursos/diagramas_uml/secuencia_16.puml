@@ -1,0 +1,82 @@
+@startuml secuencia_16_reportar_incidente
+
+title Diagrama de Secuencia 16: Reportar incidente (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Usuario
+participant "Frontend" as FE <<Heredado>>
+participant "ReportsController" as RC <<Heredado>>
+participant "StoreReportRequest" as SRR <<Heredado>>
+participant "ReportService" as RS <<Heredado>>
+database "Reports" as RDB <<Heredado>>
+database "ReportEvidences" as RE <<Heredado>>
+participant "NotificationService" as NS <<Heredado>>
+actor Administrador
+actor Arrendador
+
+Usuario -> FE : Navega a /reportIncident/{id}
+activate FE
+
+Usuario -> FE : Completa formulario:\ntítulo, tipo de reporte,\nprioridad (baja/media/alta),\ndescripción (mín. 20 caracteres),\narchivos (evidencia)
+
+FE -> RC : POST /reports\n(multipart con archivos adjuntos)
+activate RC
+
+RC -> SRR : Valida todos los campos
+activate SRR
+SRR --> RC : Validación exitosa
+deactivate SRR
+
+RC -> RS : create(): dentro de transacción
+activate RS
+
+RS -> RDB : Crea registro de Reports\ncon status='pending'
+activate RDB
+RDB --> RS : Reporte creado
+deactivate RDB
+
+loop Para cada archivo subido
+  RS -> RS : Almacena archivo en\nstorage/app/public/reports/
+
+  RS -> RE : Crea registro de ReportEvidences\ncon file_path y file_type
+  activate RE
+  RE --> RS : Evidencia registrada
+  deactivate RE
+end
+
+RS -> RS : Consulta todos los usuarios\ncon rol administrador
+
+loop Para cada administrador
+  RS -> NS : send() → STORE_REPORTED
+  activate NS
+  NS --> Administrador : Notificación: nuevo reporte de incidente
+  deactivate NS
+end
+
+RS -> RS : Obtiene arrendador de la bodega reportada
+
+opt El arrendador no es también administrador
+  RS -> NS : send() → STORE_REPORTED\nal arrendador
+  activate NS
+  NS --> Arrendador : Notificación: incidente reportado\nen su bodega
+  deactivate NS
+end
+
+RS --> RC : Reporte creado exitosamente
+deactivate RS
+
+RC --> FE : JSON del reporte
+deactivate RC
+
+FE --> Usuario : Muestra confirmación del reporte
+deactivate FE
+
+@enduml

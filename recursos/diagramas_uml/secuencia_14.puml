@@ -1,0 +1,90 @@
+@startuml secuencia_14_procesar_pago
+
+title Diagrama de Secuencia 14: Procesar pago y confirmar reserva (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendatario
+participant "Frontend" as FE <<Heredado>>
+participant "PaymentsController" as PC <<Heredado>>
+participant "PaymentsPolicy" as PP <<Heredado>>
+participant "PaymentService" as PS <<Heredado>>
+database "Payments" as PDB <<Heredado>>
+participant "ReservationService" as RS <<Heredado>>
+database "Reservations" as RDB <<Heredado>>
+participant "NotificationService" as NS <<Heredado>>
+
+Arrendatario -> FE : Selecciona reserva para pagar
+activate FE
+
+FE -> PC : POST /payments\n{reservation_id, payment_method\n(credit_card/debit_card),\npayment_state=paid, payment_date}
+activate PC
+
+PC -> PP : create(): verifica que el usuario\nsea el arrendatario dueño de la reserva
+activate PP
+
+alt No autorizado
+  PP --> PC : Autorización denegada
+  deactivate PP
+  PC --> FE : Respuesta 403: No autorizado
+  FE --> Arrendatario : Muestra error de autorización
+else Autorizado
+  PP --> PC : Autorización exitosa
+  deactivate PP
+
+  PC -> PS : process(): dentro de transacción de BD
+  activate PS
+
+  PS -> PDB : Crea registro de Payments
+  activate PDB
+  PDB --> PS : Pago creado
+  deactivate PDB
+
+  opt payment_state='paid' Y reserva no confirmada aún
+    PS -> RS : confirm(): confirma la reserva
+    activate RS
+
+    RS -> RDB : Actualiza status a 'confirmed'
+    activate RDB
+    RDB --> RS : Reserva confirmada
+    deactivate RDB
+
+    RS -> NS : send() → RESERVATION_CONFIRMED\nal arrendatario
+    activate NS
+    NS --> Arrendatario : Notificación: reserva confirmada
+    deactivate NS
+
+    loop Cancelación en cascada de reservas pendientes superpuestas
+      RS -> RDB : cancel(): cancela reserva superpuesta
+      activate RDB
+      RDB --> RS : Reserva cancelada
+      deactivate RDB
+
+      RS -> NS : send() → RESERVATION_CANCELED\nal arrendatario afectado
+      activate NS
+      NS --> NS : Envía notificación
+      deactivate NS
+    end
+
+    RS --> PS : Confirmación completada
+    deactivate RS
+  end
+
+  PS --> PC : Pago procesado exitosamente
+  deactivate PS
+
+  PC --> FE : JSON del pago
+  deactivate PC
+
+  FE --> Arrendatario : Muestra confirmación del pago
+  deactivate FE
+end
+
+@enduml

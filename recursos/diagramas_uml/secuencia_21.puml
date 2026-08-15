@@ -1,0 +1,87 @@
+@startuml secuencia_21
+title Bloquear y reactivar cuenta de usuario (NUEVO — HUA-03)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Administrador <<Nuevo>>
+participant Frontend <<Nuevo>>
+participant AdminController <<Nuevo>>
+participant UserBlockingService <<Nuevo>>
+database User <<Nuevo>>
+database RegistroAuditoria <<Nuevo>>
+participant "TokenStore\n(Sanctum)" as TokenStore <<Nuevo>>
+participant NotificationService <<Nuevo>>
+
+Administrador -> Frontend : Accede al panel de gestión de usuarios
+activate Frontend
+Administrador -> Frontend : Selecciona usuario a bloquear/reactivar
+
+alt Bloquear
+    Frontend -> AdminController : POST /admin/users/{id}/block\n{reason}
+    activate AdminController
+    AdminController -> UserBlockingService : block(user, reason, adminId)
+    activate UserBlockingService
+
+    UserBlockingService -> User : Actualizar state='blocked'
+    activate User
+    User --> UserBlockingService : Actualizado
+    deactivate User
+
+    UserBlockingService -> TokenStore : Revocar todos los tokens\nactivos del usuario
+    activate TokenStore
+    TokenStore --> UserBlockingService : Tokens revocados
+    deactivate TokenStore
+
+    UserBlockingService -> RegistroAuditoria : Crear registro\n(action='block', reason,\nadmin_id, timestamp)
+    activate RegistroAuditoria
+    RegistroAuditoria --> UserBlockingService : Registro creado
+    deactivate RegistroAuditoria
+
+    UserBlockingService -> NotificationService : send() notificación al usuario\n(si aplica)
+    activate NotificationService
+    NotificationService --> UserBlockingService : Enviada
+    deactivate NotificationService
+
+    UserBlockingService --> AdminController : Usuario bloqueado
+    deactivate UserBlockingService
+    AdminController --> Frontend : Usuario actualizado
+    deactivate AdminController
+    Frontend --> Administrador : Muestra usuario bloqueado
+
+else Reactivar
+    Frontend -> AdminController : POST /admin/users/{id}/reactivate
+    activate AdminController
+    AdminController -> UserBlockingService : reactivate(user, adminId)
+    activate UserBlockingService
+
+    UserBlockingService -> User : Actualizar state='active'
+    activate User
+    User --> UserBlockingService : Actualizado
+    deactivate User
+
+    UserBlockingService -> RegistroAuditoria : Crear registro\n(action='reactivate',\nadmin_id, timestamp)
+    activate RegistroAuditoria
+    RegistroAuditoria --> UserBlockingService : Registro creado
+    deactivate RegistroAuditoria
+
+    UserBlockingService --> AdminController : Usuario reactivado
+    deactivate UserBlockingService
+    AdminController --> Frontend : Usuario actualizado
+    deactivate AdminController
+    Frontend --> Administrador : Muestra usuario activo
+end
+
+deactivate Frontend
+
+note across
+  Planificado — ERS HUA-03, sin código todavía
+end note
+
+@enduml

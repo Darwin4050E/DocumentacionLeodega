@@ -1,0 +1,45 @@
+@startuml secuencia_8_subir_fotos_bodega
+title Diagrama de Secuencia — Subir Fotos de Bodega
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendador" as A
+participant "Frontend" as FE <<Heredado>>
+participant "StorePhotoController" as SPC <<Heredado>>
+participant "StorageService\n(Laravel Storage)" as SS <<Heredado>>
+database "StorePhoto" as DB <<Heredado>>
+
+A -> FE : Selecciona fotos para la bodega
+activate FE
+
+FE -> SPC : POST /store-rooms/{id}/photos\n(multipart/form-data)
+activate SPC
+
+SPC -> SPC : Recibir archivos del request
+
+loop Para cada archivo
+  SPC -> SS : Almacenar archivo en\nstorage/app/public/store_photos/
+  activate SS
+  SS --> SPC : ruta del archivo
+  deactivate SS
+
+  SPC -> DB : Crear registro StorePhoto\n{ photo_url }
+  activate DB
+  DB --> SPC : storePhoto creado
+  deactivate DB
+end
+
+SPC --> FE : 201 [ fotos creadas ]
+deactivate SPC
+
+FE --> A : Muestra galería de fotos actualizada
+deactivate FE
+
+@enduml

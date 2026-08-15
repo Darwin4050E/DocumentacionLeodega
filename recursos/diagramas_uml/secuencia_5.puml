@@ -1,0 +1,62 @@
+@startuml secuencia_5_actualizacion_perfil
+title Diagrama de Secuencia — Actualización de Perfil
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "ProfileController" as PC <<Heredado>>
+participant "UpdateProfileRequest" as UPR <<Heredado>>
+database "User" as DB <<Heredado>>
+
+== Consulta de perfil ==
+
+U -> FE : Navega a Configuración
+activate FE
+
+FE -> PC : GET /profile
+activate PC
+
+PC -> DB : Obtener datos del usuario
+activate DB
+DB --> PC : user
+deactivate DB
+
+PC --> FE : 200 { user }
+deactivate PC
+
+FE --> U : Muestra formulario con datos actuales
+deactivate FE
+
+== Actualización de perfil ==
+
+U -> FE : Modifica campos\n(name, lastname, email, phone)
+activate FE
+
+FE -> PC : PUT /profile { name, lastname, email, phone }
+activate PC
+
+PC -> UPR : Validar campos
+activate UPR
+UPR --> PC : validación exitosa
+deactivate UPR
+
+PC -> DB : Actualizar registro User
+activate DB
+DB --> PC : user actualizado
+deactivate DB
+
+PC --> FE : 200 { user actualizado }
+deactivate PC
+
+FE --> U : Muestra datos actualizados
+deactivate FE
+
+@enduml

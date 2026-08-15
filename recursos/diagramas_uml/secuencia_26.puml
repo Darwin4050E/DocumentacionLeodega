@@ -1,0 +1,93 @@
+@startuml secuencia_26_aceptar_rechazar_invitacion
+title Aceptar o rechazar invitación a organización (NUEVO — HUC-14)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Invitado" as Invitado <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "InvitacionController" as IC <<Nuevo>>
+participant "InvitacionService" as IS <<Nuevo>>
+database "Invitacion (DB)" as DBInv <<Nuevo>>
+database "MiembroOrganizacion (DB)" as DBMiembro <<Nuevo>>
+participant "NotificationService" as NS <<Nuevo>>
+actor "Propietario" as Propietario <<Nuevo>>
+
+Invitado -> FE : Ve notificación de\ninvitación pendiente
+activate FE
+
+FE -> IC : GET /invitaciones
+activate IC
+IC --> FE : Lista de invitaciones pendientes
+deactivate IC
+
+Invitado -> FE : Selecciona invitación
+
+alt Aceptar invitación
+    FE -> IC : PATCH /invitaciones/{id}\n{estado: 'aceptada'}
+    activate IC
+
+    IC -> IS : aceptar(invitacion)
+    activate IS
+
+    IS -> DBInv : Actualiza Invitacion.estado='aceptada'
+    activate DBInv
+    DBInv --> IS : actualizado
+    deactivate DBInv
+
+    IS -> DBMiembro : Crea registro MiembroOrganizacion\n(user, organizacion, rol_asignado)
+    activate DBMiembro
+    DBMiembro --> IS : miembro creado
+    deactivate DBMiembro
+
+    IS -> NS : notify(propietario, "Miembro aceptó invitación")
+    activate NS
+    NS -> Propietario : Notificación
+    NS --> IS : enviado
+    deactivate NS
+
+    IS --> IC : invitación actualizada
+    deactivate IS
+
+    IC --> FE : 200 OK {invitacion}
+    deactivate IC
+
+else Rechazar invitación
+    FE -> IC : PATCH /invitaciones/{id}\n{estado: 'rechazada'}
+    activate IC
+
+    IC -> IS : rechazar(invitacion)
+    activate IS
+
+    IS -> DBInv : Actualiza Invitacion.estado='rechazada'
+    activate DBInv
+    DBInv --> IS : actualizado
+    deactivate DBInv
+
+    IS -> NS : notify(propietario, "Miembro rechazó invitación")
+    activate NS
+    NS -> Propietario : Notificación
+    NS --> IS : enviado
+    deactivate NS
+
+    IS --> IC : invitación actualizada
+    deactivate IS
+
+    IC --> FE : 200 OK {invitacion}
+    deactivate IC
+end
+
+FE --> Invitado : Muestra resultado de la acción
+deactivate FE
+
+note over FE, NS
+  Planificado — ERS HUC-14, sin código todavía
+end note
+
+@enduml

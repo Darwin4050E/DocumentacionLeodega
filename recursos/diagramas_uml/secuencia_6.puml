@@ -1,0 +1,51 @@
+@startuml secuencia_6_cambio_contrasena
+title Diagrama de Secuencia — Cambio de Contraseña
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "SecurityController" as SC <<Heredado>>
+participant "ChangePasswordRequest" as CPR <<Heredado>>
+database "User" as DB <<Heredado>>
+
+U -> FE : Navega a pestaña Seguridad
+activate FE
+
+U -> FE : Ingresa contraseña actual\ny nueva contraseña (con confirmación)
+
+FE -> SC : PUT /password\n{ actual_p, new_p, new_p_confirmation }
+activate SC
+
+SC -> CPR : Validar campos\n(actual_p coincide, new_p min 8 chars + confirmed)
+activate CPR
+
+alt Contraseña actual incorrecta
+  CPR --> SC : error de validación
+  SC --> FE : 422 Error de validación
+  FE --> U : Muestra error\n"La contraseña actual no coincide"
+else Validación exitosa
+  CPR --> SC : validación exitosa
+  deactivate CPR
+
+  SC -> DB : Actualizar contraseña\n(hash bcrypt)
+  activate DB
+  DB --> SC : contraseña actualizada
+  deactivate DB
+
+  SC --> FE : 200 Contraseña cambiada
+  deactivate SC
+
+  FE --> U : Muestra mensaje de éxito
+end
+
+deactivate FE
+
+@enduml

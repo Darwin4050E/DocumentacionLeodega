@@ -1,0 +1,72 @@
+@startuml secuencia_25_invitar_miembro_organizacion
+title Invitar miembro a organización (NUEVO — HUE-01)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Propietario" as Propietario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "OrganizacionController" as OC <<Nuevo>>
+participant "InvitacionService" as IS <<Nuevo>>
+database "Invitacion (DB)" as DB <<Nuevo>>
+participant "NotificationService" as NS <<Nuevo>>
+actor "Invitado" as Invitado <<Nuevo>>
+
+Propietario -> FE : Navega al panel de miembros\nde la organización
+activate FE
+
+Propietario -> FE : Ingresa email de la persona a invitar
+FE -> OC : POST /organizaciones/{id}/invitaciones\n{email, rol_asignado}
+activate OC
+
+OC -> OC : Valida que Propietario\nes dueño de la organización
+
+OC -> IS : invitar(organizacion, email, rol)
+activate IS
+
+IS -> DB : Busca usuario con email
+activate DB
+DB --> IS : resultado
+deactivate DB
+
+alt Usuario no está en el sistema
+    IS -> DB : Crea registro de invitación pendiente
+    activate DB
+    DB --> IS : invitación creada
+    deactivate DB
+    IS -> NS : Envía email de invitación al correo externo
+    activate NS
+    NS --> IS : email enviado
+    deactivate NS
+else Usuario existe en el sistema
+    IS -> DB : Crea registro Invitacion\ncon estado='pendiente'
+    activate DB
+    DB --> IS : invitación creada
+    deactivate DB
+    IS -> NS : send(INVITACION_ORGANIZACION, invitado)
+    activate NS
+    NS -> Invitado : Notificación de invitación
+    NS --> IS : notificación enviada
+    deactivate NS
+end
+
+IS --> OC : registro de invitación
+deactivate IS
+
+OC --> FE : 201 Created {invitacion}
+deactivate OC
+
+FE --> Propietario : Muestra "Invitación enviada"
+deactivate FE
+
+note over FE, NS
+  Planificado — ERS HUE-01, sin código todavía
+end note
+
+@enduml

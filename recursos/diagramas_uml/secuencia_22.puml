@@ -1,0 +1,115 @@
+@startuml secuencia_22
+title Validar permiso de bomberos (NUEVO — HUA-01 / HUG-04)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendador <<Nuevo>>
+participant Frontend <<Nuevo>>
+participant StoreRoomsController <<Nuevo>>
+participant PermisoBomberosService <<Nuevo>>
+database PermisoBomberos <<Nuevo>>
+database StoreRooms <<Nuevo>>
+participant StoreModerationService <<Nuevo>>
+actor Administrador <<Nuevo>>
+participant NotificationService <<Nuevo>>
+
+== Registro de bodega con permiso de bomberos ==
+
+Arrendador -> Frontend : Registra bodega con permiso\nde bomberos adjunto
+activate Frontend
+Frontend -> StoreRoomsController : POST /storeRooms\n(datos + documento de permiso)
+activate StoreRoomsController
+StoreRoomsController -> StoreRooms : Crear StoreRooms\n(status='pending')
+activate StoreRooms
+StoreRooms --> StoreRoomsController : Bodega creada
+deactivate StoreRooms
+
+StoreRoomsController -> PermisoBomberosService : attach(storeRoom, permitFile)
+activate PermisoBomberosService
+PermisoBomberosService -> PermisoBomberos : Almacenar documento,\ncrear registro PermisoBomberos
+activate PermisoBomberos
+PermisoBomberos --> PermisoBomberosService : Registro creado
+deactivate PermisoBomberos
+PermisoBomberosService --> StoreRoomsController : Permiso adjuntado
+deactivate PermisoBomberosService
+
+StoreRoomsController --> Frontend : Bodega creada con permiso
+deactivate StoreRoomsController
+Frontend --> Arrendador : Confirmación de registro
+deactivate Frontend
+
+== Revisión administrativa del permiso ==
+
+Administrador -> Frontend : Revisa bodega con permiso
+activate Frontend
+Frontend -> StoreRoomsController : GET /admin/bodegas/{id}/permiso-bomberos
+activate StoreRoomsController
+StoreRoomsController -> PermisoBomberos : Obtener datos del permiso
+activate PermisoBomberos
+PermisoBomberos --> StoreRoomsController : Datos del permiso
+deactivate PermisoBomberos
+StoreRoomsController --> Frontend : Información del permiso
+deactivate StoreRoomsController
+Frontend --> Administrador : Muestra permiso para validación
+deactivate Frontend
+
+Administrador -> Frontend : Valida o rechaza el permiso
+activate Frontend
+
+alt Permiso válido
+    Frontend -> PermisoBomberosService : validate(permiso, adminId)
+    activate PermisoBomberosService
+    PermisoBomberosService -> PermisoBomberos : Actualizar estado='validado'
+    activate PermisoBomberos
+    PermisoBomberos --> PermisoBomberosService : Actualizado
+    deactivate PermisoBomberos
+
+    PermisoBomberosService -> StoreModerationService : moderate(storeRoom, 'approved')
+    activate StoreModerationService
+    StoreModerationService -> StoreRooms : Actualizar publication_status='approved'
+    activate StoreRooms
+    StoreRooms --> StoreModerationService : Actualizado
+    deactivate StoreRooms
+    StoreModerationService --> PermisoBomberosService : Moderación completada
+    deactivate StoreModerationService
+
+    PermisoBomberosService -> NotificationService : send() → STORE_APPROVED\nal arrendador
+    activate NotificationService
+    NotificationService -> Arrendador : Notificación: bodega aprobada
+    deactivate NotificationService
+
+    PermisoBomberosService --> Frontend : Permiso validado
+    deactivate PermisoBomberosService
+
+else Permiso inválido
+    Frontend -> PermisoBomberosService : reject(permiso, reason)
+    activate PermisoBomberosService
+    PermisoBomberosService -> PermisoBomberos : Actualizar estado='rechazado'
+    activate PermisoBomberos
+    PermisoBomberos --> PermisoBomberosService : Actualizado
+    deactivate PermisoBomberos
+
+    PermisoBomberosService -> NotificationService : send() → STORE_REJECTED\nal arrendador (con motivo)
+    activate NotificationService
+    NotificationService -> Arrendador : Notificación: bodega rechazada\n(incluye motivo)
+    deactivate NotificationService
+
+    PermisoBomberosService --> Frontend : Permiso rechazado
+    deactivate PermisoBomberosService
+end
+
+Frontend --> Administrador : Muestra resultado
+deactivate Frontend
+
+note across
+  Planificado — ERS HUA-01 / HUG-04, sin código todavía
+end note
+
+@enduml

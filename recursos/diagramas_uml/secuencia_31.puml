@@ -1,0 +1,67 @@
+@startuml secuencia_31_importar_inventario_excel
+title Importar inventario desde Excel (NUEVO — HUC-13)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendatario" as Arrendatario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "InventarioController" as IC <<Nuevo>>
+participant "ImportacionService" as IS <<Nuevo>>
+database "InventarioLocal (DB)" as DB <<Nuevo>>
+
+Arrendatario -> FE : Navega a importación de inventario
+activate FE
+
+FE --> Arrendatario : Proporciona enlace de descarga\npara plantilla Excel
+
+Arrendatario -> Arrendatario : Llena Excel con datos\nde inventario
+
+Arrendatario -> FE : Sube archivo .xlsx
+
+FE -> IC : POST /inventario/importar\n(multipart con archivo .xlsx)
+activate IC
+
+IC -> IC : Valida tipo de archivo (.xlsx)
+
+IC -> IS : procesarExcel(tenant, file)
+activate IS
+
+IS -> IS : Parsea archivo Excel\n(lee filas)
+
+IS -> IS : Valida cada fila\n(campos requeridos:\nnombre, cantidad, unidad)
+
+alt Errores de validación
+    IS --> IC : Lista de errores con\nnúmeros de fila
+    IC --> FE : 422 Unprocessable Entity\n{errores: [{fila, mensaje}]}
+    FE --> Arrendatario : Muestra errores por fila
+else Validación exitosa
+    loop Para cada fila válida
+        IS -> DB : Crea/actualiza registro\nInventarioLocal
+        activate DB
+        DB --> IS : registro guardado
+        deactivate DB
+    end
+
+    IS --> IC : Resumen de importación\n{total_procesados, creados,\nactualizados, errores}
+    deactivate IS
+
+    IC --> FE : 200 OK {resumen}
+    deactivate IC
+
+    FE --> Arrendatario : Muestra resultados de importación\n(creados, actualizados, errores)
+end
+
+deactivate FE
+
+note over FE, DB
+  Planificado — ERS HUC-13, sin código todavía
+end note
+
+@enduml

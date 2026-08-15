@@ -1,0 +1,64 @@
+@startuml secuencia_27_cambio_contexto_organizacion
+title Cambio de contexto personal / organización (NUEVO — HUE-02)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as Usuario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "ContextoController" as CC <<Nuevo>>
+database "MiembroOrganizacion (DB)" as DBMiembro <<Nuevo>>
+database "Organizacion (DB)" as DBOrg <<Nuevo>>
+
+Usuario -> FE : Hace clic en el selector\nde contexto (header)
+activate FE
+
+FE -> CC : GET /usuario/organizaciones
+activate CC
+
+CC -> DBMiembro : Consulta organizaciones\ndonde el usuario es miembro
+activate DBMiembro
+DBMiembro --> CC : lista de membresías
+deactivate DBMiembro
+
+CC -> DBOrg : Obtiene datos de cada organización
+activate DBOrg
+DBOrg --> CC : datos de organizaciones
+deactivate DBOrg
+
+CC --> FE : Lista de organizaciones con roles
+deactivate CC
+
+FE --> Usuario : Muestra lista de organizaciones\ny opción "Personal"
+
+Usuario -> FE : Selecciona organización\n(o contexto "Personal")
+
+FE -> CC : POST /usuario/contexto\n{organizacion_id} (o null para personal)
+activate CC
+
+CC -> DBMiembro : Valida que el usuario\nes miembro de la organización
+activate DBMiembro
+DBMiembro --> CC : membresía confirmada
+deactivate DBMiembro
+
+CC -> CC : Actualiza contexto de sesión\n(almacena organizacion_id activa)
+
+CC --> FE : 200 OK {contexto actualizado}
+deactivate CC
+
+FE -> FE : Recarga dashboard con datos\ndel contexto seleccionado
+
+FE --> Usuario : Muestra dashboard en contexto\nde la organización seleccionada
+deactivate FE
+
+note over FE, DBOrg
+  Planificado — ERS HUE-02, sin código todavía
+end note
+
+@enduml

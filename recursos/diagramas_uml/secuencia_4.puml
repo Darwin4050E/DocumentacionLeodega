@@ -1,0 +1,84 @@
+@startuml secuencia_4_restablecimiento_contrasena
+title Diagrama de Secuencia — Restablecimiento de Contraseña
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "PasswordResetController" as PRC <<Heredado>>
+participant "PasswordBroker\n(Laravel)" as PB <<Heredado>>
+participant "MailService" as MS <<Heredado>>
+database "User" as DB <<Heredado>>
+
+== Solicitud de enlace de restablecimiento ==
+
+U -> FE : Clic en "Olvidé mi contraseña"
+activate FE
+
+FE -> PRC : POST /forgot-password { email }
+activate PRC
+
+PRC -> PB : Password::sendResetLink({ email })
+activate PB
+
+PB -> DB : Generar token y almacenar\nen tabla password_resets
+activate DB
+DB --> PB : token almacenado
+deactivate DB
+
+PB -> MS : Enviar correo de restablecimiento\n(token + enlace)
+activate MS
+MS --> PB : correo enviado
+deactivate MS
+
+PB --> PRC : estado de envío
+deactivate PB
+
+PRC --> FE : 200 Enlace enviado
+deactivate PRC
+
+FE --> U : "Revise su correo electrónico"
+deactivate FE
+
+== Restablecimiento de contraseña ==
+
+U -> FE : Clic en enlace del correo
+activate FE
+
+U -> FE : Ingresa nueva contraseña
+
+FE -> PRC : POST /reset-password\n{ token, email, password, password_confirmation }
+activate PRC
+
+PRC -> PB : Password::reset(credentials)
+activate PB
+
+PB -> DB : Verificar token
+activate DB
+DB --> PB : token válido
+deactivate DB
+
+PB -> DB : Actualizar contraseña del usuario
+activate DB
+DB --> PB : contraseña actualizada
+deactivate DB
+
+PB --> PRC : estado de restablecimiento
+deactivate PB
+
+PRC --> FE : 200 Contraseña restablecida
+deactivate PRC
+
+FE -> FE : Redirige a /login
+
+FE --> U : Muestra pantalla de inicio de sesión
+deactivate FE
+
+@enduml

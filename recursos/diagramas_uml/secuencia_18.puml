@@ -1,0 +1,68 @@
+@startuml secuencia_18
+title Crear conversación y enviar mensaje (HEREDADO)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor UsuarioA <<Heredado>>
+participant Frontend <<Heredado>>
+participant ConversationController <<Heredado>>
+participant MessageController <<Heredado>>
+database Conversation <<Heredado>>
+database Message <<Heredado>>
+participant NotificationService <<Heredado>>
+actor UsuarioB <<Heredado>>
+
+UsuarioA -> Frontend : Desea contactar a UsuarioB
+activate Frontend
+Frontend -> ConversationController : POST /conversations\n{user_id: UsuarioB.id}
+activate ConversationController
+ConversationController -> Conversation : Verificar si ya existe\nconversación entre ambos usuarios
+activate Conversation
+
+alt Conversación ya existe
+    Conversation --> ConversationController : Conversación existente
+    deactivate Conversation
+    ConversationController --> Frontend : Conversación existente
+else Nueva conversación
+    ConversationController -> Conversation : Crear Conversation
+    activate Conversation
+    Conversation --> ConversationController : Conversación creada
+    deactivate Conversation
+    ConversationController -> Conversation : Adjuntar ambos usuarios\nvía tabla pivote conversation_user
+    activate Conversation
+    Conversation --> ConversationController : Relación creada
+    deactivate Conversation
+    ConversationController --> Frontend : Conversación nueva
+end
+
+deactivate ConversationController
+Frontend --> UsuarioA : Muestra conversación
+deactivate Frontend
+
+UsuarioA -> Frontend : Escribe mensaje
+activate Frontend
+Frontend -> MessageController : POST /conversations/{id}/messages\n{body, file (opcional, multipart)}
+activate MessageController
+MessageController -> MessageController : Gate check: usuario\nes participante
+MessageController -> Message : Crear Message\n(sender_id, body, is_read=false)
+activate Message
+Message --> MessageController : Mensaje creado
+deactivate Message
+MessageController -> MessageController : Identificar otros participantes
+MessageController -> NotificationService : Enviar notificación MESSAGE\na UsuarioB (preview ≤ 50 chars)
+activate NotificationService
+NotificationService -> UsuarioB : Notificación de nuevo mensaje
+deactivate NotificationService
+MessageController --> Frontend : Mensaje creado
+deactivate MessageController
+Frontend --> UsuarioA : Muestra mensaje enviado
+deactivate Frontend
+
+@enduml

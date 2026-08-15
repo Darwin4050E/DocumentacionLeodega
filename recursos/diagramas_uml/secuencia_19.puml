@@ -1,0 +1,69 @@
+@startuml secuencia_19
+title Marcar mensajes como leídos y consultar notificaciones (HEREDADO)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Usuario <<Heredado>>
+participant Frontend <<Heredado>>
+participant MessageController <<Heredado>>
+participant NotificationsController <<Heredado>>
+database Message <<Heredado>>
+database Notifications <<Heredado>>
+
+Usuario -> Frontend : Abre una conversación
+activate Frontend
+
+Frontend -> MessageController : GET /conversations/{id}/messages
+activate MessageController
+MessageController -> Message : Listar mensajes paginados (20/página)
+activate Message
+Message --> MessageController : Mensajes paginados
+deactivate Message
+MessageController --> Frontend : Lista de mensajes
+deactivate MessageController
+
+Frontend -> MessageController : POST /conversations/{id}/read
+activate MessageController
+MessageController -> MessageController : Gate check: usuario\nes participante
+MessageController -> Message : Actualizar mensajes recibidos\n(no enviados por usuario)\nis_read=true
+activate Message
+Message --> MessageController : Actualización exitosa
+deactivate Message
+MessageController --> Frontend : Éxito
+deactivate MessageController
+
+Frontend -> NotificationsController : GET /notifications-unread-count
+activate NotificationsController
+NotificationsController -> Notifications : Contar notificaciones no leídas
+activate Notifications
+Notifications --> NotificationsController : Cantidad
+deactivate Notifications
+NotificationsController --> Frontend : Cantidad de no leídas
+deactivate NotificationsController
+
+Frontend --> Usuario : Actualiza badge de notificaciones
+deactivate Frontend
+
+opt Usuario hace clic en una notificación
+    Usuario -> Frontend : Selecciona notificación
+    activate Frontend
+    Frontend -> NotificationsController : POST /notifications/{id}/read
+    activate NotificationsController
+    NotificationsController -> Notifications : Actualizar is_read=true
+    activate Notifications
+    Notifications --> NotificationsController : Actualización exitosa
+    deactivate Notifications
+    NotificationsController --> Frontend : Éxito
+    deactivate NotificationsController
+    Frontend --> Usuario : Muestra contenido de la notificación
+    deactivate Frontend
+end
+
+@enduml

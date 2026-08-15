@@ -1,0 +1,60 @@
+@startuml secuencia_13_cancelar_reserva
+
+title Diagrama de Secuencia 13: Cancelar reserva (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendador
+participant "Frontend" as FE <<Heredado>>
+participant "ReservationsController" as RC <<Heredado>>
+participant "UpdateReservationStatusRequest" as URR <<Heredado>>
+participant "ReservationService" as RS <<Heredado>>
+database "Reservations" as RDB <<Heredado>>
+participant "NotificationService" as NS <<Heredado>>
+actor Arrendatario
+
+Arrendador -> FE : Visualiza la reserva
+activate FE
+
+Arrendador -> FE : Hace clic en "Cancelar"\ne ingresa motivo de cancelación
+
+FE -> RC : PATCH /landlord/reservations/{id}/status\n{status='canceled', cancelation_reason}
+activate RC
+
+RC -> RC : Verificación de Gate:\nsolo el arrendador de la bodega
+
+RC -> URR : Valida campos de la solicitud
+activate URR
+URR --> RC : Validación exitosa
+deactivate URR
+
+RC -> RS : cancel(): actualiza reserva
+activate RS
+
+RS -> RDB : Actualiza status='canceled'\ny almacena cancelation_reason
+activate RDB
+RDB --> RS : Reserva actualizada
+deactivate RDB
+
+RS -> NS : send() → RESERVATION_CANCELED\nal arrendatario
+activate NS
+NS --> Arrendatario : Notificación: reserva cancelada\ncon motivo de cancelación
+deactivate NS
+
+RS --> RC : Reserva cancelada exitosamente
+deactivate RS
+
+RC --> FE : JSON de la reserva actualizada
+deactivate RC
+
+FE --> Arrendador : Muestra reserva cancelada
+deactivate FE
+
+@enduml

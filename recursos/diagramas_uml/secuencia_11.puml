@@ -1,0 +1,82 @@
+@startuml secuencia_11_reservar_bodega
+
+title Diagrama de Secuencia 11: Reservar bodega (con detección de conflictos) (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendatario
+participant "Frontend" as FE <<Heredado>>
+participant "ReservationsController" as RC <<Heredado>>
+participant "StoreReservationRequest" as SRR <<Heredado>>
+participant "ReservationService" as RS <<Heredado>>
+database "Reservations" as RDB <<Heredado>>
+participant "NotificationService" as NS <<Heredado>>
+actor Arrendador
+
+Arrendatario -> FE : Abre modal de reserva\nen detalle de bodega
+activate FE
+
+FE -> RC : GET /storeRooms/{id}/reserved-dates
+activate RC
+RC -> RDB : Consulta rangos de fechas confirmadas
+activate RDB
+RDB --> RC : Fechas reservadas
+deactivate RDB
+RC --> FE : Rangos de fechas confirmadas
+deactivate RC
+
+FE -> FE : Muestra calendario con\nfechas no disponibles deshabilitadas
+
+Arrendatario -> FE : Selecciona fecha_inicio y fecha_fin
+
+FE -> RC : POST /reservations\n{store_room_id, start_date, end_date, total_mount}
+activate RC
+
+RC -> SRR : Valida campos de la solicitud
+activate SRR
+SRR --> RC : Validación exitosa
+deactivate SRR
+
+RC -> RC : Busca arrendatario (tenant)\nasociado al usuario
+
+RC -> RS : create(): verifica conflictos\ncon reservas confirmadas
+activate RS
+
+RS -> RDB : Consulta reservas confirmadas\nen rango de fechas
+activate RDB
+RDB --> RS : Reservas existentes
+deactivate RDB
+
+alt Conflicto detectado
+  RS --> RC : Lanza ReservationConflictException
+  RC --> FE : Respuesta 409: Conflicto de fechas
+  FE --> Arrendatario : Muestra error:\n"Las fechas seleccionadas no están disponibles"
+else Sin conflicto
+  RS -> RDB : Crea registro de Reservations\ncon status='pending'
+  activate RDB
+  RDB --> RS : Reserva creada
+  deactivate RDB
+
+  RS -> NS : send(): notifica al arrendador\ncon RESERVATION_REQUEST
+  activate NS
+  NS --> Arrendador : Notificación: nueva solicitud de reserva
+  deactivate NS
+
+  RS --> RC : Reserva creada exitosamente
+  deactivate RS
+
+  RC --> FE : JSON de la reserva
+  deactivate RC
+
+  FE --> Arrendatario : Muestra "Solicitud enviada"
+  deactivate FE
+end
+
+@enduml

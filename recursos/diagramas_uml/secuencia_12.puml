@@ -1,0 +1,87 @@
+@startuml secuencia_12_confirmar_reserva
+
+title Diagrama de Secuencia 12: Confirmar reserva por arrendador (cancelación en cascada) (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Arrendador
+participant "Frontend" as FE <<Heredado>>
+participant "ReservationsController" as RC <<Heredado>>
+participant "UpdateReservationStatusRequest" as URR <<Heredado>>
+participant "ReservationService" as RS <<Heredado>>
+database "Reservations" as RDB <<Heredado>>
+participant "NotificationService" as NS <<Heredado>>
+actor Arrendatario
+
+Arrendador -> FE : Consulta solicitudes de reserva
+activate FE
+FE -> RC : GET /landlord/reservations
+activate RC
+RC --> FE : Lista de reservas pendientes
+deactivate RC
+
+Arrendador -> FE : Hace clic en "Confirmar"\nen una reserva pendiente
+
+FE -> RC : PATCH /landlord/reservations/{id}/status\n{status='confirmed'}
+activate RC
+
+RC -> RC : Verificación de Gate:\nsolo el arrendador de la bodega\npuede actualizar
+
+RC -> URR : Valida campos de la solicitud
+activate URR
+URR --> RC : Validación exitosa
+deactivate URR
+
+RC -> RS : confirm(): verifica que no exista\notra reserva confirmada con superposición
+activate RS
+
+RS -> RDB : Consulta reservas confirmadas\ncon fechas superpuestas
+activate RDB
+RDB --> RS : Reservas existentes
+deactivate RDB
+
+alt Conflicto con otra reserva confirmada
+  RS --> RC : Lanza ReservationConflictException
+  RC --> FE : Respuesta 409: Conflicto de fechas
+  FE --> Arrendador : Muestra error de conflicto
+else Sin conflicto
+  RS -> RDB : Actualiza status a 'confirmed'
+  activate RDB
+  RDB --> RS : Reserva actualizada
+  deactivate RDB
+
+  RS -> NS : send() → RESERVATION_CONFIRMED\nal arrendatario
+  activate NS
+  NS --> Arrendatario : Notificación: reserva confirmada
+  deactivate NS
+
+  loop Para cada reserva pendiente con fechas superpuestas en la misma bodega
+    RS -> RDB : cancel(): actualiza status='canceled'\nrazón="Bloqueada por reserva confirmada"
+    activate RDB
+    RDB --> RS : Reserva cancelada
+    deactivate RDB
+
+    RS -> NS : send() → RESERVATION_CANCELED\nal arrendatario afectado
+    activate NS
+    NS --> Arrendatario : Notificación: reserva cancelada
+    deactivate NS
+  end
+
+  RS --> RC : Reserva confirmada exitosamente
+  deactivate RS
+
+  RC --> FE : JSON de la reserva confirmada
+  deactivate RC
+
+  FE --> Arrendador : Muestra reserva confirmada
+  deactivate FE
+end
+
+@enduml

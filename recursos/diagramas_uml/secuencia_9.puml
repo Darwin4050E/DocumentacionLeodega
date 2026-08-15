@@ -1,0 +1,59 @@
+@startuml secuencia_9_buscar_listar_bodegas
+
+title Diagrama de Secuencia 9: Buscar y listar bodegas (Heredado)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor Usuario
+participant "Frontend" as FE <<Heredado>>
+participant "StoreRoomsController" as SRC <<Heredado>>
+database "StoreRooms" as SR <<Heredado>>
+database "StorePrices" as SP <<Heredado>>
+database "StorePhoto" as SPH <<Heredado>>
+database "Ratings" as RT <<Heredado>>
+
+Usuario -> FE : Abre página de catálogo/búsqueda
+activate FE
+
+FE -> SRC : GET /storeRooms\n(endpoint público, sin autenticación)
+activate SRC
+
+SRC -> SR : index(): consulta StoreRooms\ncon relaciones (prices, photos, ratings)
+activate SR
+SR --> SRC : Lista de bodegas
+deactivate SR
+
+loop Para cada bodega
+  SRC -> SP : Carga precios de la bodega
+  activate SP
+  SP --> SRC : Precios asociados
+  deactivate SP
+
+  SRC -> SPH : Carga fotos de la bodega
+  activate SPH
+  SPH --> SRC : Fotos asociadas
+  deactivate SPH
+
+  SRC -> RT : Consulta calificaciones
+  activate RT
+  RT --> SRC : Calificaciones
+  deactivate RT
+
+  SRC -> SRC : Calcula promedio de calificación
+end
+
+SRC --> FE : JSON: arreglo de bodegas con\nprecios, fotos y calificaciones anidados
+deactivate SRC
+
+FE -> FE : Renderiza grilla/lista con filtros\n(ciudad, tipo de bodega, etc. del lado del cliente)
+FE --> Usuario : Muestra catálogo de bodegas
+deactivate FE
+
+@enduml

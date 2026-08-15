@@ -1,0 +1,59 @@
+@startuml secuencia_28_registrar_endpoint_inventario
+title Registrar endpoint de inventario externo (NUEVO — HUC-10)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Arrendatario" as Arrendatario <<Nuevo>>
+participant "Frontend" as FE <<Nuevo>>
+participant "InventarioController" as IC <<Nuevo>>
+participant "EndpointInventarioService" as EIS <<Nuevo>>
+database "EndpointInventario (DB)" as DB <<Nuevo>>
+
+Arrendatario -> FE : Navega a configuración\nde inventario
+activate FE
+
+Arrendatario -> FE : Llena formulario:\nURL del endpoint,\ntipo de autenticación (API key / OAuth),\ncredenciales
+
+FE -> IC : POST /inventario/endpoints\n{url, auth_type, credentials}
+activate IC
+
+IC -> IC : Valida formato de URL
+
+IC -> EIS : registrar(tenant, data)
+activate EIS
+
+EIS -> EIS : Prueba conexión al endpoint\nexterno (HTTP ping)
+
+alt Conexión fallida
+    EIS --> IC : Error: "No se pudo conectar al endpoint"
+    IC --> FE : 422 Unprocessable Entity\n{error}
+    FE --> Arrendatario : Muestra error de conexión
+else Conexión exitosa
+    EIS -> DB : Crea registro EndpointInventario\n(url, auth_type, credenciales cifradas,\nestado='activo')
+    activate DB
+    DB --> EIS : registro creado
+    deactivate DB
+
+    EIS --> IC : registro de endpoint
+    deactivate EIS
+
+    IC --> FE : 201 Created {endpoint}
+    deactivate IC
+
+    FE --> Arrendatario : Muestra "Endpoint registrado exitosamente"
+end
+
+deactivate FE
+
+note over FE, DB
+  Planificado — ERS HUC-10, sin código todavía
+end note
+
+@enduml

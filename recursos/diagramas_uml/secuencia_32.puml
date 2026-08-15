@@ -1,0 +1,101 @@
+@startuml secuencia_32_leodeguita_login_movil
+title Leodeguita: Inicio de sesión móvil (NUEVO — HUL-01)
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "UsuarioMóvil" as UM <<Nuevo>>
+participant "AppMóvil\n(Leodeguita)" as App <<Nuevo>>
+participant "APIGateway" as GW <<Nuevo>>
+participant "AuthController" as AC <<Nuevo>>
+participant "AuthService" as AS <<Nuevo>>
+database "User (DB)" as DBUser <<Nuevo>>
+participant "EmpresaService" as ES <<Nuevo>>
+database "MiembroOrganizacion (DB)" as DBMiembro <<Nuevo>>
+
+UM -> App : Abre la aplicación Leodeguita
+activate App
+
+App --> UM : Presenta pantalla de inicio de sesión
+
+UM -> App : Ingresa credenciales de Leodega\n(mismo email / contraseña)
+
+App -> GW : POST /api/login\n{email, password}
+activate GW
+
+GW -> AC : Enruta a login()
+activate AC
+
+AC -> AS : validar credenciales
+activate AS
+
+AS -> DBUser : Busca usuario por email
+activate DBUser
+DBUser --> AS : datos del usuario
+deactivate DBUser
+
+AS -> AS : Verifica contraseña
+
+AS -> AS : ensureUserIsNotBlocked(user)
+
+alt Usuario bloqueado
+    AS --> AC : 403 Forbidden
+    deactivate AS
+    AC --> GW : 403 Forbidden
+    deactivate AC
+    GW --> App : 403 {error: "Cuenta bloqueada"}
+    deactivate GW
+    App --> UM : Muestra "Cuenta bloqueada"
+else Usuario activo
+    AS -> AS : issueTokenFor(user, request)\ndevice_name='leodeguita_mobile'
+
+    AS --> AC : {token, user}
+    deactivate AS
+
+    AC --> GW : 200 OK {token, user}
+    deactivate AC
+
+    GW --> App : 200 OK {token, user}
+    deactivate GW
+
+    App -> App : Almacena token de forma segura\n(SecureStorage)
+
+    opt Usuario pertenece a organizaciones (HUL-02)
+        App -> GW : GET /usuario/organizaciones
+        activate GW
+
+        GW -> ES : listarOrganizaciones(user)
+        activate ES
+
+        ES -> DBMiembro : Consulta membresías del usuario
+        activate DBMiembro
+        DBMiembro --> ES : lista de organizaciones
+        deactivate DBMiembro
+
+        ES --> GW : organizaciones con roles
+        deactivate ES
+
+        GW --> App : 200 OK {organizaciones}
+        deactivate GW
+
+        App --> UM : Presenta selector de empresa
+
+        UM -> App : Selecciona contexto de empresa
+    end
+
+    App --> UM : Navega a pantalla principal
+end
+
+deactivate App
+
+note over App, DBMiembro
+  Planificado — ERS HUL-01 / HUL-02, sin código todavía
+end note
+
+@enduml

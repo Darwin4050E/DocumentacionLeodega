@@ -1,0 +1,39 @@
+@startuml secuencia_3_cierre_sesion
+title Diagrama de Secuencia — Cierre de Sesión
+
+skinparam participant {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BackgroundColor<<Nuevo>> #D5F5E3
+}
+skinparam sequence {
+  ArrowColor #2C3E50
+  LifeLineBorderColor #2C3E50
+}
+
+actor "Usuario" as U
+participant "Frontend" as FE <<Heredado>>
+participant "AuthController" as AC <<Heredado>>
+participant "TokenStore\n(Sanctum)" as TS <<Heredado>>
+
+U -> FE : Clic en "Cerrar sesión"
+activate FE
+
+FE -> AC : POST /logout\n(Header: Bearer token)
+activate AC
+
+AC -> TS : Eliminar token de acceso actual
+activate TS
+TS --> AC : token eliminado
+deactivate TS
+
+AC --> FE : 200 OK
+deactivate AC
+
+FE -> FE : Limpia localStorage\n(auth_token, auth_user)
+
+FE -> FE : Redirige a /login
+
+FE --> U : Muestra pantalla de inicio de sesión
+deactivate FE
+
+@enduml
