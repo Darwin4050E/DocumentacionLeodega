@@ -1,0 +1,55 @@
+@startuml comunicacion_02
+allowmixing
+title Diagrama de Comunicación 02 -- Reservar bodega (corresponde a Secuencia #11)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment left
+skinparam nodesep 150
+skinparam ranksep 55
+skinparam object {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Actor>> #FCF3CF
+  BorderColor<<Actor>> #B7950B
+}
+skinparam ArrowColor #2C3E50
+skinparam ArrowFontSize 12
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Rol |
+  |<#FCF3CF>| Actor humano |
+  |<#D6EAF8>| Objeto Heredado (equipo anterior) |
+endlegend
+
+object "arrendatario : Arrendatario" as T <<Actor>>
+note top of T
+  N, N.M = orden y jerarquía del mensaje
+  (*) = mensaje iterativo (loop)
+end note
+
+object "frontend : Frontend" as FE <<Heredado>>
+object "reservationsController : ReservationsController" as RC <<Heredado>>
+together {
+  object "reservationService : ReservationService" as RS <<Heredado>>
+  database "reservations : Reservations" as RDB <<Heredado>>
+}
+object "notificationService : NotificationService" as NS <<Heredado>>
+object "arrendador : Arrendador" as L <<Actor>>
+
+T -down-> FE : 1: seleccionarFechas()
+FE -down-> RC : 2: store(): reserva
+RC -down-> RS : 3: create()\n(valida StoreReservationRequest)
+RS -right-> RDB : 3.1: findOverlapping(): reservas;\n[sin conflicto] insert(status='pending')
+RS -down-> NS : 3.2: send(RESERVATION_REQUEST)
+NS -right-> L : 3.2.1: notificar()
+FE -up-> T : 4: mostrarResultado()
+
+note bottom of RS
+  3.1 lanza ReservationConflictException si hay
+  reserva confirmada con fechas solapadas (409)
+end note
+
+@enduml

@@ -317,6 +317,7 @@ Bucle de sincronización por endpoint & ERS HUC-12; \texttt{SincronizacionServic
 
 % ------------------------------------------------------------
 \section{Diagramas de Secuencia}
+\label{sec:secuencia}
 \noindent Se documentan a continuación los \textbf{32 diagramas de secuencia} de los algoritmos transaccionales más relevantes del sistema. Se priorizan escenarios de la funcionalidad \textbf{nueva} (organizaciones, inventario, Leodeguita, permisos de bomberos, panel administrativo) complementados con los flujos transaccionales \textbf{heredados} que constituyen el núcleo del marketplace. Cada diagrama distingue participantes heredados (\colorbox{heredadobg}{azul}) de nuevos (\colorbox{nuevobg}{verde}).
 
 % --- Flujos heredados (1--20) ---
@@ -389,15 +390,125 @@ Bucle de sincronización por endpoint & ERS HUC-12; \texttt{SincronizacionServic
 
 % ------------------------------------------------------------
 \section{Diagramas de Colaboración / Comunicación}
-\noindent Con fines ilustrativos, se presentan versiones en diagrama de comunicación de algunos de los escenarios de secuencia más representativos.
+\sloppy
+\noindent Se presentan 6 diagramas de comunicación (UML, notación de PlantUML sobre \texttt{object}/\texttt{database} con mensajes numerados) que ilustran los escenarios de interacción más representativos entre objetos, priorizando los mismos flujos transaccionales centrales documentados en los Diagramas de Secuencia (\S\ref{sec:secuencia}) para permitir comparar ambas vistas del mismo comportamiento: la temporal (secuencia) y la estructural (colaboración, organizada alrededor de los enlaces entre objetos). Cada mensaje se numera de forma jerárquica (\texttt{N}, \texttt{N.M}, \texttt{N.M.P}\ldots) según el orden de disparo: un mensaje \texttt{N.M} se dispara dentro del procesamiento del mensaje \texttt{N} que lo contiene, siguiendo la convención estándar de los diagramas de colaboración UML. Los mensajes marcados con asterisco (\texttt{*}) son iterativos (se repiten en un \textit{loop}, p.\,ej. una notificación por cada administrador). Se seleccionaron 5 escenarios heredados (autenticación, reserva con detección de conflictos, confirmación con cancelación en cascada, pago que confirma la reserva, y reporte de incidente con notificación en cascada) y 1 escenario nuevo planificado (bloqueo de cuenta, ERS HUA-03), para cubrir tanto el núcleo heredado del marketplace como un ejemplo representativo de la funcionalidad nueva.
 
-\DiagramaPagina{Diagrama de Comunicación 01 -- [Escenario ilustrado, ej. correspondiente a Secuencia \#1]}{imagenes/comunicacion_01.png}{com01}{[Descripción del escenario y correspondencia con el diagrama de secuencia equivalente.]}
+\subsection{Diagrama de Comunicación 01 -- Inicio de sesión}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.5}{imagenes/comunicacion_01.png}
+    \caption{Diagrama de comunicación -- Inicio de sesión}
+    \label{fig:com01}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#2. El \texttt{Frontend} envía las credenciales a \texttt{AuthController} (2), que consulta \texttt{User} (2.1), valida credenciales localmente (2.2) y delega en \texttt{AuthService} la verificación de bloqueo y la emisión del token (2.3), la cual a su vez crea el token en \texttt{TokenStore}/Sanctum (2.3.1). \texttt{AuthService} lanza \texttt{AccountBlockedException} si \texttt{user.state = 'blocked'}, interrumpiendo el flujo antes de emitir el token.
 
-\DiagramaPagina{Diagrama de Comunicación 02 -- [Escenario ilustrado]}{imagenes/comunicacion_02.png}{com02}{[Descripción del escenario.]}
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+AuthController, AuthService, User, TokenStore (Sanctum) & \url{backend/app/Http/Controllers/AuthController.php}, \url{backend/app/Services/AuthService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
 
-\DiagramaPagina{Diagrama de Comunicación 03 -- [Escenario ilustrado]}{imagenes/comunicacion_03.png}{com03}{[Descripción del escenario.]}
+\subsection{Diagrama de Comunicación 02 -- Reservar bodega}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.5}{imagenes/comunicacion_02.png}
+    \caption{Diagrama de comunicación -- Reservar bodega}
+    \label{fig:com02}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#11. \texttt{ReservationsController} delega en \texttt{ReservationService} (3), que consulta conflictos y, si no hay solapamiento, crea la reserva en \texttt{Reservations} con \texttt{status='pending'} (3.1) y notifica al arrendador vía \texttt{NotificationService} (3.2--3.2.1). \texttt{ReservationService} lanza \texttt{ReservationConflictException} (409) si ya existe una reserva confirmada con fechas solapadas.
 
-\noindent\textit{Nota: Agregue más bloques si desea ilustrar escenarios adicionales.}
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+ReservationsController, ReservationService, Reservations, NotificationService & \url{backend/app/Http/Controllers/ReservationsController.php}, \url{backend/app/Services/ReservationService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Comunicación 03 -- Confirmar reserva con cancelación en cascada}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.6}{imagenes/comunicacion_03.png}
+    \caption{Diagrama de comunicación -- Confirmar reserva con cancelación en cascada}
+    \label{fig:com03}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#12. Al confirmar (3), \texttt{ReservationService} verifica solapamiento con otras reservas confirmadas y, si no hay conflicto, actualiza \texttt{status='confirmed'} y \textbf{cancela en cascada} (marcado \texttt{*}) todas las reservas pendientes solapadas en la misma bodega (3.1), notificando en cada caso al arrendatario correspondiente (3.2). Mismo guard de conflicto (\texttt{ReservationConflictException}, 409) que en la Secuencia~\#11, aplicado aquí sobre otras reservas ya confirmadas.
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+ReservationsController, ReservationService, Reservations, NotificationService & \url{backend/app/Http/Controllers/ReservationsController.php}, \url{backend/app/Services/ReservationService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Comunicación 04 -- Procesar pago y confirmar reserva}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.98}{0.5}{imagenes/comunicacion_04.png}
+    \caption{Diagrama de comunicación -- Procesar pago y confirmar reserva}
+    \label{fig:com04}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#14. Ilustra el algoritmo transaccional que enlaza \texttt{Payments} con \texttt{Reservations}: \texttt{PaymentsPolicy} verifica que quien paga sea el arrendatario dueño de la reserva (3, deniega con 403 si no); \texttt{PaymentService} registra el pago (4.1) y, si queda \texttt{paid} y la reserva no estaba confirmada, invoca a \texttt{ReservationService.confirm()} (4.2), que a su vez actualiza la reserva y dispara la misma cancelación en cascada de la Secuencia~\#12 (4.2.1--4.2.2).
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+PaymentsController, PaymentsPolicy, PaymentService, Payments & \url{backend/app/Services/PaymentService.php}, \url{backend/app/Policies/PaymentsPolicy.php} & \cellcolor{heredadobg}Heredado \\ \hline
+ReservationService, Reservations, NotificationService & \url{backend/app/Services/ReservationService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Comunicación 05 -- Reportar incidente con notificación en cascada}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.98}{0.55}{imagenes/comunicacion_05.png}
+    \caption{Diagrama de comunicación -- Reportar incidente con notificación en cascada}
+    \label{fig:com05}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#16. \texttt{ReportService} crea el reporte (3.1), adjunta una evidencia por cada archivo subido (3.2, iterativo) y notifica en cascada a todos los administradores (3.3--3.3.1, iterativo) y, si el arrendador de la bodega reportada no es también administrador, también a él (3.3--3.3.2).
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+ReportsController, ReportService, Reports, ReportEvidences, NotificationService & \url{backend/app/Http/Controllers/ReportsController.php}, \url{backend/app/Services/ReportService.php} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Comunicación 06 -- Bloquear cuenta de usuario}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.85}{0.5}{imagenes/comunicacion_06.png}
+    \caption{Diagrama de comunicación -- Bloquear cuenta de usuario (nuevo, planificado)}
+    \label{fig:com06}
+\end{figure}
+\noindent\textbf{Descripción:} Corresponde a la Secuencia~\#21 (ERS HUA-03, planificado, sin código todavía). \texttt{UserBlockingService} actualiza \texttt{User.state='blocked'} (3.1), revoca todos los tokens activos de Sanctum (3.2), registra la acción en \texttt{RegistroAuditoria} (3.3) y notifica al usuario (3.4). La reactivación sigue el mismo flujo sin el paso 3.2.
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{5cm}|L{7.5cm}|M{2cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / clase)} & \textbf{Estado} \\ \hline
+\endhead
+AdminController, UserBlockingService, RegistroAuditoria & ERS HUA-03 (sin código) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada (los 6 diagramas):} \textit{PlantUML v1.2026.6} (renderizado localmente con \texttt{plantuml.jar} sobre OpenJDK). Fuentes: \url{recursos/diagramas_uml/comunicacion_01.puml} a \url{comunicacion_06.puml}.\par}
+\fussy
 \clearpage
 
 % ------------------------------------------------------------

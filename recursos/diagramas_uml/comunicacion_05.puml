@@ -1,0 +1,59 @@
+@startuml comunicacion_05
+allowmixing
+title Diagrama de Comunicación 05 -- Reportar incidente con notificación en cascada (corresponde a Secuencia #16)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 190
+skinparam defaultTextAlignment left
+skinparam nodesep 150
+skinparam ranksep 55
+skinparam object {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Actor>> #FCF3CF
+  BorderColor<<Actor>> #B7950B
+}
+skinparam ArrowColor #2C3E50
+skinparam ArrowFontSize 12
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Rol |
+  |<#FCF3CF>| Actor humano |
+  |<#D6EAF8>| Objeto Heredado (equipo anterior) |
+endlegend
+
+object "usuario : Usuario" as U <<Actor>>
+note top of U
+  N, N.M = orden y jerarquía del mensaje
+  (*) = mensaje iterativo (loop)
+end note
+
+object "frontend : Frontend" as FE <<Heredado>>
+object "reportsController : ReportsController" as RC <<Heredado>>
+together {
+  object "reportService : ReportService" as RS <<Heredado>>
+  database "reports : Reports" as RDB <<Heredado>>
+  database "reportEvidences : ReportEvidences" as RE <<Heredado>>
+}
+object "notificationService : NotificationService" as NS <<Heredado>>
+object "administrador : Administrador" as A <<Actor>>
+object "arrendador : Arrendador" as L <<Actor>>
+
+U -down-> FE : 1: completarFormulario()
+FE -down-> RC : 2: store(): reporte
+RC -down-> RS : 3: create()\n(valida StoreReportRequest)
+RS -right-> RDB : 3.1: insert(status='pending')
+RS -right-> RE : 3.2: *insert(evidencia) (por archivo)
+RS -down-> NS : 3.3: *send(admin, STORE_REPORTED);\n[arrendador<>admin] send(landlord, STORE_REPORTED)
+NS -right-> A : 3.3.1: *notificar()
+NS -down-> L : 3.3.2: notificar()
+FE -up-> U : 4: mostrarConfirmacion()
+
+note bottom of RS
+  3.2 se repite por cada archivo de evidencia adjunto
+  3.3/3.3.1 se repiten por cada usuario con rol administrador
+end note
+
+@enduml
