@@ -1,0 +1,53 @@
+@startuml diagrama_clases_08_excepciones
+title Diagrama de Clases 08 — Excepciones de Dominio
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Excepcion>> #FADBD8
+  BorderColor<<Excepcion>> #C0392B
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#FADBD8>| Excepción de dominio |
+endlegend
+
+package "Excepciones de Dominio" <<Excepcion>> {
+  class RuntimeException <<Excepcion>> {
+    <<PHP SPL>>
+  }
+  class DuplicateRatingException <<Excepcion>> {
+  }
+  class ReservationConflictException <<Excepcion>> {
+  }
+  class AccountBlockedException <<Excepcion>> {
+  }
+  DuplicateRatingException --|> RuntimeException
+  ReservationConflictException --|> RuntimeException
+  AccountBlockedException --|> RuntimeException
+}
+
+note bottom
+  Las tres extienden RuntimeException (PHP SPL) sin alterar
+  su contrato, por lo que son sustituibles en cualquier bloque
+  que ya capture RuntimeException o Throwable (Liskov, Tabla 3.4).
+  DuplicateRatingException: lanzada por RatingsService.
+  ReservationConflictException: lanzada por ReservationService,
+  propagada por PaymentService.
+  AccountBlockedException: lanzada por AuthService.
+end note
+
+@enduml

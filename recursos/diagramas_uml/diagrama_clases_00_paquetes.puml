@@ -1,0 +1,70 @@
+@startuml diagrama_clases_00_paquetes
+title Diagrama de Clases — Vista General por Paquetes (Leodega)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 260
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 75
+skinparam package {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Servicio>> #FCF3CF
+  BorderColor<<Servicio>> #B7950B
+  BackgroundColor<<Policy>> #F5EEF8
+  BorderColor<<Policy>> #8E44AD
+  BackgroundColor<<Excepcion>> #FADBD8
+  BorderColor<<Excepcion>> #C0392B
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#D5F5E3>| Nuevo (planificado, ERS) |
+  |<#FCF3CF>| Servicio de aplicación |
+  |<#F5EEF8>| Policy (autorización) |
+  |<#FADBD8>| Excepción de dominio |
+endlegend
+
+note as N0
+  Vista de contexto: cada paquete se detalla en su
+  propio diagrama (uno por paquete) con todos
+  los atributos, métodos y relaciones internas.
+end note
+
+package "Diagrama 01\nUsuarios y Roles\n----\nUser, Landlords,\nTenants, Admin" <<Heredado>> as P1
+package "Diagrama 02\nAlmacenes (Listings)\n----\nStoreRooms, StorePrices,\nStorePhoto, StoreDisponibility,\nStoreModeration, CancelationsPolices" <<Heredado>> as P2
+package "Diagrama 03\nReservas y Pagos\n----\nReservations, Payments,\nRatings, Favorites" <<Heredado>> as P3
+package "Diagrama 04\nComunicación\n----\nConversation, Message,\nNotifications, NotificationType" <<Heredado>> as P4
+package "Diagrama 05\nModeración y Reportes\n----\nReports, ReportEvidences" <<Heredado>> as P5
+package "Diagrama 06\nServicios de Aplicación\n----\n8 servicios (AuthService,\nReservationService, PaymentService, ...)" <<Servicio>> as P6
+package "Diagrama 07\nAutorización (Policies)\n----\nConversationPolicy,\nReservationsPolicy, PaymentsPolicy" <<Policy>> as P7
+package "Diagrama 08\nExcepciones de Dominio\n----\nDuplicateRatingException,\nReservationConflictException,\nAccountBlockedException" <<Excepcion>> as P8
+package "Diagrama 09\nNuevo (planificado, ERS)\n----\nOrganizacion, OrganizacionMiembro,\nConexionInventario, ProductoInventario,\nPermisoBomberos, RegistroAuditoria" <<Nuevo>> as P9
+
+P1 -down-> P2 : Landlords publica
+P1 -down-> P3 : Tenants reserva\nUser califica/guarda
+P1 -right-> P4 : User participa
+P1 -down-> P5 : User reporta
+P2 -right-> P3 : StoreRooms es\nreservada/calificada en
+P2 -down-> P5 : StoreRooms objeto de
+P6 .up.> P1 : usa
+P6 .up.> P2 : actualiza/modera
+P6 .up.> P3 : crea/confirma
+P6 .up.> P4 : crea notificación
+P6 .up.> P5 : crea/notifica
+P6 .right.> P8 : lanza
+P7 .up.> P1 : evalúa
+P7 .up.> P3 : evalúa
+P7 .up.> P4 : evalúa
+P9 .down.> P1 : User es miembro de\nOrganizacion
+P9 .up.> P2 : PermisoBomberos\nadjunta a StoreRooms
+P9 .up.> P3 : reserva empresarial\n(planificado)
+
+@enduml

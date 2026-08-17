@@ -1,0 +1,111 @@
+@startuml diagrama_clases_09_nuevo_planificado
+title Diagrama de Clases 09 — Nuevo (planificado, según ERS)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Referencia>> #EAECEE
+  BorderColor<<Referencia>> #839192
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D5F5E3>| Nuevo (planificado, ERS) |
+  |<#EAECEE>| Referencia (definida en otro diagrama) |
+endlegend
+
+class User <<Referencia>> {
+  .. definida en Diagrama de Clases 01 (Usuarios y Roles) ..
+}
+class Tenants <<Referencia>> {
+  .. definida en Diagrama de Clases 01 (Usuarios y Roles) ..
+}
+class Admin <<Referencia>> {
+  .. definida en Diagrama de Clases 01 (Usuarios y Roles) ..
+}
+class StoreRooms <<Referencia>> {
+  .. definida en Diagrama de Clases 02 (Almacenes) ..
+}
+class Reservations <<Referencia>> {
+  .. definida en Diagrama de Clases 03 (Reservas y Pagos) ..
+}
+
+package "Nuevo (planificado, según ERS)" <<Nuevo>> {
+  class Organizacion <<Nuevo>> {
+    - id: int
+    - nombre: string
+    - creado_por: int
+  }
+
+  class OrganizacionMiembro <<Nuevo>> {
+    - id: int
+    - organizacion_id: int
+    - user_id: int
+    - estado_invitacion: enum{invitada,aceptada,rechazada}
+  }
+
+  class ConexionInventario <<Nuevo>> {
+    - id: int
+    - tenant_id: int
+    - endpoint_url: string
+    - credencial: string (cifrada)
+    - mapeo_campos: json
+  }
+
+  class ProductoInventario <<Nuevo>> {
+    - id: int
+    - conexion_id: int
+    - nombre: string
+    - cantidad: decimal
+    - unidad_medida: string
+    - fecha_consulta: datetime
+  }
+
+  class PermisoBomberos <<Nuevo>> {
+    - id: int
+    - store_room_id: int
+    - documento_url: string
+    - estado: enum{pendiente,aprobado,rechazado}
+    - fecha_validacion: date
+  }
+
+  class RegistroAuditoria <<Nuevo>> {
+    - id: int
+    - admin_id: int
+    - accion: string
+    - entidad_afectada: string
+    - motivo: string
+    - fecha: datetime
+  }
+}
+
+User "*" -- "*" Organizacion : es miembro de
+(User, Organizacion) .. OrganizacionMiembro
+Organizacion ..> Reservations : reserva empresarial\n(planificado, HUE-05)
+Tenants "1" *-- "0..1" ConexionInventario : configura
+ConexionInventario "1" *-- "0..*" ProductoInventario : sincroniza/importa
+StoreRooms "1" *-- "0..1" PermisoBomberos : adjunta
+Admin "1" -- "0..*" RegistroAuditoria : ejecuta
+RegistroAuditoria "0..*" --> User : afecta a
+
+note bottom of RegistroAuditoria
+  Fuente: ERS HUA-03 (bloqueo/reactivación con
+  auditoría), HUE-01..06 (organizaciones).
+  Sin código todavía — clases planificadas.
+end note
+
+@enduml

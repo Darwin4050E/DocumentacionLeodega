@@ -1,0 +1,129 @@
+@startuml diagrama_clases_06_servicios
+title Diagrama de Clases 06 — Servicios de Aplicación
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 240
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam class {
+  BackgroundColor<<Servicio>> #FCF3CF
+  BorderColor<<Servicio>> #B7950B
+  BackgroundColor<<Referencia>> #EAECEE
+  BorderColor<<Referencia>> #839192
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#FCF3CF>| Servicio de aplicación |
+  |<#EAECEE>| Referencia (definida en otro diagrama) |
+endlegend
+
+package "Modelos de dominio (referencia)" <<Referencia>> {
+  class User <<Referencia>>
+  class Tenants <<Referencia>>
+  class Landlords <<Referencia>>
+  class StoreRooms <<Referencia>>
+  class StoreModeration <<Referencia>>
+  class Reservations <<Referencia>>
+  class Payments <<Referencia>>
+  class Ratings <<Referencia>>
+  class Reports <<Referencia>>
+  class Notifications <<Referencia>>
+  class NotificationType <<Referencia>>
+}
+note bottom of NotificationType
+  Definidas en Diagramas de Clases 01 a 05
+end note
+
+package "Excepciones (referencia)" <<Referencia>> {
+  class AccountBlockedException <<Referencia>>
+  class ReservationConflictException <<Referencia>>
+  class DuplicateRatingException <<Referencia>>
+}
+note bottom of DuplicateRatingException
+  Definidas en Diagrama de Clases 08 (Excepciones)
+end note
+
+package "Servicios de Aplicación" <<Servicio>> {
+  class AuthService <<Servicio>> {
+    + issueTokenFor(user: User, request: Request): string
+    + ensureUserIsNotBlocked(user: User): void
+    .. throws ..
+    AccountBlockedException
+  }
+
+  class StoreModerationService <<Servicio>> {
+    + moderate(room: StoreRooms, decision: string,\nreason: ?string, adminId: ?int): StoreModeration
+  }
+
+  class PaymentService <<Servicio>> {
+    + process(reservation: Reservations, data: array,\nactingUserId: ?int): Payments
+    .. throws ..
+    ReservationConflictException
+  }
+
+  class NotificationService <<Servicio>> {
+    + {static} send(senderId, receiverId, type: NotificationType,\ntitle, body, data): Notifications
+  }
+
+  class RatingsService <<Servicio>> {
+    + create(user: User, data: array): Ratings
+    .. throws ..
+    DuplicateRatingException
+  }
+
+  class ReportService <<Servicio>> {
+    + create(reportingUserId, data, files): Reports
+    - notifyAdminsAndLandlord(reportingUserId, report): void
+  }
+
+  class ReservationService <<Servicio>> {
+    + create(tenant, room, data, actingUserId): Reservations
+    + confirm(reservation, actingUserId): Reservations
+    + cancel(reservation, reason, actingUserId): Reservations
+    .. throws ..
+    ReservationConflictException
+  }
+
+  class UserRegistrationService <<Servicio>> {
+    + createProfileForRole(user: User): void
+  }
+}
+
+AuthService ..> User : usa
+AuthService ..> AccountBlockedException : lanza
+NotificationService ..> Notifications : crea
+NotificationService ..> NotificationType : usa
+StoreModerationService ..> StoreRooms : actualiza
+StoreModerationService ..> StoreModeration : crea
+StoreModerationService ..> NotificationService : usa
+PaymentService ..> Payments : crea
+PaymentService ..> ReservationService : usa
+PaymentService ..> ReservationConflictException : propaga
+RatingsService ..> Ratings : crea
+RatingsService ..> User : usa
+RatingsService ..> DuplicateRatingException : lanza
+ReportService ..> Reports : crea
+ReportService ..> StoreRooms : usa
+ReportService ..> User : usa
+ReportService ..> NotificationService : usa
+ReservationService ..> Reservations : crea/actualiza
+ReservationService ..> StoreRooms : usa
+ReservationService ..> Tenants : usa
+ReservationService ..> NotificationService : usa
+ReservationService ..> ReservationConflictException : lanza
+UserRegistrationService ..> Landlords : crea
+UserRegistrationService ..> Tenants : crea
+UserRegistrationService ..> User : usa
+
+@enduml

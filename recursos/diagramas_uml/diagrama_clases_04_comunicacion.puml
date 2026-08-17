@@ -1,0 +1,81 @@
+@startuml diagrama_clases_04_comunicacion
+title Diagrama de Clases 04 — Comunicación
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Referencia>> #EAECEE
+  BorderColor<<Referencia>> #839192
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#EAECEE>| Referencia (definida en otro diagrama) |
+endlegend
+
+class User <<Referencia>> {
+  .. definida en Diagrama de Clases 01 (Usuarios y Roles) ..
+}
+
+package "Comunicación" <<Heredado>> {
+  class Conversation <<Heredado>> {
+    - id: int
+  }
+
+  class Message <<Heredado>> {
+    - id: int
+    - conversation_id: int
+    - sender_id: int
+    - body: string
+    - file_path: string
+    - file_type: string
+    - file_name: string
+    - is_read: bool
+  }
+
+  class Notifications <<Heredado>> {
+    - id: int
+    - sender_id: int
+    - receiver_id: int
+    - type: NotificationType
+    - title: string
+    - body: string
+    - data: json
+    - is_read: bool
+  }
+
+  enum NotificationType <<Heredado>> {
+    MESSAGE
+    RESERVATION_REQUEST
+    RESERVATION_CONFIRMED
+    RESERVATION_CANCELED
+    STORE_CREATED
+    STORE_REPORTED
+    STORE_APPROVED
+    STORE_REJECTED
+  }
+}
+
+User "*" -- "*" Conversation : participa
+Conversation "1" *-- "0..*" Message : contiene
+User "1" -- "0..*" Message : envía
+User "1" -- "0..*" Notifications : envía >
+User "1" -- "0..*" Notifications : recibe >
+Notifications --> NotificationType : tipo
+
+@enduml

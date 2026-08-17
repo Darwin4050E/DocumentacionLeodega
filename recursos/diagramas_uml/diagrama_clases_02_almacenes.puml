@@ -1,0 +1,96 @@
+@startuml diagrama_clases_02_almacenes
+title Diagrama de Clases 02 — Almacenes (Listings)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Referencia>> #EAECEE
+  BorderColor<<Referencia>> #839192
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+  |<#EAECEE>| Referencia (definida en otro diagrama) |
+endlegend
+
+class Landlords <<Referencia>> {
+  .. definida en Diagrama de Clases 01 (Usuarios y Roles) ..
+}
+
+package "Almacenes (Listings)" <<Heredado>> {
+  class StoreRooms <<Heredado>> {
+    - id: int
+    - landlord_id: int
+    - room_type: enum{habitacion,garaje,contenedor,sotano,atico,bodega}
+    - storage_type: enum{completa,privado,compartido}
+    - direction: string
+    - city: string
+    - size: decimal
+    - title: string
+    - description: string
+    - security: string
+    - publication_status: enum{pending,approved,rejected}
+    - publication_date: datetime
+  }
+
+  class StorePrices <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - mode: string
+    - price: decimal
+    - disponibility: string
+  }
+
+  class StorePhoto <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - photo_url: string
+  }
+
+  class StoreDisponibility <<Heredado>> {
+    - id: int
+    - store_room_id: int
+    - start_date: date
+    - end_date: date
+  }
+
+  class StoreModeration <<Heredado>> {
+    - id: int
+    - store_id: int
+    - status: enum{pending,approved,rejected}
+    - reason_rejected: string
+    - moderation_date: date
+  }
+
+  class CancelationsPolices <<Heredado>> {
+    - id: int
+    - landlord_id: int
+    - policy_name: string
+    - description: string
+    - is_default: bool
+  }
+}
+
+Landlords "1" *-- "0..*" StoreRooms : publica
+Landlords "1" *-- "0..*" CancelationsPolices : define
+StoreRooms "1" *-- "0..*" StorePrices : tarifas
+StoreRooms "1" *-- "0..*" StorePhoto : fotos
+StoreRooms "1" *-- "0..*" StoreDisponibility : calendario
+StoreRooms "1" *-- "0..*" StoreModeration : historial moderación
+
+@enduml

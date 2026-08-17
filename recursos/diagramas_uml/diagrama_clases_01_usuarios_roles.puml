@@ -1,0 +1,77 @@
+@startuml diagrama_clases_01_usuarios_roles
+title Diagrama de Clases 01 — Usuarios y Roles
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam defaultTextAlignment left
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor #EAECEE
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #839192
+  FontStyle bold
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado / Rol |
+  |<#D6EAF8>| Heredado (equipo anterior) |
+endlegend
+
+package "Usuarios y Roles" <<Heredado>> {
+  class User <<Heredado>> {
+    - id: int
+    - name: string
+    - lastname: string
+    - email: string
+    - phone: string
+    - password: string
+    - role: enum{admin,landlord,tenant}
+    - state: enum{active,blocked,pending}
+    - start_date: date
+    - enable_messages: bool
+    --
+    + setPasswordAttribute(value): void
+    + sendPasswordResetNotification(token): void
+  }
+
+  class Landlords <<Heredado>> {
+    - id: int
+    - user_id: int
+    - optional_company: string
+  }
+
+  class Tenants <<Heredado>> {
+    - id: int
+    - user_id: int
+    - search_preference: string
+  }
+
+  class Admin <<Heredado>> {
+    - id: int
+    - user_id: int
+    - admin_level: string
+  }
+}
+
+User "1" *-- "0..1" Landlords : perfil
+User "1" *-- "0..1" Tenants : perfil
+User "1" *-- "0..1" Admin : perfil
+
+note bottom of User
+  Patrón de "perfil compuesto": el rol NO se modela
+  con herencia de clases, sino con una relación hasOne
+  opcional hacia Landlords/Tenants/Admin. Permite agregar
+  un futuro rol sin modificar User (Open/Closed, Tabla 3.4).
+end note
+
+@enduml
