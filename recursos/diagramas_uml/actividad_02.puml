@@ -1,0 +1,60 @@
+@startuml actividad_02
+title Diagrama de Actividad 02 — Inicio de sesión con verificación de estado de cuenta (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Usuario|
+start
+:Ingresa email y contraseña;<<#D6EAF8>>
+
+|Frontend|
+:Envía POST /login;<<#D6EAF8>>
+
+|AuthController|
+:Auth::attempt(email, password);<<#D6EAF8>>
+if (¿Credenciales válidas?) then (no)
+  :Responde 401\n"Credenciales inválidas";<<#D6EAF8>>
+  stop
+else (sí)
+endif
+:Carga User con relaciones\nlandlord / tenant;<<#D6EAF8>>
+
+|AuthService|
+:ensureUserIsNotBlocked(User);<<#D6EAF8>>
+if (¿User.state == "blocked"?) then (sí)
+  :Auth::logout();<<#D6EAF8>>
+  :Responde 403\n"Esta cuenta ha sido bloqueada";<<#D6EAF8>>
+  stop
+else (no, activo o pending)
+endif
+:issueTokenFor(User, Request)\ncrea token Sanctum;<<#D6EAF8>>
+:Intenta guardar IP y user-agent\nen el token;<<#D6EAF8>>
+note right: Si falla el guardado de\nmetadata, solo se registra\nen el log (no interrumpe el login)
+
+|AuthController|
+:Responde 200 con user + token;<<#D6EAF8>>
+
+|Frontend|
+:Guarda token y usuario en localStorage;<<#D6EAF8>>
+:Redirige según role\n(admin / landlord / tenant);<<#D6EAF8>>
+
+|Usuario|
+:Accede al dashboard de su rol;<<#D6EAF8>>
+stop
+
+@enduml

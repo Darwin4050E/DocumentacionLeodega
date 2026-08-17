@@ -1,0 +1,56 @@
+@startuml actividad_11
+title Diagrama de Actividad 11 — Gestión de organizaciones: creación, invitación y respuesta (Nuevo, planificado — ERS HUE-04 / HUE-01 / HUC-14)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Propietario|
+start
+:Completa datos de la organización\n(nombre, RUC, dirección);<<#D5F5E3>>
+
+|OrganizacionService|
+:create(): crea Organizacion\ny un MiembroOrganizacion con\nel creador como rol = "propietario";<<#D5F5E3>>
+
+|Propietario|
+:Invita a un miembro por email;<<#D5F5E3>>
+
+|InvitacionService|
+:crear(): busca si el email\nya pertenece a un usuario\ndel sistema;<<#D5F5E3>>
+if (¿Usuario ya existe\nen Leodega?) then (sí)
+  :Crea Invitacion con\nestado = "pendiente";<<#D5F5E3>>
+  :Notifica al usuario invitado;<<#D5F5E3>>
+else (no)
+  :Envía email de invitación\nexterna (alta fuera del sistema);<<#D5F5E3>>
+  stop
+endif
+
+|Invitado|
+:Revisa su invitación pendiente;<<#D5F5E3>>
+:Decide aceptar o rechazar;<<#D5F5E3>>
+
+|InvitacionService|
+if (decisión?) then (aceptar)
+  :aceptar(): actualiza\nestado = "aceptada";<<#D5F5E3>>
+  :Crea MiembroOrganizacion\ncon el rol asignado;<<#D5F5E3>>
+  :Notifica al propietario\n(invitación aceptada);<<#D5F5E3>>
+else (rechazar)
+  :Actualiza estado = "rechazada";<<#D5F5E3>>
+  :Notifica al propietario\n(invitación rechazada);<<#D5F5E3>>
+endif
+stop
+
+@enduml

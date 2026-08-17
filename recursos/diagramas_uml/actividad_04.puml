@@ -1,0 +1,66 @@
+@startuml actividad_04
+title Diagrama de Actividad 04 — Solicitud, confirmación y cancelación en cascada de reservas (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Arrendatario|
+start
+:Consulta fechas ya reservadas\nde la bodega;<<#D6EAF8>>
+:Selecciona start_date y end_date;<<#D6EAF8>>
+:Solicita reserva (total_mount);<<#D6EAF8>>
+
+|ReservationService|
+:create(): busca reservas "confirmed"\nque se solapen con el rango pedido;<<#D6EAF8>>
+if (¿Existe conflicto?) then (sí)
+  :Lanza ReservationConflictException;<<#D6EAF8>>
+  :Responde 409\n"La bodega ya está reservada\nen esas fechas";<<#D6EAF8>>
+  stop
+else (no)
+endif
+:Crea Reservations con\nstatus = "pending";<<#D6EAF8>>
+:Notifica al arrendador\n(RESERVATION_REQUEST);<<#D6EAF8>>
+
+|Arrendador|
+:Revisa la solicitud de reserva;<<#D6EAF8>>
+:Decide confirmar o cancelar;<<#D6EAF8>>
+
+|ReservationService|
+if (decisión?) then (cancelar)
+  :cancel(): status = "canceled",\nguarda cancelation_reason\n("Rejected by landlord" por defecto);<<#D6EAF8>>
+  :Notifica al arrendatario\n(RESERVATION_CANCELED);<<#D6EAF8>>
+  stop
+else (confirmar)
+  :confirm(): busca OTRA reserva "confirmed"\nque se solape en la misma bodega;<<#D6EAF8>>
+  if (¿Existe conflicto con otra\nreserva ya confirmada?) then (sí)
+    :Lanza ReservationConflictException\n(el estado no cambia);<<#D6EAF8>>
+    stop
+  else (no)
+    :Actualiza status = "confirmed";<<#D6EAF8>>
+    fork
+      :Notifica al arrendatario\n(RESERVATION_CONFIRMED);<<#D6EAF8>>
+    fork again
+      :Cancela en cascada (bulk update)\ntodas las reservas "pending" de la\nmisma bodega solapadas en fechas\n(reason = "Blocked by confirmed reservation");<<#D6EAF8>>
+    end fork
+  endif
+endif
+
+|Arrendatario|
+:Recibe confirmación de reserva\n(o notificación de cancelación en cascada\nsi tenía otra solicitud pendiente\nsobre las mismas fechas);<<#D6EAF8>>
+stop
+
+@enduml

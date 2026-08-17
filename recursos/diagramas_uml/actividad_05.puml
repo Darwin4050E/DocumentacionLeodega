@@ -1,0 +1,46 @@
+@startuml actividad_05
+title Diagrama de Actividad 05 — Registro de pago y confirmación automática de reserva (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Arrendatario|
+start
+:Registra pago de una reserva\n(payment_method, payment_state\nsimulando pasarela de pago);<<#D6EAF8>>
+
+|PaymentsPolicy|
+:create(): verifica que el usuario\nsea el tenant dueño de la reserva;<<#D6EAF8>>
+if (¿Es el dueño de la reserva?) then (no)
+  :Responde 403;<<#D6EAF8>>
+  stop
+else (sí)
+endif
+
+|PaymentService|
+:process() (dentro de una\ntransacción DB);<<#D6EAF8>>
+:Crea registro Payments\n(reservation_id, payment_method,\npayment_state, payment_date);<<#D6EAF8>>
+if (¿payment_state == "paid" Y\nla reserva no está ya "confirmed"?) then (sí)
+  :Invoca ReservationService::confirm()\n(ver Actividad 04: notifica al tenant\ny cancela en cascada reservas\n"pending" solapadas);<<#D6EAF8>>
+else (no: pending, failed,\no ya estaba confirmed)
+  :No se dispara confirmación\n(solo queda el pago registrado);<<#D6EAF8>>
+endif
+
+|Arrendatario|
+:Recibe el resultado del pago\n(y la confirmación de reserva\nsi payment_state = "paid");<<#D6EAF8>>
+stop
+
+@enduml

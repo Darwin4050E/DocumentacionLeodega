@@ -1,0 +1,60 @@
+@startuml actividad_06
+title Diagrama de Actividad 06 — Reportar incidente y resolución administrativa (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Usuario|
+start
+:Completa formulario de reporte\n(título, prioridad, tipo, descripción);<<#D6EAF8>>
+:Adjunta archivos de evidencia (opcional);<<#D6EAF8>>
+
+|ReportService|
+:create(): crea Reports con\nstatus = "pending";<<#D6EAF8>>
+repeat :Por cada archivo adjunto;
+  :Guarda el archivo en\nstorage/app/public/reports/;<<#D6EAF8>>
+  :Crea registro ReportEvidences;<<#D6EAF8>>
+repeat while (¿quedan archivos?) is (sí)
+->no;
+:notifyAdminsAndLandlord();<<#D6EAF8>>
+
+fork
+  repeat :Por cada administrador\ndel sistema;
+    :Notifica (STORE_REPORTED);<<#D6EAF8>>
+  repeat while (¿quedan admins?) is (sí)
+  ->no;
+fork again
+  if (¿La bodega tiene arrendador\ny este NO está entre los admins\nya notificados?) then (sí)
+    :Notifica al arrendador\nde la bodega (STORE_REPORTED);<<#D6EAF8>>
+  else (no: landlord es también admin)
+    :Omite notificación duplicada;<<#D6EAF8>>
+  endif
+end fork
+
+|Administrador|
+:Revisa el reporte pendiente;<<#D6EAF8>>
+:Decide resolver o cancelar\n(UpdateReportStatusRequest\nvalida in:resolved,canceled);<<#D6EAF8>>
+
+|ReportsController|
+if (status?) then (resolved)
+  :Actualiza status = "resolved",\nlimpia cancelation_reason;<<#D6EAF8>>
+else (canceled)
+  :Actualiza status = "canceled",\nguarda cancelation_reason\n("Canceled by admin" por defecto);<<#D6EAF8>>
+endif
+stop
+
+@enduml

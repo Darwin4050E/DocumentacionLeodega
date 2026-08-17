@@ -1,0 +1,54 @@
+@startuml actividad_12
+title Diagrama de Actividad 12 — Registro, mapeo y sincronización de inventario externo (Nuevo, planificado — ERS HUC-10 / HUC-11 / HUC-12)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Arrendatario|
+start
+:Registra URL y credenciales\nde su sistema de inventario externo;<<#D5F5E3>>
+
+|EndpointInventarioService|
+:registrar(): prueba la conexión\ncon un HTTP ping;<<#D5F5E3>>
+if (¿Conexión exitosa?) then (no)
+  :Responde error de conexión;<<#D5F5E3>>
+  stop
+else (sí)
+  :Crea EndpointInventario\ncon credenciales cifradas;<<#D5F5E3>>
+endif
+
+|Arrendatario|
+:Mapea campos del API externo\na campos de Leodega\n(nombre→product_name,\ncantidad→quantity, etc.);<<#D5F5E3>>
+
+|EndpointInventarioService|
+:Persiste las correspondencias\nen MapeoInventario;<<#D5F5E3>>
+
+|SincronizacionService|
+:sincronizar(): itera los\nendpoints activos del arrendatario;<<#D5F5E3>>
+repeat :Por cada endpoint activo;
+  :Obtiene datos del API externo;<<#D5F5E3>>
+  :Aplica los mapeos definidos;<<#D5F5E3>>
+  :Actualiza InventarioCache\n(upsert local);<<#D5F5E3>>
+repeat while (¿quedan endpoints\npor sincronizar?) is (sí)
+->no;
+:Devuelve lista unificada\nal Frontend;<<#D5F5E3>>
+
+|Arrendatario|
+:Consulta su inventario\nsincronizado en el dashboard;<<#D5F5E3>>
+stop
+
+@enduml

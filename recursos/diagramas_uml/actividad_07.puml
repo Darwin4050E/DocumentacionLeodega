@@ -1,0 +1,40 @@
+@startuml actividad_07
+title Diagrama de Actividad 07 — Calificar bodega (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Arrendatario|
+start
+:Abre la ficha de una bodega;<<#D6EAF8>>
+:Envía calificación\n(stars 1-5 + comentario);<<#D6EAF8>>
+
+|RatingsService|
+:create(): busca si el mismo\nusuario ya calificó esta bodega\n(store_id + user_id);<<#D6EAF8>>
+if (¿Ya existe una calificación\nprevia de este usuario\npara esta bodega?) then (sí)
+  :Lanza DuplicateRatingException;<<#D6EAF8>>
+  :Responde 409\n"Ya calificaste esta bodega";<<#D6EAF8>>
+  stop
+else (no)
+  :Crea registro Ratings\n(store_id, user_id, stars, comment);<<#D6EAF8>>
+endif
+
+|Arrendatario|
+:Ve su calificación reflejada\nen el promedio de la bodega;<<#D6EAF8>>
+stop
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml actividad_08
+title Diagrama de Actividad 08 — Mensajería: conversación, envío y lectura de mensajes (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Usuario A|
+start
+:Inicia chat con Usuario B\n(desde ficha de bodega o mensajería);<<#D6EAF8>>
+
+|ConversationController|
+:store(): busca conversación\nexistente entre ambos usuarios;<<#D6EAF8>>
+if (¿Ya existe una conversación\nentre Usuario A y Usuario B?) then (sí)
+  :Reutiliza la conversación existente;<<#D6EAF8>>
+else (no)
+  :Crea Conversation y adjunta\nambos usuarios (tabla pivot\nconversation_user);<<#D6EAF8>>
+endif
+
+|Usuario A|
+:Escribe y envía un mensaje;<<#D6EAF8>>
+
+|MessageController|
+:Gate::authorize("view", conversation);<<#D6EAF8>>
+if (¿Usuario A pertenece\na la conversación?) then (no)
+  :Responde 403;<<#D6EAF8>>
+  stop
+else (sí)
+endif
+:Crea Message\n(sender_id, body, is_read=false);<<#D6EAF8>>
+repeat :Por cada participante\ndistinto del remitente;
+  :Notifica (MESSAGE, preview\nlimitado a 50 caracteres);<<#D6EAF8>>
+repeat while (¿quedan participantes?) is (sí)
+->no;
+
+|Usuario B|
+:Abre la conversación;<<#D6EAF8>>
+
+|MessageController|
+:markRead(): marca como is_read=true\ntodos los mensajes recibidos\n(no enviados por Usuario B);<<#D6EAF8>>
+
+|Usuario B|
+:Ve los mensajes como leídos\ny responde si lo desea;<<#D6EAF8>>
+stop
+
+@enduml

@@ -5,15 +5,314 @@
 
 % ------------------------------------------------------------
 \section{Diagramas de Actividad}
-\noindent Se documenta un diagrama de actividad por cada proceso relevante del sistema.
+\noindent Se documentan a continuación los \textbf{12 procesos de negocio y flujos procedimentales} más relevantes del sistema, uno por diagrama, con sus carriles (swimlanes) por actor/componente, puntos de decisión y --- donde el propio código lo justifica --- bifurcaciones/uniones (fork/join). Se cubren los cinco grupos de casos de uso de la Sección B: Autenticación/Cuenta (Actividades 1-2), Cliente: Catálogo/Reservas/Pagos/Calificaciones (Actividades 4-5, 7), Arrendador: Gestión de Bodegas (Actividad 3), Administrador: Moderación/Reportes/Cuentas (Actividades 3, 6, 9) y Módulos Nuevos: Organizaciones e Inventario (Actividades 10-12), más Mensajería (Actividad 8). Cada acción queda coloreada según su procedencia (\colorbox{heredadobg}{azul} = heredado, \colorbox{nuevobg}{verde} = nuevo/planificado); los procesos 1-8 son enteramente heredados y los procesos 9-12 son enteramente nuevos (planificados según el ERS, sin código todavía), por lo que la distinción se aplica de forma homogénea a todo el diagrama.
 
-\DiagramaPagina{Diagrama de Actividad 01 -- [Nombre del proceso]}{imagenes/actividad_01.png}{actividad01}{[Descripción del proceso de negocio modelado: actores/carriles (swimlanes) involucrados, puntos de decisión y flujos paralelos si aplica.]}
+\subsection{Diagrama de Actividad 01 -- Registro de usuario y alta automática de perfil por rol}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.82}{imagenes/actividad_01.png}
+    \caption{Diagrama de Actividad 01 -- Registro de usuario y alta automática de perfil por rol}
+    \label{fig:actividad01}
+\end{figure}
 
-\DiagramaPagina{Diagrama de Actividad 02 -- [Nombre del proceso]}{imagenes/actividad_02.png}{actividad02}{[Descripción del proceso.]}
+\noindent\textbf{Descripción:} El usuario elige su rol (arrendador/arrendatario) en \texttt{Decision.tsx} y completa el formulario de registro. \texttt{UserController::store()} primero aplica un guard: si la petición es anónima y \texttt{role="admin"}, rechaza con 403 (evita auto-promoción a administrador). Si pasa, valida con \texttt{StoreUserRequest} y crea el \texttt{User} dentro de una transacción DB. \texttt{UserRegistrationService::createProfileForRole()} decide, según el rol, si crear un perfil \texttt{Landlords} o \texttt{Tenants} (no crea nada para \texttt{admin} u otro rol). Fuente: \url{backend/app/Http/Controllers/UserController.php}, \url{backend/app/Services/UserRegistrationService.php}.
 
-\DiagramaPagina{Diagrama de Actividad 03 -- [Nombre del proceso]}{imagenes/actividad_03.png}{actividad03}{[Descripción del proceso.]}
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_01.puml}.\par}
 
-\noindent\textit{Nota: Duplique el llamado a \texttt{\textbackslash DiagramaPagina} anterior hasta cubrir TODOS los procesos del sistema, según lo requiere la rúbrica.}
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Guard anti auto-promoción a admin & \texttt{UserController::store()} & \cellcolor{heredadobg}Heredado \\ \hline
+Validación de campos & \texttt{StoreUserRequest} & \cellcolor{heredadobg}Heredado \\ \hline
+Creación de \texttt{User} (transacción) & \texttt{ApiController::storeModel()} vía \texttt{UserController::store()} & \cellcolor{heredadobg}Heredado \\ \hline
+Bifurcación por rol (landlord/tenant/otro) & \texttt{UserRegistrationService::createProfileForRole()} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 02 -- Inicio de sesión con verificación de estado de cuenta}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.82}{imagenes/actividad_02.png}
+    \caption{Diagrama de Actividad 02 -- Inicio de sesión con verificación de estado de cuenta}
+    \label{fig:actividad02}
+\end{figure}
+
+\noindent\textbf{Descripción:} \texttt{AuthController::login()} autentica con \texttt{Auth::attempt()} (401 si las credenciales no son válidas). Si son válidas, \texttt{AuthService::ensureUserIsNotBlocked()} verifica \texttt{User.state}: si está \texttt{blocked}, hace \texttt{Auth::logout()} y responde 403 (el guard es deliberadamente mínimo y no afecta a \texttt{pending}, que sigue iniciando sesión con normalidad). Si no está bloqueada, \texttt{issueTokenFor()} emite el token Sanctum e intenta guardar IP/user-agent (un fallo ahí solo se registra en el log, no interrumpe el login). El Frontend guarda la sesión en \texttt{localStorage} y redirige según el rol. Fuente: \url{backend/app/Http/Controllers/AuthController.php}, \url{backend/app/Services/AuthService.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_02.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Decisión: credenciales válidas & \texttt{Auth::attempt()} vía \texttt{AuthController::login()} & \cellcolor{heredadobg}Heredado \\ \hline
+Decisión: cuenta bloqueada & \texttt{AuthService::ensureUserIsNotBlocked()} & \cellcolor{heredadobg}Heredado \\ \hline
+Emisión de token + metadata & \texttt{AuthService::issueTokenFor()} & \cellcolor{heredadobg}Heredado \\ \hline
+Redirección por rol & \texttt{Frontend} (consumidor del token) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 03 -- Publicación y moderación de bodega}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.85}{imagenes/actividad_03.png}
+    \caption{Diagrama de Actividad 03 -- Publicación y moderación de bodega}
+    \label{fig:actividad03}
+\end{figure}
+
+\noindent\textbf{Descripción:} Ciclo completo desde la publicación hasta la decisión administrativa. El arrendador crea la bodega (\texttt{StoreRoomsController::store()}, \texttt{publication\_status="pending"}). El administrador la revisa y decide aprobar/rechazar; \texttt{StoreRoomsController::update()} exige rol \texttt{admin} en esa rama (403 si no lo es) y, si rechaza, exige \texttt{reason\_rejected}. \texttt{StoreModerationService::moderate()} concentra en una sola transacción: actualizar \texttt{publication\_status}, crear el registro de auditoría en \texttt{StoreModeration}, y notificar al arrendador (\texttt{STORE\_APPROVED}/\texttt{STORE\_REJECTED}). Fuente: \url{backend/app/Http/Controllers/StoreRoomsController.php}, \url{backend/app/Services/StoreModerationService.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_03.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Creación con estado pending & \texttt{StoreRoomsController::store()} & \cellcolor{heredadobg}Heredado \\ \hline
+Guard de rol admin en la decisión & \texttt{StoreRoomsController::update()} & \cellcolor{heredadobg}Heredado \\ \hline
+Transacción: update + auditoría + notificación & \texttt{StoreModerationService::moderate()} & \cellcolor{heredadobg}Heredado \\ \hline
+Sincronización con \texttt{StoreModerationController} & \texttt{StoreModerationController::store()} (mismo servicio) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 04 -- Solicitud, confirmación y cancelación en cascada de reservas}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.9}{imagenes/actividad_04.png}
+    \caption{Diagrama de Actividad 04 -- Solicitud, confirmación y cancelación en cascada de reservas}
+    \label{fig:actividad04}
+\end{figure}
+
+\noindent\textbf{Descripción:} Proceso transaccional central del marketplace. \texttt{ReservationService::create()} verifica conflicto con reservas \texttt{confirmed} (409 si hay solape); si no, crea la reserva \texttt{pending} y notifica al arrendador. El arrendador decide confirmar o cancelar. Al confirmar, \texttt{confirm()} re-verifica conflicto con OTRA reserva confirmada y, si no hay, actualiza a \texttt{confirmed} disparando dos efectos independientes del mismo evento (modelados como bifurcación/unión): notificar al arrendatario y cancelar en cascada (bulk update, sin notificación individual) todas las reservas \texttt{pending} solapadas de la misma bodega. Fuente: \url{backend/app/Services/ReservationService.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_04.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Decisión de conflicto en create() & \texttt{ReservationService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Decisión de conflicto en confirm() & \texttt{ReservationService::confirm()} & \cellcolor{heredadobg}Heredado \\ \hline
+Bifurcación: notificar + cascada de cancelación & \texttt{ReservationService::confirm()} (mismo método, dos efectos) & \cellcolor{heredadobg}Heredado \\ \hline
+Cancelación directa por el arrendador & \texttt{ReservationService::cancel()} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 05 -- Registro de pago y confirmación automática de reserva}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.9}{0.75}{imagenes/actividad_05.png}
+    \caption{Diagrama de Actividad 05 -- Registro de pago y confirmación automática de reserva}
+    \label{fig:actividad05}
+\end{figure}
+
+\noindent\textbf{Descripción:} \texttt{PaymentsPolicy::create()} exige que quien paga sea el tenant dueño de la reserva (403 si no). \texttt{PaymentService::process()}, dentro de una transacción, crea el \texttt{Payments} y, si \texttt{payment\_state="paid"} y la reserva no está ya \texttt{confirmed}, invoca \texttt{ReservationService::confirm()} (Actividad 04) --- registrar el pago y confirmar la reserva quedan como una sola operación de servidor. Fuente: \url{backend/app/Services/PaymentService.php}, \url{backend/app/Policies/PaymentsPolicy.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_05.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Autorización de ownership & \texttt{PaymentsPolicy::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Creación de Payments (transacción) & \texttt{PaymentService::process()} & \cellcolor{heredadobg}Heredado \\ \hline
+Decisión: paid \& no confirmada todavía & \texttt{PaymentService::process()} & \cellcolor{heredadobg}Heredado \\ \hline
+Confirmación encadenada de la reserva & \texttt{ReservationService::confirm()} (ver Actividad 04) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 06 -- Reportar incidente y resolución administrativa}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.9}{imagenes/actividad_06.png}
+    \caption{Diagrama de Actividad 06 -- Reportar incidente y resolución administrativa}
+    \label{fig:actividad06}
+\end{figure}
+
+\noindent\textbf{Descripción:} \texttt{ReportService::create()} crea el \texttt{Reports} en \texttt{pending}, procesa en bucle los archivos de evidencia (\texttt{ReportEvidences}) y llama a \texttt{notifyAdminsAndLandlord()}, que se modela como bifurcación/unión con dos ramas independientes: notificar (en bucle) a cada administrador del sistema, y notificar al arrendador de la bodega solo si no está ya entre los admins notificados (evita duplicados). El administrador luego resuelve o cancela el reporte (\texttt{ReportsController::updateStatus()}, validado por \texttt{UpdateReportStatusRequest} contra \texttt{in:resolved,canceled}). Fuente: \url{backend/app/Services/ReportService.php}, \url{backend/app/Http/Controllers/ReportsController.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_06.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Creación + bucle de evidencias & \texttt{ReportService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Bifurcación: notificar admins vs.\ landlord & \texttt{ReportService::notifyAdminsAndLandlord()} & \cellcolor{heredadobg}Heredado \\ \hline
+Guard anti-duplicado (landlord también admin) & \texttt{ReportService::notifyAdminsAndLandlord()} & \cellcolor{heredadobg}Heredado \\ \hline
+Resolución/cancelación administrativa & \texttt{ReportsController::updateStatus()} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 07 -- Calificar bodega}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.85}{0.65}{imagenes/actividad_07.png}
+    \caption{Diagrama de Actividad 07 -- Calificar bodega}
+    \label{fig:actividad07}
+\end{figure}
+
+\noindent\textbf{Descripción:} \texttt{RatingsService::create()} aplica la única regla de negocio del proceso: un usuario no puede calificar la misma bodega dos veces (\texttt{store\_id} + \texttt{user\_id}); si ya existe, lanza \texttt{DuplicateRatingException} (409). Si no, crea el registro \texttt{Ratings} (stars 1-5 + comentario). Fuente: \url{backend/app/Services/RatingsService.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_07.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Decisión de calificación duplicada & \texttt{RatingsService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+Creación de Ratings & \texttt{RatingsService::create()} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 08 -- Mensajería: conversación, envío y lectura de mensajes}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.9}{0.8}{imagenes/actividad_08.png}
+    \caption{Diagrama de Actividad 08 -- Mensajería: conversación, envío y lectura de mensajes}
+    \label{fig:actividad08}
+\end{figure}
+
+\noindent\textbf{Descripción:} \texttt{ConversationController::store()} reutiliza la conversación 1-a-1 existente entre ambos usuarios o crea una nueva (tabla pivot \texttt{conversation\_user}). \texttt{MessageController::store()} exige \texttt{Gate::authorize("view", conversation)}, crea el \texttt{Message} y notifica en bucle a cada participante distinto del remitente. \texttt{MessageController::markRead()} marca como leídos (bulk update) los mensajes recibidos por quien abre la conversación. Fuente: \url{backend/app/Http/Controllers/ConversationController.php}, \url{backend/app/Http/Controllers/MessageController.php}.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_08.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Decisión: conversación ya existe & \texttt{ConversationController::store()} & \cellcolor{heredadobg}Heredado \\ \hline
+Guard de pertenencia a la conversación & \texttt{Gate::authorize("view", ...)} en \texttt{MessageController} & \cellcolor{heredadobg}Heredado \\ \hline
+Bucle de notificación a participantes & \texttt{MessageController::store()} & \cellcolor{heredadobg}Heredado \\ \hline
+Marcado de lectura (bulk update) & \texttt{MessageController::markRead()} & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 09 -- Bloqueo y reactivación de cuenta de usuario}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.85}{imagenes/actividad_09.png}
+    \caption{Diagrama de Actividad 09 -- Bloqueo y reactivación de cuenta de usuario}
+    \label{fig:actividad09}
+\end{figure}
+
+\noindent\textbf{Descripción:} Flujo planificado (ERS HUA-03, sin código todavía). El administrador decide bloquear o reactivar una cuenta. Al bloquear, \texttt{UserBlockingService::block()} se modela con bifurcación/unión de tres efectos independientes del mismo evento: actualizar \texttt{User.state="blocked"}, revocar todos los tokens Sanctum activos, y crear el registro de auditoría en \texttt{RegistroAuditoria} (clase nueva, Sección B). Al reactivar, actualiza \texttt{state="active"} sin revocar tokens. En ambos casos se notifica al usuario y se audita. Complementa el guard de login de la Actividad 02 (\texttt{AuthService::ensureUserIsNotBlocked()}), que ya rechaza \texttt{state="blocked"} pero sin disparar aún esta gestión completa de bloqueo/auditoría/revocación de tokens.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_09.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Bifurcación: state + revocación + auditoría & ERS HUA-03; \texttt{UserBlockingService} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Clase \texttt{RegistroAuditoria} & ERS HUA-03; Sección B (planificada) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Reactivación sin revocar tokens & ERS HUA-03; \texttt{UserBlockingService} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Guard existente que este flujo complementa & \texttt{AuthService::ensureUserIsNotBlocked()} (ver Actividad 02) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 10 -- Validación de permiso de bomberos al publicar bodega}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.82}{imagenes/actividad_10.png}
+    \caption{Diagrama de Actividad 10 -- Validación de permiso de bomberos al publicar bodega}
+    \label{fig:actividad10}
+\end{figure}
+
+\noindent\textbf{Descripción:} Flujo planificado (ERS HUA-01 / HUG-04, sin código todavía) que extiende la Actividad 03. El arrendador adjunta el documento del permiso de bomberos; \texttt{PermisoBomberosService::attach()} (planificado) lo almacena y crea el registro \texttt{PermisoBomberos}. La bodega sigue naciendo \texttt{pending} por el flujo heredado. El administrador valida el permiso y, según el resultado, enruta la decisión por el mismo \texttt{StoreModerationService::moderate()} ya existente (Actividad 03) --- este proceso nuevo reutiliza el servicio heredado en vez de duplicar la lógica de aprobación/rechazo.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_10.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Adjuntar documento + crear PermisoBomberos & ERS HUA-01/HUG-04; \texttt{PermisoBomberosService::attach()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Decisión: permiso válido y vigente & ERS HUA-01/HUG-04 (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Creación de la bodega en pending & \texttt{StoreRoomsController::store()} (ver Actividad 03) & \cellcolor{heredadobg}Heredado \\ \hline
+Aprobación/rechazo reutilizado & \texttt{StoreModerationService::moderate()} (ver Actividad 03) & \cellcolor{heredadobg}Heredado \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 11 -- Gestión de organizaciones: creación, invitación y respuesta}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.9}{imagenes/actividad_11.png}
+    \caption{Diagrama de Actividad 11 -- Gestión de organizaciones: creación, invitación y respuesta}
+    \label{fig:actividad11}
+\end{figure}
+
+\noindent\textbf{Descripción:} Flujo planificado (ERS HUE-04 / HUE-01 / HUC-14, sin código todavía). \texttt{OrganizacionService::create()} crea la \texttt{Organizacion} y un \texttt{MiembroOrganizacion} con el creador como \texttt{rol="propietario"}. \texttt{InvitacionService::crear()} decide entre invitar a un usuario ya existente en Leodega (crea \texttt{Invitacion} pendiente y notifica) o a uno externo (solo envía email, sin registro interno). El invitado decide aceptar (\texttt{aceptar()}: crea \texttt{MiembroOrganizacion} con el rol asignado) o rechazar, notificando al propietario en ambos casos.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_11.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Creación de organización + membresía inicial & ERS HUE-04; \texttt{OrganizacionService::create()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Decisión: usuario existente vs.\ externo & ERS HUE-01; \texttt{InvitacionService::crear()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Decisión: aceptar vs.\ rechazar invitación & ERS HUC-14; \texttt{InvitacionService::aceptar()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
+\clearpage
+
+\subsection{Diagrama de Actividad 12 -- Registro, mapeo y sincronización de inventario externo}
+\begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.92}{0.9}{imagenes/actividad_12.png}
+    \caption{Diagrama de Actividad 12 -- Registro, mapeo y sincronización de inventario externo}
+    \label{fig:actividad12}
+\end{figure}
+
+\noindent\textbf{Descripción:} Flujo planificado (ERS HUC-10 / HUC-11 / HUC-12, sin código todavía). \texttt{EndpointInventarioService::registrar()} prueba la conexión (HTTP ping) antes de crear el \texttt{EndpointInventario} con credenciales cifradas. El arrendatario mapea campos del API externo a campos de Leodega, persistidos en \texttt{MapeoInventario}. \texttt{SincronizacionService::sincronizar()} itera (bucle, no concurrente) cada endpoint activo, obtiene datos, aplica los mapeos y actualiza \texttt{InventarioCache} (upsert local) antes de devolver la lista unificada al Frontend.
+
+\bigskip
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/actividad_12.puml}.\par}
+
+\bigskip
+\noindent\textbf{Tabla de trazabilidad}
+\begin{longtable}{|L{4cm}|L{7.5cm}|M{2.3cm}|}
+\hline
+\rowcolor{cajagris} \textbf{Elemento} & \textbf{Fuente (archivo / método)} & \textbf{Estado} \\ \hline
+\endhead
+Decisión: conexión exitosa & ERS HUC-10; \texttt{EndpointInventarioService::registrar()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Mapeo de campos externos & ERS HUC-11; \texttt{MapeoInventario} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+Bucle de sincronización por endpoint & ERS HUC-12; \texttt{SincronizacionService::sincronizar()} (planificado) & \cellcolor{nuevobg}Nuevo (planificado) \\ \hline
+\end{longtable}
 \clearpage
 
 % ------------------------------------------------------------

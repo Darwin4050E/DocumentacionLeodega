@@ -1,0 +1,55 @@
+@startuml actividad_01
+title Diagrama de Actividad 01 — Registro de usuario y alta automática de perfil por rol (Heredado)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Usuario|
+start
+:Elige rol (Arrendador / Arrendatario)\nen pantalla de decisión (Decision.tsx);<<#D6EAF8>>
+:Completa formulario de registro\n(nombre, apellido, teléfono, email, contraseña);<<#D6EAF8>>
+
+|Frontend|
+:Envía POST /user\n{name, lastname, phone, email, password, role};<<#D6EAF8>>
+
+|UserController|
+if (¿Sin sesión activa Y role == "admin"?) then (sí)
+  :Rechaza con 403\n"No autorizado para crear\nusuario con rol admin";<<#D6EAF8>>
+  stop
+else (no)
+endif
+:StoreUserRequest valida los campos;<<#D6EAF8>>
+:storeModel() crea el registro User\n(dentro de una transacción DB);<<#D6EAF8>>
+
+|UserRegistrationService|
+:createProfileForRole(User);<<#D6EAF8>>
+if (role?) then (landlord)
+  :Crea perfil Landlords\n(user_id, optional_company=null);<<#D6EAF8>>
+elseif (role?) then (tenant)
+  :Crea perfil Tenants\n(user_id, search_preference='');<<#D6EAF8>>
+else (admin u otro)
+  :No crea perfil adicional;<<#D6EAF8>>
+endif
+
+|UserController|
+:Responde 201 con el usuario creado;<<#D6EAF8>>
+
+|Usuario|
+:Recibe confirmación de cuenta creada\n(queda disponible para iniciar sesión,\nver Actividad 02);<<#D6EAF8>>
+stop
+
+@enduml

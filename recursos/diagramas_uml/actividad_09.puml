@@ -1,0 +1,52 @@
+@startuml actividad_09
+title Diagrama de Actividad 09 — Bloqueo y reactivación de cuenta de usuario (Nuevo, planificado — ERS HUA-03)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Administrador|
+start
+:Selecciona una cuenta de usuario\nen el panel administrativo;<<#D5F5E3>>
+:Decide bloquear o reactivar,\ncon una razón (si bloquea);<<#D5F5E3>>
+
+|UserBlockingService|
+if (decisión?) then (bloquear)
+  :block(User, reason, adminId);<<#D5F5E3>>
+  fork
+    :Actualiza User.state = "blocked";<<#D5F5E3>>
+  fork again
+    :Revoca todos los tokens\nSanctum activos del usuario;<<#D5F5E3>>
+  fork again
+    :Crea registro en\nRegistroAuditoria\n(acción, razón, admin, fecha);<<#D5F5E3>>
+  end fork
+else (reactivar)
+  :reactivate(User, adminId);<<#D5F5E3>>
+  :Actualiza User.state = "active"\n(sin revocar tokens);<<#D5F5E3>>
+  :Crea registro en\nRegistroAuditoria;<<#D5F5E3>>
+endif
+:Notifica al usuario afectado;<<#D5F5E3>>
+
+|Usuario afectado|
+if (decisión?) then (bloquear)
+  :Su próximo intento de login\nes rechazado por\nAuthService::ensureUserIsNotBlocked()\n(ver Actividad 02);<<#D5F5E3>>
+  stop
+else (reactivar)
+  :Puede iniciar sesión\nnuevamente con normalidad;<<#D5F5E3>>
+  stop
+endif
+
+@enduml

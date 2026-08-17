@@ -1,0 +1,52 @@
+@startuml actividad_10
+title Diagrama de Actividad 10 — Validación de permiso de bomberos al publicar bodega (Nuevo, planificado — ERS HUA-01 / HUG-04)
+skinparam backgroundColor #FFFFFF
+skinparam wrapWidth 220
+skinparam activity {
+  BackgroundColor<<Heredado>> #D6EAF8
+  BorderColor<<Heredado>> #2E86C1
+  BackgroundColor<<Nuevo>> #D5F5E3
+  BorderColor<<Nuevo>> #27AE60
+}
+skinparam legend {
+  BackgroundColor #FDFEFE
+}
+
+legend right
+  |= Color |= Estado |
+  |<#D6EAF8>| Heredado (equipo anterior, existe en código) |
+  |<#D5F5E3>| Nuevo (planificado, ERS — sin código todavía) |
+endlegend
+
+|Arrendador|
+start
+:Completa formulario de bodega\n(ver Actividad 03);<<#D5F5E3>>
+
+|Arrendador|
+:Adjunta documento del\npermiso de bomberos;<<#D5F5E3>>
+
+|PermisoBomberosService|
+:attach(): almacena el documento\ny crea el registro\nPermisoBomberos;<<#D5F5E3>>
+
+:StoreRooms queda con\npublication_status = "pending"\n(ver Actividad 03, heredado);<<#D5F5E3>>
+
+|Administrador|
+:Revisa la bodega pendiente\ny el documento adjunto;<<#D5F5E3>>
+
+|Administrador|
+:Valida el permiso de bomberos;<<#D5F5E3>>
+if (¿Permiso válido y vigente?) then (sí)
+
+|StoreModerationService|
+  :moderate(room, "approved", ...)\n(mismo servicio heredado,\nver Actividad 03);<<#D5F5E3>>
+  :Notifica STORE_APPROVED;<<#D5F5E3>>
+  stop
+else (no)
+
+|StoreModerationService|
+  :moderate(room, "rejected", reason)\n(mismo servicio heredado,\nver Actividad 03);<<#D5F5E3>>
+  :Notifica STORE_REJECTED\ncon el motivo del rechazo;<<#D5F5E3>>
+  stop
+endif
+
+@enduml
