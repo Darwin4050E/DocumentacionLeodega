@@ -1,0 +1,73 @@
+@startuml flujo_ventanas
+title Flujo de Ventanas del Prototipo de Alta Fidelidad -- Leodega
+
+skinparam backgroundColor white
+skinparam activity {
+  BackgroundColor #D6EAF8
+  BorderColor #1B4F72
+  FontSize 12
+}
+skinparam activityDiamond {
+  BackgroundColor #FCF3CF
+  BorderColor #7D6608
+}
+skinparam ArrowColor #34495E
+skinparam titleFontSize 16
+
+start
+:Landing Page\n(hero, cómo funciona, por qué elegirnos,\nbodegas populares);
+if (¿Tiene cuenta?) then (no)
+  :Registro;
+else (sí)
+  :Inicio de sesión;
+endif
+:Selección de perfil\n(Cliente / Gestor / Administrador);
+
+switch (Rol seleccionado)
+case (Cliente)
+  :Catálogo de bodegas\n(filtros: ciudad, tamaño, precio);
+  :Detalle de bodega\n(galería, calendario, mapa, costos);
+  :Reserva -- Paso 1: Detalle;
+  :Reserva -- Paso 2: Pago;
+  :Reserva -- Paso 3: Comprobante;
+  fork
+    :Mis Reservas\n(activas, completadas, canceladas);
+  fork again
+    :Mensajes\n(consultas y chat de reserva activa);
+  fork again
+    :Inventario\n(conexión a sistema externo);
+  end fork
+
+case (Gestor de Almacenamiento)
+  :Panel Mis Bodegas\n(todas / aprobadas / pendientes / rechazadas);
+  :Publicar Bodega -- 7 pasos\n(tipo, modalidad, fotos, ubicación,\ntítulo, precio y tamaño, permiso de bomberos);
+  fork
+    :Reservas Recibidas\n(tabla con métricas y filtros);
+  fork again
+    :Mensajes\n(por bodega y estado de reserva);
+  fork again
+    :Calendario\n(reservas y pagos pendientes);
+  fork again
+    :Configuración de Perfil;
+  end fork
+
+case (Administrador)
+  :Dashboard\n(métricas globales de la plataforma);
+  :Aprobación de Bodegas\n(cola de revisión, verificación de permiso);
+  if (¿Aprueba la bodega?) then (no)
+    :Modal de Rechazo\n(razón + comentario opcional);
+  else (sí)
+  endif
+  fork
+    :Gestión de Cuentas\n(bloquear / reactivar);
+  fork again
+    :Reportes\n(por tipo y estado de resolución);
+  fork again
+    :Mensajes\n(soporte y moderación);
+  fork again
+    :Configuración de Perfil;
+  end fork
+endswitch
+
+stop
+@enduml
