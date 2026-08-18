@@ -147,6 +147,25 @@
   \clearpage
 }
 
+% Variante de \DiagramaPagina con la herramienta de modelado ya
+% completada (PlantUML) en vez del placeholder genérico, y la
+% Descripción envuelta en \sloppy para evitar overfull hbox con
+% identificadores de código largos. Uso:
+% \DiagramaPaginaHerramienta{Título}{ruta/archivo.png}{etiqueta}{Descripción}{nombre-fuente-sin-extension}
+\newcommand{\DiagramaPaginaHerramienta}[5]{%
+  \subsection{#1}
+  \begin{figure}[H]
+    \centering
+    \DiagramaImagen{0.95}{0.55}{#2}
+    \caption{#1}
+    \label{fig:#3}
+  \end{figure}
+  {\sloppy\noindent\textbf{Descripción:} #4\par}
+  \bigskip
+  {\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/#5.puml}.\par}
+  \clearpage
+}
+
 % ============================================================
 % TABLA REUTILIZABLE PARA ESPECIFICACIÓN DE CASOS DE USO
 % ============================================================

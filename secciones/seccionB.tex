@@ -61,7 +61,7 @@ Sistema de Inventario Externo & Secundario (nuevo) & Actor externo del cliente. 
 \noindent\textbf{Descripción:} El Visitante se registra (\url{routes/api.php}, \texttt{POST /user} y \texttt{/register}) e inicia sesión; el login \texttt{\guillemotleft include\guillemotright} la verificación de que la cuenta no esté bloqueada (\texttt{AuthController::login()} lanza \texttt{AccountBlockedException} si \texttt{state = blocked}). La recuperación de contraseña \texttt{\guillemotleft include\guillemotright} el envío de correo hacia el actor externo (\texttt{ResetPasswordNotification}). El actor abstracto \texttt{Usuario Registrado} agrupa lo común a los tres roles: gestión de perfil, contraseña y sesiones, eliminación de cuenta y la mensajería, donde \texttt{Enviar mensaje} \texttt{\guillemotleft include\guillemotright} \texttt{Notificar a destinatario} (tipo \texttt{MESSAGE} del enum \texttt{NotificationType}).
 
 \bigskip
-{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_01.puml}.\par}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/casos_uso_01.puml}.\par}
 
 \bigskip
 \noindent\textbf{Tabla de trazabilidad}
@@ -87,7 +87,7 @@ Conversación, Enviar mensaje, Marcar leídos, Notificaciones & \texttt{Conversa
 \noindent\textbf{Descripción:} Núcleo transaccional del arrendatario. \texttt{Reservar bodega} \texttt{\guillemotleft include\guillemotright} \texttt{Verificar conflicto de fechas} y \texttt{Notificar}, y \texttt{\guillemotleft extend\guillemotright} el envío de una consulta pre-reserva (\texttt{ReservationService}). \texttt{Confirmar pago} \texttt{\guillemotleft include\guillemotright} \texttt{Confirmar reserva asociada}, disparada por \texttt{PaymentService} cuando el pago queda en \texttt{paid}, que a su vez notifica. \texttt{Calificar arrendamiento} \texttt{\guillemotleft include\guillemotright} \texttt{Validar calificación única} (\texttt{RatingsService}, \texttt{DuplicateRatingException}). \texttt{Reportar incidente} \texttt{\guillemotleft include\guillemotright} la notificación en cascada a administradores y al arrendador dueño (\texttt{ReportService::create()}).
 
 \bigskip
-{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_02.puml}.\par}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/casos_uso_02.puml}.\par}
 
 \bigskip
 \noindent\textbf{Tabla de trazabilidad}
@@ -114,7 +114,7 @@ Reportar incidente / Notificar en cascada & \texttt{ReportsController::store}; \
 \noindent\textbf{Descripción:} \texttt{Publicar bodega} \texttt{\guillemotleft include\guillemotright} cargar fotos, definir precios, definir disponibilidad y enviar a moderación; incorpora además, como paso \cellcolor{nuevobg}Nuevo, \texttt{Registrar permiso de bomberos} (ERS HUG-04/HUA-01), aún ausente en \texttt{StoreRoomsController::store}. \texttt{Eliminar bodega} \texttt{\guillemotleft include\guillemotright} \texttt{Verificar sin reservas activas o futuras} (HUG-07). En reservas recibidas, \texttt{Confirmar reserva} \texttt{\guillemotleft include\guillemotright} \texttt{Cancelar en cascada las reservas en conflicto} y \texttt{Notificar al cliente} (\texttt{ReservationService::confirm()}, extraído de \texttt{ReservationsController::updateStatus}).
 
 \bigskip
-{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_03.puml}.\par}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/casos_uso_03.puml}.\par}
 
 \bigskip
 \noindent\textbf{Tabla de trazabilidad}
@@ -139,7 +139,7 @@ Ver reservas recibidas, Confirmar, Rechazar/cancelar & \url{ReservationsControll
 \noindent\textbf{Descripción:} \texttt{Moderar publicación de bodega} \texttt{\guillemotleft extend\guillemotright} aprobar/rechazar y \texttt{\guillemotleft include\guillemotright} \texttt{Sincronizar estado de publicación} y \texttt{Notificar al arrendador} (\texttt{StoreModerationService}); incorpora el paso \cellcolor{nuevobg}Nuevo \texttt{Validar permiso de bomberos} (HUA-01). La gestión de cuentas incluye dos casos \cellcolor{nuevobg}Nuevos: \texttt{Bloquear/Reactivar cuenta} (que \texttt{\guillemotleft include\guillemotright} \texttt{Registrar auditoría}, HUA-03) y \texttt{Consultar panel de métricas} (HUA-02). Hoy solo existe el campo \texttt{User.state} como base parcial del bloqueo.
 
 \bigskip
-{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_04.puml}.\par}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/casos_uso_04.puml}.\par}
 
 \bigskip
 \noindent\textbf{Tabla de trazabilidad}
@@ -166,7 +166,7 @@ Consultar panel de métricas & ERS HUA-02, sin código & \cellcolor{nuevobg}Nuev
 \noindent\textbf{Descripción:} Ambos paquetes son íntegramente \cellcolor{nuevobg}Nuevos/planificados (ERS, sin código todavía). El Administrador de Organización crea la organización e invita miembros; \texttt{Invitar miembro cliente} \texttt{\guillemotleft include\guillemotright} \texttt{Validar que sea rol cliente} (un arrendador no puede unirse a una organización, regla del ERS HUE-01) y \texttt{Enviar invitación por correo} hacia el actor externo. El cliente miembro acepta/rechaza la invitación (\texttt{\guillemotleft extend\guillemotright} cambiar contexto), reserva a nombre de la organización, y opera la integración de inventario: \texttt{Ver inventario sincronizado} \texttt{\guillemotleft include\guillemotright} \texttt{Sincronizar con sistema externo} (actor secundario).
 
 \bigskip
-{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6}. Fuente: \url{recursos/diagramas_uml/casos_uso_05.puml}.\par}
+{\sloppy\noindent\textbf{Herramienta de modelado utilizada:} \textit{PlantUML v1.2026.6} (motor Graphviz/\texttt{dot}). Fuente: \url{recursos/diagramas_uml/casos_uso_05.puml}.\par}
 
 \bigskip
 \noindent\textbf{Tabla de trazabilidad}
@@ -409,7 +409,7 @@ UC-43 & Importar inventario desde Excel & Cliente & HUC-13 & \cellcolor{nuevobg}
 % ------------------------------------------------------------
 \section{Diagrama de Clases}
 
-\noindent El diagrama modela la capa de \textbf{lógica de negocio} completa: 19 modelos Eloquent \textbf{heredados} (agrupados en los paquetes Usuarios y Roles, Almacenes, Reservas y Pagos, Comunicación, y Moderación y Reportes), los 8 \textbf{servicios de aplicación} que concentran las reglas de negocio reales (p. ej. \texttt{ReservationService} resuelve conflictos de fechas y cancela en cascada; \texttt{ReportService} notifica en cascada a administradores y al arrendador; \texttt{StoreModerationService} sincroniza \texttt{StoreRooms} con su historial de moderación y notifica al arrendador; \texttt{PaymentService} confirma la reserva asociada cuando un pago se registra como exitoso), las 3 \textbf{policies} de autorización (incluida \texttt{PaymentsPolicy}, que valida que quien paga sea el \textit{tenant} dueño de la reserva), el enum \texttt{NotificationType} (incluye \texttt{STORE\_APPROVED}/\texttt{STORE\_REJECTED}) y las 3 \textbf{excepciones de dominio} (\texttt{DuplicateRatingException}, \texttt{ReservationConflictException}, \texttt{AccountBlockedException}, todas extienden \texttt{RuntimeException}). El patrón \texttt{User} 1 -- (0..1) \texttt{Landlords}/\texttt{Tenants}/\texttt{Admin} refleja una decisión real de diseño del código: los roles se modelan como \textbf{perfiles compuestos} (relación \texttt{hasOne}, no herencia de clases), lo que permite añadir nuevos roles sin modificar \texttt{User} (ver Open/Closed en la Tabla~\ref{tab:solid}). \texttt{StoreModerationService}, \texttt{PaymentService}, \texttt{PaymentsPolicy} y \texttt{AccountBlockedException} se clasifican como \textbf{heredado} (no \textbf{nuevo}): pertenecen a módulos que el ERS ya declara completos (moderación de bodegas, registro de pagos, autenticación), no a requerimientos nuevos del alcance. Se añade además el paquete \textbf{Nuevo (planificado)} con 6 clases derivadas directamente del ERS (\S1.3 Alcance) para los módulos aún sin código: \texttt{Organizacion}, \texttt{OrganizacionMiembro}, \texttt{ConexionInventario}, \texttt{ProductoInventario}, \texttt{PermisoBomberos} y \texttt{RegistroAuditoria}.
+{\sloppy\noindent El diagrama modela la capa de \textbf{lógica de negocio} completa: 19 modelos Eloquent \textbf{heredados} (agrupados en los paquetes Usuarios y Roles, Almacenes, Reservas y Pagos, Comunicación, y Moderación y Reportes), los 8 \textbf{servicios de aplicación} que concentran las reglas de negocio reales (p. ej. \texttt{ReservationService} resuelve conflictos de fechas y cancela en cascada; \texttt{ReportService} notifica en cascada a administradores y al arrendador; \texttt{StoreModerationService} sincroniza \texttt{StoreRooms} con su historial de moderación y notifica al arrendador; \texttt{PaymentService} confirma la reserva asociada cuando un pago se registra como exitoso), las 3 \textbf{policies} de autorización (incluida \texttt{PaymentsPolicy}, que valida que quien paga sea el \textit{tenant} dueño de la reserva), el enum \texttt{NotificationType} (incluye \texttt{STORE\_APPROVED}/\texttt{STORE\_REJECTED}) y las 3 \textbf{excepciones de dominio} (\texttt{DuplicateRatingException}, \texttt{ReservationConflictException}, \texttt{AccountBlockedException}, todas extienden \texttt{RuntimeException}). El patrón \texttt{User} 1 -- (0..1) \texttt{Landlords}/\texttt{Tenants}/\texttt{Admin} refleja una decisión real de diseño del código: los roles se modelan como \textbf{perfiles compuestos} (relación \texttt{hasOne}, no herencia de clases), lo que permite añadir nuevos roles sin modificar \texttt{User} (ver Open/Closed en la Tabla~\ref{tab:solid}). \texttt{StoreModerationService}, \texttt{PaymentService}, \texttt{PaymentsPolicy} y \texttt{AccountBlockedException} se clasifican como \textbf{heredado} (no \textbf{nuevo}): pertenecen a módulos que el ERS ya declara completos (moderación de bodegas, registro de pagos, autenticación), no a requerimientos nuevos del alcance. Se añade además el paquete \textbf{Nuevo (planificado)} con 6 clases derivadas directamente del ERS (\S1.3 Alcance) para los módulos aún sin código: \texttt{Organizacion}, \texttt{OrganizacionMiembro}, \texttt{ConexionInventario}, \texttt{ProductoInventario}, \texttt{PermisoBomberos} y \texttt{RegistroAuditoria}.\par}
 
 Dado el tamaño del sistema (35 clases/enums en total), un único diagrama solo se aprecia con \textit{zoom}, lo que perjudica la legibilidad exigida por la rúbrica (hasta -50 pts). Por ello se presenta un \textbf{diagrama general por paquetes} (vista de contexto, sin atributos) seguido de \textbf{9 diagramas de detalle}, uno por cada paquete del sistema, cada uno con sus atributos, métodos y relaciones internas completos. Las clases externas a un paquete que participan en alguna relación se muestran como cajas \textbf{«Referencia»} (gris, sin atributos) que remiten al diagrama donde están definidas por completo.
 
@@ -636,13 +636,13 @@ Todas las excepciones de dominio (\texttt{DuplicateRatingException}, \texttt{Res
 I -- Interface Segregation &
 No hay interfaces PHP explícitas en el código actual (todas las clases de servicio y policy son concretas) --- ver \S\ref{sssec:malos-olores}, ``Ausencia de contratos/interfaces'', como oportunidad de mejora identificada. En su forma actual, cada \textit{policy} (\texttt{ConversationPolicy}, \texttt{ReservationsPolicy}) expone un único método de autorización específico a su caso de uso, en vez de un contrato genérico ``autorizable'' con métodos que la clase implementante no necesitaría, lo cual sí respeta el \emph{espíritu} de ISP aunque no exista una interfaz formal. \\ \hline
 D -- Dependency Inversion &
-Laravel resuelve los servicios (\texttt{ReservationService}, \texttt{RatingsService}, etc.) por \textit{method injection} en la firma de las acciones del controlador (p.\,ej. \texttt{ReservationsController::store(StoreReservationRequest \$request, ReservationService \$reservationService)}), en vez de instanciarlos con \texttt{new} dentro del método. Esto desacopla el controlador de la construcción concreta del servicio y permite sustituirlo (p.\,ej. en tests) sin modificar el controlador. \\ \hline
+Laravel resuelve los servicios (\texttt{ReservationService}, \texttt{RatingsService}, etc.) por \textit{method injection} en la firma de las acciones del controlador (p.\,ej. \texttt{ReservationsController::store(\-StoreReservationRequest \$request, ReservationService \$reservationService)}), en vez de instanciarlos con \texttt{new} dentro del método. Esto desacopla el controlador de la construcción concreta del servicio y permite sustituirlo (p.\,ej. en tests) sin modificar el controlador. \\ \hline
 \end{longtable}
 }
 
 \subsection{Patrones de Diseño Aplicados}
 {\setlength{\tabcolsep}{4pt}
-\begin{longtable}{|M{2.9cm}|M{2.4cm}|L{8.8cm}|}
+\begin{longtable}{|M{2.9cm}|M{3.2cm}|L{8cm}|}
 \caption{Patrones de diseño utilizados en el sistema \cite{ref22}} \label{tab:patrones} \\
 \hline
 \rowcolor{cajagris} \textbf{Patrón} & \textbf{Categoría} & \textbf{Dónde se aplica / Justificación} \\
