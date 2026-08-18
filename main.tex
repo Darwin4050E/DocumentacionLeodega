@@ -192,12 +192,19 @@
 \newcommand{\CUfechas}[2]{Fecha de creación: & #1 & \cuLabelC{Última fecha de revisión:} & #2 \\ \hline}
 \newcommand{\CUdescripcion}[1]{Descripción: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
 \newcommand{\CUactores}[1]{Actores: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
-\newcommand{\CUprecondiciones}[1]{Precondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
-\newcommand{\CUpostcondiciones}[1]{Postcondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
-\newcommand{\CUflujo}[1]{Flujo: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
-\newcommand{\CUalternativos}[1]{Flujos Alternativos: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+% Nota: los campos con listas (enumerate/itemize) se envuelven en un
+% \minipage{\linewidth} propio porque el centrado vertical de la columna
+% L (m{}) no calcula bien la altura de una lista y el contenido queda
+% pegado arriba de la celda; el minipage explícito lo corrige. Dentro del
+% minipage se agrega un pequeño margen superior (\rule invisible, ya que
+% \vspace al inicio de un minipage se descarta) e inferior (\vspace) para
+% que el contenido no quede pegado a los bordes horizontales de la celda.
+\newcommand{\CUprecondiciones}[1]{Precondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{\begin{minipage}{\linewidth}\rule{0pt}{4pt}#1\vspace{4pt}\end{minipage}} \\ \hline}
+\newcommand{\CUpostcondiciones}[1]{Postcondiciones: & \multicolumn{3}{L{\cuvalwidth}|}{\begin{minipage}{\linewidth}\rule{0pt}{4pt}#1\vspace{4pt}\end{minipage}} \\ \hline}
+\newcommand{\CUflujo}[1]{Flujo: & \multicolumn{3}{L{\cuvalwidth}|}{\begin{minipage}{\linewidth}\rule{0pt}{4pt}#1\vspace{4pt}\end{minipage}} \\ \hline}
+\newcommand{\CUalternativos}[1]{Flujos Alternativos: & \multicolumn{3}{L{\cuvalwidth}|}{\begin{minipage}{\linewidth}\rule{0pt}{4pt}#1\vspace{4pt}\end{minipage}} \\ \hline}
 \newcommand{\CUexcepciones}[1]{Excepciones: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
-\newcommand{\CUrequerimientos}[1]{Requerimientos: & \multicolumn{3}{L{\cuvalwidth}|}{#1} \\ \hline}
+\newcommand{\CUrequerimientos}[1]{Requerimientos: & \multicolumn{3}{L{\cuvalwidth}|}{\begin{minipage}{\linewidth}\rule{0pt}{4pt}#1\vspace{4pt}\end{minipage}} \\ \hline}
 
 % Entorno principal. Argumento: nombre del caso de uso para el pie.
 \newenvironment{casouso}[1]{%
