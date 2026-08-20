@@ -8,13 +8,13 @@
 
 \subsection{Marco de Identificación y Análisis}
 
-Los riesgos del proyecto se identificaron mediante tres técnicas complementarias: listas de chequeo de riesgos típicos de proyectos de software, categorías documentadas de riesgo (técnico, de alcance, de recursos/equipo, de cronograma, de seguridad y externo/regulatorio) y sesiones de tormenta de ideas del equipo, contrastadas contra los artefactos de planificación del proyecto (historias de usuario, cronograma PERT/CPM y estimación funcional COSMIC, ver Sección~\ref{sec:cronograma-a}).
+Los riesgos del proyecto se identificaron mediante tres técnicas complementarias: listas de chequeo de riesgos típicos de proyectos de software, categorías documentadas de riesgo por módulo/actor del sistema y sesiones de tormenta de ideas del equipo, contrastadas contra los artefactos de planificación del proyecto (historias de usuario y cronograma PERT/CPM, ver Sección~\ref{sec:cronograma-a}).
 
 Cada riesgo identificado se evalúa según dos dimensiones cualitativas de 5 niveles:
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Probabilidad de ocurrencia:} (1) No probable [1--20\%], (2) Posible [20--40\%], (3) Poco probable [40--60\%], (4) Probable [60--80\%], (5) Muy probable [80--100\%].
-    \item \textbf{Impacto potencial:} (1) Mínimo, (2) Obstáculo menor --- podría no afectar la satisfacción del cliente, presupuesto, cronograma o desempeño---, (3) Obstáculo --- potencial insatisfacción del cliente, sobrecosto, retraso o degradación del sistema---, (4) Obstáculo mayor --- efecto significativo sobre cliente, cronograma, presupuesto o desempeño---, (5) Seria amenaza --- severa insatisfacción del cliente, sobrecosto grave, retraso grave o degradación severa del sistema.
+    \item \textbf{Probabilidad de ocurrencia:} (1) Raro [1--20\%], (2) Poco probable [20--40\%], (3) Moderado [40--60\%], (4) Probable [60--80\%], (5) Casi seguro [80--100\%].
+    \item \textbf{Impacto potencial:} (1) Insignificante --- mínimo---, (2) Menor --- podría no afectar la satisfacción del cliente, presupuesto, cronograma o desempeño---, (3) Significativo --- potencial insatisfacción del cliente, sobrecosto, retraso o degradación del sistema---, (4) Mayor --- efecto significativo sobre cliente, cronograma, presupuesto o desempeño---, (5) Severo --- severa insatisfacción del cliente, sobrecosto grave, retraso grave o degradación severa del sistema.
 \end{itemize}
 
 El nivel de riesgo resultante (Probabilidad $\times$ Impacto) se clasifica de acuerdo con la matriz de calor 5$\times$5 de la Tabla~\ref{tab:matriz-riesgo}, la cual determina el orden de prioridad de atención: primero los riesgos de alta probabilidad y alto impacto, luego los de alto impacto con baja probabilidad, después los de bajo impacto con alta probabilidad, y por último los de bajo impacto y baja probabilidad.
@@ -56,20 +56,39 @@ Para el manejo de cada riesgo se aplica una (o una combinación) de las siguient
 
 \subsection{Registro de Riesgos del Proyecto}
 
-La Tabla~\ref{tab:riesgos-eval} presenta los riesgos identificados para Leodega, ordenados de mayor a menor nivel de riesgo. Los riesgos R-01 y R-02 están directamente vinculados a la concentración de tamaño funcional revelada por la estimación COSMIC del proyecto (el módulo Cliente concentra 120 de 324 puntos de función, el 37\,\% del total) y a la ausencia de holgura en la ruta crítica del cronograma (Sección~\ref{sec:cronograma-a}).
+Los riesgos se identificaron y organizaron por módulo/actor del sistema (Gestor de Bodega, Cliente, Administrador, Organización y Leodeguita), cada uno vinculado a la historia de usuario que lo origina. Se identificaron 32 riesgos funcionales; ninguno alcanza los niveles ``Muy alto'' o ``Extremo'': 4 son ``Alto'', 25 ``Medio'' y 3 ``Bajo'' (Tabla~\ref{tab:riesgos-resumen}). Para cada riesgo se documenta, además de su evaluación, cómo el sistema lo previene o mitiga en la práctica (Tabla~\ref{tab:riesgos-plan}).
 
-{\setlength{\tabcolsep}{4pt}
-\begin{longtable}{|M{1.3cm}|L{5.3cm}|M{2.0cm}|M{1.9cm}|M{1.9cm}|M{1.8cm}|}
+\begin{table}[H]
+\centering
+\caption{Resumen de riesgos por nivel}
+\label{tab:riesgos-resumen}
+\begin{tabular}{|l|c|}
+\hline
+\rowcolor{cajagris}
+\textbf{Nivel} & \textbf{Cantidad} \\
+\hline
+\cellcolor{riskmuybajo}Muy bajo & 0 \\ \hline
+\cellcolor{riskbajo}Bajo & 3 \\ \hline
+\cellcolor{riskmedio}Medio & 25 \\ \hline
+\cellcolor{riskalto}Alto & 4 \\ \hline
+\cellcolor{riskmuyalto}Muy alto & 0 \\ \hline
+\cellcolor{riskextremo}Extremo & 0 \\ \hline
+\textbf{Total} & \textbf{32} \\ \hline
+\end{tabular}
+\end{table}
+
+{\small\setlength{\tabcolsep}{4pt}
+\begin{longtable}{|M{1.2cm}|M{2.5cm}|L{5.0cm}|M{2.0cm}|M{2.0cm}|M{1.5cm}|}
 \caption{Identificación y evaluación de riesgos} \label{tab:riesgos-eval} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID} & \textbf{Riesgo} & \textbf{Categoría} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
+\textbf{ID} & \textbf{Módulo} & \textbf{Riesgo} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
 \hline
 \endfirsthead
 \multicolumn{6}{c}{\textit{Tabla~\ref{tab:riesgos-eval} (continuación)}} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID} & \textbf{Riesgo} & \textbf{Categoría} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
+\textbf{ID} & \textbf{Módulo} & \textbf{Riesgo} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} \\
 \hline
 \endhead
 \hline \multicolumn{6}{r}{\textit{continúa en la siguiente página}} \\
@@ -77,63 +96,155 @@ La Tabla~\ref{tab:riesgos-eval} presenta los riesgos identificados para Leodega,
 \hline
 \endlastfoot
 
-R-01 & Retraso o falla en la integración con los sistemas de inventario externos de los clientes (HUC-10 a HUC-13): Leodega depende de APIs de terceros no controladas por el equipo y de un modelo de sincronización \textit{pull} cuyo comportamiento real se desconoce hasta la integración. & Técnico / Integración & 4 -- Probable & 4 -- Obstáculo mayor & \cellcolor{riskmuyalto}Muy alto (16) \\
+RG-01 & Gestor de Bodega & Permiso de bomberos vencido o inválido al registrar la bodega (HUG-04). & 3 -- Moderado & 4 -- Mayor & \cellcolor{riskalto}Alto (12) \\
 \hline
-R-02 & Subestimación del esfuerzo del módulo Cliente, que concentra el 37\,\% del tamaño funcional total del sistema (120 de 324 CFP según la estimación COSMIC), lo que puede provocar desbordes de cronograma en los Sprints 2, 4 y 5. & Técnico / Complejidad & 4 -- Probable & 4 -- Obstáculo mayor & \cellcolor{riskmuyalto}Muy alto (16) \\
+RG-02 & Gestor de Bodega & Registro de bodega con datos incompletos o inválidos (HUG-04). & 4 -- Probable & 2 -- Menor & \cellcolor{riskmedio}Medio (8) \\
 \hline
-R-03 & Retraso en cascada sobre la ruta crítica del proyecto si cualquiera de sus actividades se atrasa, dado que ninguna tiene holgura (float = 0). & Cronograma & 3 -- Poco probable & 5 -- Seria amenaza & \cellcolor{riskmuyalto}Muy alto (15) \\
+RG-03 & Gestor de Bodega & Cancelación de reserva ya iniciada o finalizada (HUG-06). & 2 -- Poco probable & 3 -- Significativo & \cellcolor{riskmedio}Medio (6) \\
 \hline
-R-04 & Indisponibilidad o rotación de un integrante del equipo, dado que la planificación con recursos limitados ya asume el uso máximo de personal disponible sin holgura adicional en las tareas críticas. & Recursos / Equipo & 3 -- Poco probable & 4 -- Obstáculo mayor & \cellcolor{riskalto}Alto (12) \\
+RG-04 & Gestor de Bodega & Eliminación de bodega con reservas activas o futuras (HUG-07). & 2 -- Poco probable & 4 -- Mayor & \cellcolor{riskmedio}Medio (8) \\
 \hline
-R-05 & Curva de aprendizaje del equipo con la tecnología del acompañante móvil Leodeguita, no utilizada previamente en la plataforma heredada (100\,\% web). & Técnico / Aprendizaje & 4 -- Probable & 3 -- Obstáculo & \cellcolor{riskalto}Alto (12) \\
+RG-05 & Gestor de Bodega & Edición de bodega afecta reservas confirmadas (HUG-08). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
 \hline
-R-06 & Vulnerabilidades en la autenticación compartida entre la plataforma web y Leodeguita (mismas credenciales, tokens Bearer) si el almacenamiento de tokens en el cliente móvil no es seguro. & Seguridad & 2 -- Posible & 5 -- Seria amenaza & \cellcolor{riskalto}Alto (10) \\
+RG-06 & Gestor de Bodega & No recibir notificación de pago confirmado (HUG-02). & 2 -- Poco probable & 3 -- Significativo & \cellcolor{riskmedio}Medio (6) \\
 \hline
-R-07 & Demoras o inconsistencias en la validación del permiso del cuerpo de bomberos por parte del Administrador, al depender de un proceso de revisión documental no automatizado. & Externo / Regulatorio & 3 -- Poco probable & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (9) \\
+RG-07 & Gestor de Bodega & Chat no disponible tras finalizar el alquiler (HUG-03). & 5 -- Casi seguro & 1 -- Insignificante & \cellcolor{riskmedio}Medio (5) \\
 \hline
-R-08 & Cambios o ambigüedades en los requerimientos de las historias de usuario durante el desarrollo que obliguen a retrabajo. & Alcance & 2 -- Posible & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (6) \\
+RC-01 & Cliente & Reserva con fechas solapadas con otra confirmada (HUC-03). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
 \hline
-R-09 & Expectativa del cliente/evaluador de un procesamiento de pago real, dado que el flujo de pago está simulado por diseño (fuera de alcance). & Alcance & 2 -- Posible & 3 -- Obstáculo & \cellcolor{riskmedio}Medio (6) \\
+RC-02 & Cliente & No completar el pago dentro del tiempo de hold (HUC-05). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RC-03 & Cliente & Endpoint de inventario externo no responde o es inválido (HUC-10, HUC-12). & 4 -- Probable & 3 -- Significativo & \cellcolor{riskalto}Alto (12) \\
+\hline
+RC-04 & Cliente & Mapeo de campos de inventario incorrecto (HUC-11). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RC-05 & Cliente & Importación de Excel con filas incompletas o formato incorrecto (HUC-13). & 4 -- Probable & 2 -- Menor & \cellcolor{riskmedio}Medio (8) \\
+\hline
+RC-06 & Cliente & Intento de cancelar reserva ya iniciada (HUC-07). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RC-07 & Cliente & Invitación de organización expirada (HUC-14). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RC-08 & Cliente & Reserva o consulta sin sesión activa (HUC-03, HUC-04). & 3 -- Moderado & 1 -- Insignificante & \cellcolor{riskbajo}Bajo (3) \\
+\hline
+RA-01 & Administrador & Aprobar bodega con permiso de bomberos inválido (HUA-01). & 2 -- Poco probable & 5 -- Severo & \cellcolor{riskalto}Alto (10) \\
+\hline
+RA-02 & Administrador & Bloquear cuenta de usuario legítimo por error (HUA-03). & 2 -- Poco probable & 4 -- Mayor & \cellcolor{riskmedio}Medio (8) \\
+\hline
+RA-03 & Administrador & Métricas del dashboard inexactas o desactualizadas (HUA-02). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RA-04 & Administrador & Resolver reporte sin respuesta al cliente (HUA-04). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RA-05 & Administrador & Acumulación de reportes sin resolver (HUA-02, HUA-04). & 3 -- Moderado & 3 -- Significativo & \cellcolor{riskmedio}Medio (9) \\
+\hline
+RO-01 & Organización & Crear organización con RUC duplicado (HUE-04). & 2 -- Poco probable & 3 -- Significativo & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RO-02 & Organización & Invitar a usuarios con rol gestor en vez de cliente (HUE-01). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RO-03 & Organización & Miembro elimina reservas de la organización sin permiso (HUE-06). & 2 -- Poco probable & 4 -- Mayor & \cellcolor{riskmedio}Medio (8) \\
+\hline
+RO-04 & Organización & Reserva empresarial hecha en contexto personal por error (HUE-05). & 4 -- Probable & 3 -- Significativo & \cellcolor{riskalto}Alto (12) \\
+\hline
+RO-05 & Organización & Cambio de contexto erróneo personal/organización (HUE-02). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RO-06 & Organización & Miembro eliminado pierde acceso a la organización (HUE-03). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RL-01 & Leodeguita & Inicio de sesión con credenciales incorrectas (HUL-01). & 4 -- Probable & 1 -- Insignificante & \cellcolor{riskmedio}Medio (4) \\
+\hline
+RL-02 & Leodeguita & Publicar bodega con nombre duplicado (HUL-03). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RL-03 & Leodeguita & Campos incompletos en publicación desde el móvil (HUL-03). & 4 -- Probable & 2 -- Menor & \cellcolor{riskmedio}Medio (8) \\
+\hline
+RL-04 & Leodeguita & Espacio no disponible mientras se visualiza (HUL-06). & 3 -- Moderado & 2 -- Menor & \cellcolor{riskmedio}Medio (6) \\
+\hline
+RL-05 & Leodeguita & Cliente sin compañías asociadas en Leodeguita (HUL-02). & 3 -- Moderado & 1 -- Insignificante & \cellcolor{riskbajo}Bajo (3) \\
+\hline
+RL-06 & Leodeguita & Listado de bodegas o espacios vacío en el móvil (HUL-04, HUL-05). & 3 -- Moderado & 1 -- Insignificante & \cellcolor{riskbajo}Bajo (3) \\
 \hline
 \end{longtable}
 }
 
 {\setlength{\tabcolsep}{4pt}
-\begin{longtable}{|M{0.9cm}|M{2.0cm}|L{4.5cm}|L{4.5cm}|M{2.4cm}|}
+\begin{longtable}{|M{1.1cm}|M{2.4cm}|L{11.6cm}|}
 \caption{Plan de respuesta a riesgos} \label{tab:riesgos-plan} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID} & \textbf{Estrategia} & \textbf{Acciones de mitigación} & \textbf{Plan de contingencia} & \textbf{Responsable} \\
+\textbf{ID} & \textbf{Estrategia} & \textbf{Aplicación en el sistema} \\
 \hline
 \endfirsthead
-\multicolumn{5}{c}{\textit{Tabla~\ref{tab:riesgos-plan} (continuación)}} \\
+\multicolumn{3}{c}{\textit{Tabla~\ref{tab:riesgos-plan} (continuación)}} \\
 \hline
 \rowcolor{cajagris}
-\textbf{ID} & \textbf{Estrategia} & \textbf{Acciones de mitigación} & \textbf{Plan de contingencia} & \textbf{Responsable} \\
+\textbf{ID} & \textbf{Estrategia} & \textbf{Aplicación en el sistema} \\
 \hline
 \endhead
-\hline \multicolumn{5}{r}{\textit{continúa en la siguiente página}} \\
+\hline \multicolumn{3}{r}{\textit{continúa en la siguiente página}} \\
 \endfoot
 \hline
 \endlastfoot
 
-R-01 & Reducción de impacto + Plan de contingencia & Diseñar el conector de inventario con una capa de adaptación (patrón \textit{Adapter}) desacoplada del núcleo y definir contratos de API simulados (\textit{mocks}) desde etapas tempranas para pruebas de integración anticipadas. & Si la integración real no está disponible a tiempo, degradar al modo de importación manual vía Excel (HUC-13) para cumplir la fecha de entrega, e integrar el conector en un sprint posterior. & Equipo Sprint 5 \\
+RG-01 & Reducción de probabilidad & Validar la vigencia del permiso antes de enviar; el sistema exige adjuntar el documento obligatoriamente y lo envía a revisión del administrador (HUA-01). \\
 \hline
-R-02 & Reducción de impacto & Usar la estimación funcional COSMIC para re-balancear el personal asignado por sprint y descomponer las historias más grandes (HUC-10 a HUC-13) en subtareas verificables. & Priorizar las funcionalidades de mayor valor de negocio del módulo Cliente (búsqueda, reserva, pago) sobre las de menor prioridad (integración de inventario) si el tiempo se agota. & Líder técnico \\
+RG-02 & Reducción de probabilidad & Validación de campos obligatorios en el formulario con mensajes de error claros antes de permitir el envío. \\
 \hline
-R-03 & Planes de contingencia + Reducción de probabilidad & Monitorear semanalmente el avance de las actividades de la ruta crítica y reforzar con personal adicional ante cualquier desviación temprana. & Usar la holgura ganada en la optimización de recursos y, de ser necesario, negociar con el cliente una reducción de alcance en funcionalidades no críticas para proteger la fecha de entrega. & Líder de proyecto \\
+RG-03 & Evitar & El sistema bloquea la cancelación de reservas en curso o finalizadas y muestra un mensaje de error indicando que no es posible. \\
 \hline
-R-04 & Planes de contingencia + Reducción de probabilidad & Distribuir el conocimiento de los módulos críticos entre al menos dos integrantes (reducir el \textit{bus factor}) y mantener documentación técnica continuamente actualizada. & Reasignar las tareas del integrante ausente al miembro con menor carga según el cronograma nivelado, aceptando una extensión acotada antes de escalar al profesor/cliente. & Todo el equipo \\
+RG-04 & Evitar & El sistema bloquea la eliminación cuando existen reservas activas o futuras y solicita gestionarlas antes de eliminar. \\
 \hline
-R-05 & Reducción de probabilidad + Reducción de impacto & Capacitación express del equipo antes del sprint del acompañante móvil, reutilizando la lógica de negocio y los endpoints REST ya validados en el backend. & Reducir el alcance de Leodeguita a las historias de mayor prioridad (login y exploración) si el aprendizaje consume el margen disponible. & Equipo Sprint 5 (móvil) \\
+RG-05 & Reducción de impacto & Los cambios de precio u otros datos aplican solo a nuevas reservas; las existentes conservan las condiciones originales acordadas. \\
 \hline
-R-06 & Reducción de impacto + Transferencia & Usar almacenamiento seguro nativo para los tokens, expiración corta de sesión y cumplimiento de los requerimientos de seguridad del ERS (RNF-03/RNF-04). & Revocar de forma centralizada los tokens comprometidos desde el backend y forzar reautenticación de los usuarios afectados. & Responsable de seguridad/backend \\
+RG-06 & Planes de contingencia & El gestor puede verificar contratos activos en su panel; el sistema reenvía la notificación y marca el contrato como activo. \\
 \hline
-R-07 & Aceptación + Reducción de impacto & Definir casos de prueba con documentos de permiso simulados (válidos, vencidos, ilegibles) para validar el flujo sin depender de una autoridad real. & Documentar un criterio de validación manual de respaldo si la automatización no cubre todos los casos. & QA \\
+RG-07 & Aceptación & El sistema deshabilita el chat en modo solo lectura y conserva el historial para referencia; no se requiere acción adicional. \\
 \hline
-R-08 & Reducción de probabilidad & Validar cada historia de usuario con el representante del cliente antes de iniciar el sprint correspondiente y mantener trazabilidad HU $\rightarrow$ RF (Sección B). & Congelar el alcance del sprint en curso y trasladar el cambio solicitado al backlog del siguiente sprint. & Product Owner \\
+RC-01 & Evitar & El sistema detecta conflictos de fechas, bloquea la reserva y resalta los periodos ocupados en el calendario de disponibilidad. \\
 \hline
-R-09 & Reducción de probabilidad & Documentar explícitamente el alcance y las exclusiones del proyecto (Capítulo~1) y validarlo con el cliente en el acta de conformidad. & Aclarar en la demostración del sistema que el pago es simulado por diseño. & Product Owner \\
+RC-02 & Planes de contingencia & El sistema libera la disponibilidad retenida, no finaliza la reserva y permite al cliente iniciar una nueva cuando lo desee. \\
+\hline
+RC-03 & Planes de contingencia & El sistema muestra los últimos datos disponibles con su fecha de consulta y ofrece importar desde Excel como alternativa. \\
+\hline
+RC-04 & Reducción de probabilidad & El sistema valida los campos obligatorios (nombre y cantidad) y muestra una vista previa del mapeo antes de guardar. \\
+\hline
+RC-05 & Reducción de impacto & El sistema importa las filas válidas, omite las incorrectas y muestra un reporte detallado de las filas ignoradas y el motivo. \\
+\hline
+RC-06 & Transferencia & El sistema bloquea la cancelación y deriva al cliente al administrador para resolver incidencias en curso. \\
+\hline
+RC-07 & Planes de contingencia & El sistema archiva la invitación y sugiere al cliente solicitar una nueva al administrador de la organización. \\
+\hline
+RC-08 & Evitar & El sistema redirige al login y, tras autenticar, retorna automáticamente a la bodega o reserva seleccionada. \\
+\hline
+RA-01 & Reducción de impacto & El administrador revisa el documento; el rechazo exige razón obligatoria, se notifica al gestor y debe subir un permiso válido para reiniciar. \\
+\hline
+RA-02 & Reducción de impacto & El bloqueo requiere razón obligatoria y se registra en bitácora de auditoría; la cuenta puede reactivarse posteriormente. \\
+\hline
+RA-03 & Reducción de probabilidad & El dashboard consulta columnas indexadas y filtra métricas por periodo con gráficos comparativos mensuales. \\
+\hline
+RA-04 & Evitar & El sistema bloquea la resolución si el campo de respuesta está vacío y solicita el mensaje antes de cerrar el reporte. \\
+\hline
+RA-05 & Planes de contingencia & El dashboard muestra un indicador numérico de reportes pendientes clasificados por prioridad con enlace directo al módulo. \\
+\hline
+RO-01 & Evitar & El sistema valida la unicidad del RUC (13 dígitos) y bloquea el registro si ya existe otra organización con ese RUC. \\
+\hline
+RO-02 & Evitar & El sistema bloquea la invitación a gestores de bodega y muestra que solo se pueden invitar usuarios con rol cliente. \\
+\hline
+RO-03 & Evitar & El botón de eliminar se oculta a miembros; los intentos por URL directa devuelven error 403 y se registran en auditoría. \\
+\hline
+RO-04 & Reducción de probabilidad & El selector de contexto indica claramente el contexto activo; la reserva se vincula al contexto vigente al confirmar. \\
+\hline
+RO-05 & Reducción de impacto & El indicador visual muestra el contexto activo y el panel se recarga con los datos específicos de ese contexto. \\
+\hline
+RO-06 & Aceptación & El miembro es desvinculado y notificado; el historial de reservas que realizó se preserva para auditoría. \\
+\hline
+RL-01 & Reducción de probabilidad & El sistema valida los campos, resalta los obligatorios vacíos y muestra un mensaje de error claro sin permitir el acceso. \\
+\hline
+RL-02 & Evitar & El sistema advierte que ya existe una bodega con ese nombre del mismo gestor y bloquea el registro. \\
+\hline
+RL-03 & Reducción de probabilidad & El sistema resalta los campos faltantes con un mensaje descriptivo y no realiza el registro hasta completarlos. \\
+\hline
+RL-04 & Planes de contingencia & El sistema muestra un aviso de que el espacio ya no está disponible y lo retira de la lista activa al refrescar. \\
+\hline
+RL-05 & Aceptación & El sistema redirige a la vista del rol cliente y no muestra el selector de compañía al no tener organizaciones asociadas. \\
+\hline
+RL-06 & Aceptación & El sistema muestra un mensaje indicando que no hay bodegas/espacios y ofrece la opción de publicar o explorar. \\
 \hline
 \end{longtable}
 }
