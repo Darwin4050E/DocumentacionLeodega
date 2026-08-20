@@ -1054,6 +1054,169 @@ Direct communication with platform users for support and moderation.
     \label{fig:admin_config}
 \end{figure}
 
+% =====================================================================
+%  LEODEGUITA — MOBILE COMPANION PROTOTYPE SCREENS
+%  Images in ./img_leodeguita/ (captured from recursos/leodega_prototipo/Leodeguita.html)
+% =====================================================================
+\section{Leodeguita Mobile Companion}
+\label{sec:leodeguita-prototype}
+
+In addition to the web platform documented above, the project includes \textbf{Leodeguita}, a companion mobile prototype built with the same technology stack (React) and packaged as a standalone app shell inside a phone frame. It targets two of the three platform roles --- \textbf{Client} and \textbf{Warehouse Manager} --- reusing the same business logic and flows already validated on the web, trimmed to the minimum number of steps for a mobile context. The following screens document its main flow, organised by topic and cross-referenced to the corresponding user stories (HUL-01 to HUL-06, Appendix~A).
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul01_login_cliente}\\[2pt]{\small Login}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_registro}\\[2pt]{\small Registration}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul02_selector_empresa}\\[2pt]{\small Company selector}
+\end{minipage}
+\caption{Leodeguita onboarding: shared login with Leodega credentials (HUL-01), new-account registration, and the organisation/company selector shown to clients who belong to more than one company (HUL-02).}
+\label{fig:leodeguita_onboarding}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul05_explorar}\\[2pt]{\small Explore}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul06_detalle}\\[2pt]{\small Warehouse detail}
+\end{minipage}
+\caption{Mobile catalog of available warehouse spaces (HUL-05) and the detailed view of a selected space, with location map and manager contact (HUL-06).}
+\label{fig:leodeguita_catalog}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/checkout_1_fechas}\\[2pt]{\small Dates \& duration}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/checkout_2_pago}\\[2pt]{\small Payment}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/checkout_3_confirmada}\\[2pt]{\small Confirmation}
+\end{minipage}
+\caption{Booking flow from the mobile catalog: date and duration selection, simulated card payment, and the booking confirmation screen with its receipt code.}
+\label{fig:leodeguita_checkout}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_reservas}\\[2pt]{\small My bookings}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_mensajes}\\[2pt]{\small Messages inbox}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_chat}\\[2pt]{\small Conversation}
+\end{minipage}
+\caption{Client account screens: active and finished bookings list, messages inbox, and an open conversation with a warehouse manager.}
+\label{fig:leodeguita_client_account}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.30\linewidth]{img_leodeguita/cli_inventario}
+\caption{External inventory connection screen, offered to clients renting a space: the endpoint/credential form for read-only ERP/WMS integration, with an Excel import fallback (HUC-10, HUC-13).}
+\label{fig:leodeguita_inventory}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_perfil}\\[2pt]{\small Profile}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_panel_empresa}\\[2pt]{\small Company panel}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_invitar}\\[2pt]{\small Invite member}
+\end{minipage}
+\caption{Client profile with the organisation context switcher, and company administration screens: member/reservation/activity panel and member invitation by e-mail (HUE-01, HUE-03).}
+\label{fig:leodeguita_org_panel}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_invitaciones}\\[2pt]{\small Received invitations}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/cli_crear_org}\\[2pt]{\small Create organisation}
+\end{minipage}
+\caption{Organisation invitations received by a client, who may accept or reject them (HUC-14), and the organisation-creation form validated by RUC (HUE-04).}
+\label{fig:leodeguita_org_invites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul01_login_gestor}\\[2pt]{\small Login (manager)}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul04_mis_bodegas}\\[2pt]{\small My warehouses}
+\end{minipage}
+\caption{Warehouse Manager role login and the list of published warehouses with status filters --- approved, pending, and occupied (HUL-04).}
+\label{fig:leodeguita_manager_login}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso1}\\[2pt]{\small 1. Property type}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso2}\\[2pt]{\small 2. Storage type}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso3}\\[2pt]{\small 3. Photos}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso4}\\[2pt]{\small 4. Location}
+\end{minipage}
+\caption{Mobile warehouse-publication wizard (1/2), designed with the minimum number of steps for a manager publishing from a mobile device (HUL-03).}
+\label{fig:leodeguita_publish_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso5}\\[2pt]{\small 5. Title \& description}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso6}\\[2pt]{\small 6. Price \& size}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_paso7}\\[2pt]{\small 7. Security \& permit}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/hul03_publicar_resultado}\\[2pt]{\small Result: pending review}
+\end{minipage}
+\caption{Mobile warehouse-publication wizard (2/2): pricing, mandatory fire-department permit upload, and the resulting listing in ``My warehouses'', created with ``pending verification'' status until the Administrator approves it (HUL-03, HUA-01).}
+\label{fig:leodeguita_publish_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/ges_reservas}\\[2pt]{\small Bookings}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/ges_mensajes}\\[2pt]{\small Messages}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{img_leodeguita/ges_perfil}\\[2pt]{\small Profile}
+\end{minipage}
+\caption{Manager-side bookings, messages, and profile screens. Note the absence of the organisation section shown to clients: warehouse managers do not operate under a company context.}
+\label{fig:leodeguita_manager_ops}
+\end{figure}
+
 \chapter{Acceptance Letter}
 
 \begin{center}

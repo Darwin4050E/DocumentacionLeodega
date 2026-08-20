@@ -27,3 +27,6 @@ Thumbs.db
 # ---- Código fuente de Leodega (repo git propio, solo referencia local) ----
 recursos/leodega_codigo/
 recursos/Leodega-codigo/
+
+# ---- Prototipo HTML/React de Leodega (solo referencia local, capturas ya extraídas a imagenes/) ----
+recursos/leodega_prototipo/

@@ -1,5 +1,5 @@
 \section{Prototipo de Alta Fidelidad}
-\noindent El prototipo de Leodega es una aplicación web de alta fidelidad \textbf{funcional} (no un mockup estático), desarrollada en React~19 con TypeScript y Tailwind CSS, y desplegada y navegable en \url{https://darwin4050e.github.io/PrototipoLeodega/}. El sistema soporta tres roles principales -- \textbf{Cliente}, \textbf{Gestor de Almacenamiento} (arrendador) y \textbf{Administrador} --, cada uno con su propio flujo de interacción. A continuación se documenta el flujo de ventanas (navegación) y las pantallas principales del prototipo, organizadas por rol.
+\noindent El prototipo de Leodega es una aplicación web de alta fidelidad \textbf{funcional} (no un mockup estático), desarrollada en React~19 con TypeScript y Tailwind CSS, y desplegada y navegable en \url{https://darwin4050e.github.io/PrototipoLeodega/}. El sistema soporta tres roles principales -- \textbf{Cliente}, \textbf{Gestor de Almacenamiento} (arrendador) y \textbf{Administrador} --, cada uno con su propio flujo de interacción. A continuación se documenta el flujo de ventanas (navegación) y las pantallas principales del prototipo, organizadas por rol; la Sección~\ref{sec:leodeguita_mobile} documenta además \textbf{Leodeguita}, el prototipo del acompañante móvil.
 
 \subsection{Flujo de Ventanas del Prototipo}
 \begin{figure}[H]
@@ -271,5 +271,164 @@
     \includegraphics[width=0.55\linewidth]{imagenes/fig34_admin_config.png}
     \caption{Configuración de Perfil del Administrador: editor de datos personales con selector de vista de rol.}
     \label{fig:admin_config}
+\end{figure}
+\clearpage
+
+\subsubsection{Leodeguita (Acompañante Móvil)}
+\label{sec:leodeguita_mobile}
+\noindent Además de la plataforma web documentada arriba, el proyecto incluye \textbf{Leodeguita}, un prototipo móvil acompañante desarrollado con el mismo stack tecnológico (React) y empaquetado como una app dentro de un marco de teléfono. Cubre dos de los tres roles de la plataforma --- \textbf{Cliente} y \textbf{Gestor de Almacenamiento} ---, reutilizando la misma lógica de negocio y flujos ya validados en la web, reducidos al mínimo número de pasos posible para un contexto móvil. A continuación se documentan sus pantallas principales, organizadas por tema y referenciadas a las historias de usuario correspondientes (HUL-01 a HUL-06, Anexo~A).
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul01_login_cliente}\\[2pt]{\small Inicio de sesión}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_registro}\\[2pt]{\small Registro}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul02_selector_empresa}\\[2pt]{\small Selector de empresa}
+\end{minipage}
+\caption{Onboarding de Leodeguita: inicio de sesión compartido con las credenciales de Leodega (HUL-01), registro de cuenta nueva y selector de organización/empresa mostrado a los clientes que pertenecen a más de una compañía (HUL-02).}
+\label{fig:leodeguita_onboarding}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul05_explorar}\\[2pt]{\small Explorar}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul06_detalle}\\[2pt]{\small Detalle de bodega}
+\end{minipage}
+\caption{Catálogo móvil de espacios disponibles (HUL-05) y vista de detalle de un espacio seleccionado, con mapa de ubicación y contacto del gestor (HUL-06).}
+\label{fig:leodeguita_catalog}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/checkout_1_fechas}\\[2pt]{\small Fechas y duración}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/checkout_2_pago}\\[2pt]{\small Pago}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/checkout_3_confirmada}\\[2pt]{\small Confirmación}
+\end{minipage}
+\caption{Flujo de reserva desde el catálogo móvil: selección de fechas y duración, pago simulado con tarjeta, y pantalla de confirmación con código de comprobante.}
+\label{fig:leodeguita_checkout}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_reservas}\\[2pt]{\small Mis reservas}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_mensajes}\\[2pt]{\small Bandeja de mensajes}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_chat}\\[2pt]{\small Conversación}
+\end{minipage}
+\caption{Pantallas de cuenta del cliente: lista de reservas activas y finalizadas, bandeja de mensajes y una conversación abierta con un gestor de bodega.}
+\label{fig:leodeguita_client_account}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.30\linewidth]{imagenes/leodeguita/cli_inventario}
+\caption{Pantalla de conexión de inventario externo, ofrecida a los clientes que arriendan un espacio: formulario de endpoint/credencial para integración de solo lectura con un ERP/WMS, con respaldo de importación desde Excel (HUC-10, HUC-13).}
+\label{fig:leodeguita_inventory}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_perfil}\\[2pt]{\small Perfil}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_panel_empresa}\\[2pt]{\small Panel de la empresa}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_invitar}\\[2pt]{\small Invitar miembro}
+\end{minipage}
+\caption{Perfil del cliente con el selector de contexto de organización, y pantallas de administración de la empresa: panel de miembros/reservas/actividad e invitación de miembros por correo (HUE-01, HUE-03).}
+\label{fig:leodeguita_org_panel}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_invitaciones}\\[2pt]{\small Invitaciones recibidas}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/cli_crear_org}\\[2pt]{\small Crear organización}
+\end{minipage}
+\caption{Invitaciones de organización recibidas por un cliente, quien puede aceptarlas o rechazarlas (HUC-14), y el formulario de creación de organización validado por RUC (HUE-04).}
+\label{fig:leodeguita_org_invites}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul01_login_gestor}\\[2pt]{\small Inicio de sesión (gestor)}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul04_mis_bodegas}\\[2pt]{\small Mis bodegas}
+\end{minipage}
+\caption{Inicio de sesión con el rol de Gestor de Bodega y el listado de bodegas publicadas con filtros de estado --- aprobadas, pendientes y ocupadas (HUL-04).}
+\label{fig:leodeguita_manager_login}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso1}\\[2pt]{\small 1. Tipo de espacio}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso2}\\[2pt]{\small 2. Modalidad}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso3}\\[2pt]{\small 3. Fotos}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso4}\\[2pt]{\small 4. Ubicación}
+\end{minipage}
+\caption{Asistente móvil de publicación de bodega (1/2), diseñado con el mínimo número de pasos para que un gestor publique desde su dispositivo móvil (HUL-03).}
+\label{fig:leodeguita_publish_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso5}\\[2pt]{\small 5. Título y descripción}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso6}\\[2pt]{\small 6. Precio y tamaño}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_paso7}\\[2pt]{\small 7. Seguridad y permiso}
+\end{minipage}\hfill
+\begin{minipage}{0.24\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/hul03_publicar_resultado}\\[2pt]{\small Resultado: pendiente de revisión}
+\end{minipage}
+\caption{Asistente móvil de publicación de bodega (2/2): precio, carga obligatoria del permiso del cuerpo de bomberos, y la publicación resultante en ``Mis bodegas'', creada con estado ``pendiente de verificación'' hasta que el Administrador la apruebe (HUL-03, HUA-01).}
+\label{fig:leodeguita_publish_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/ges_reservas}\\[2pt]{\small Reservas}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/ges_mensajes}\\[2pt]{\small Mensajes}
+\end{minipage}\hfill
+\begin{minipage}{0.30\linewidth}\centering
+\includegraphics[width=\linewidth]{imagenes/leodeguita/ges_perfil}\\[2pt]{\small Perfil}
+\end{minipage}
+\caption{Pantallas de reservas, mensajes y perfil del lado del gestor. Nótese la ausencia de la sección de organización que ven los clientes: el gestor de bodega no opera bajo un contexto de empresa.}
+\label{fig:leodeguita_manager_ops}
 \end{figure}
 \clearpage
